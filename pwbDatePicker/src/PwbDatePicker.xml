@@ -98,5 +98,24 @@
                 <description>Background fill color of the popover calendar (e.g., rgba(255, 255, 255, 0.85), #ffffff)</description>
             </property>
         </propertyGroup>
+        <propertyGroup caption="Validation">
+            <property key="required" type="boolean" defaultValue="false">
+                <caption>Is Required</caption>
+                <description>Enforce field value requirements inside the widget</description>
+            </property>
+            <property key="requiredMessage" type="string" required="false" defaultValue="This field is required.">
+                <caption>Validation Error Message</caption>
+                <description>Custom alert text shown when required condition is violated</description>
+            </property>
+            <property key="validationExpression" type="expression" required="false">
+                <caption>Custom Validation Rule</caption>
+                <description>Mendix expression that must return True for the selection to be valid</description>
+                <returnType type="Boolean"/>
+            </property>
+            <property key="customValidationMessage" type="string" required="false" defaultValue="Date selection violates custom validation rule.">
+                <caption>Custom Validation Message</caption>
+                <description>Alert text displayed when Custom Validation Rule evaluates to False</description>
+            </property>
+        </propertyGroup>
     </properties>
 </widget>

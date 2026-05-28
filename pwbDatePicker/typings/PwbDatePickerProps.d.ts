@@ -30,6 +30,10 @@ export interface PwbDatePickerContainerProps {
     borderRadius: string;
     bgBlur: string;
     popoverBg: string;
+    required: boolean;
+    requiredMessage: string;
+    validationExpression?: DynamicValue<boolean>;
+    customValidationMessage: string;
 }
 
 export interface PwbDatePickerPreviewProps {
@@ -60,4 +64,8 @@ export interface PwbDatePickerPreviewProps {
     borderRadius: string;
     bgBlur: string;
     popoverBg: string;
+    required: boolean;
+    requiredMessage: string;
+    validationExpression: string;
+    customValidationMessage: string;
 }

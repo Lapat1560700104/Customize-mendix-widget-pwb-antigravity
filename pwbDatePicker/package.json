@@ -1,7 +1,7 @@
 {
   "name": "pwbdatepicker",
   "widgetName": "PwbDatePicker",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "Custom pluggable widget developed with React and TypeScript.",
   "copyright": "PWB 2026",
   "author": "Antigravity",

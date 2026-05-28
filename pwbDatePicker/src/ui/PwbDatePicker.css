@@ -434,3 +434,53 @@
     background: rgba(239, 68, 68, 0.05);
 }
 
+/* Premium Validation & Error States */
+.pwb-input-error {
+    border-color: #ef4444 !important;
+}
+
+.pwb-input-error:hover {
+    border-color: #ef4444 !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.04) !important;
+}
+
+.pwb-datepicker-input.pwb-input-error.pwb-input-active {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15), 0 4px 12px rgba(239, 68, 68, 0.04) !important;
+}
+
+.pwb-validation-message {
+    color: #ef4444;
+    font-size: 12.5px;
+    font-weight: 500;
+    margin-top: 6px;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+}
+
+.pwb-warning-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    color: #ef4444;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-down {
+    animation: slideDown 0.18s ease-out forwards;
+}
+
+

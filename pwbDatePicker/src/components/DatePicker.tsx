@@ -20,6 +20,9 @@ export interface DatePickerProps {
     dateFormat?: string;
     showPresets?: boolean;
     showEraToggle?: boolean;
+    borderRadius?: string;
+    bgBlur?: string;
+    popoverBg?: string;
 }
 
 export function DatePicker({
@@ -41,7 +44,10 @@ export function DatePicker({
     style,
     dateFormat,
     showPresets = true,
-    showEraToggle = true
+    showEraToggle = true,
+    borderRadius,
+    bgBlur,
+    popoverBg
 }: DatePickerProps): ReactElement {
     const [isBuddhistEra, setIsBuddhistEra] = useState(buddhistEra);
 
@@ -416,7 +422,15 @@ export function DatePicker({
     return (
         <div
             className={`pwb-datepicker-wrapper ${readOnly ? "pwb-disabled" : ""} ${className || ""}`}
-            style={{ ...style, "--accent-color": accentColor } as any}
+            style={
+                {
+                    ...style,
+                    "--accent-color": accentColor,
+                    "--border-radius": borderRadius || "16px",
+                    "--bg-blur": bgBlur || "16px",
+                    "--popover-bg": popoverBg || "rgba(255, 255, 255, 0.85)"
+                } as any
+            }
         >
             {/* Input field display container */}
             <div

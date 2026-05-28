@@ -27,6 +27,9 @@ export interface PwbDatePickerContainerProps {
     placeholder: string;
     accentColor: string;
     dateFormat: string;
+    borderRadius: string;
+    bgBlur: string;
+    popoverBg: string;
 }
 
 export interface PwbDatePickerPreviewProps {
@@ -54,4 +57,7 @@ export interface PwbDatePickerPreviewProps {
     placeholder: string;
     accentColor: string;
     dateFormat: string;
+    borderRadius: string;
+    bgBlur: string;
+    popoverBg: string;
 }

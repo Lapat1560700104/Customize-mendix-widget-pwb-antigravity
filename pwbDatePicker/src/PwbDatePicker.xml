@@ -85,6 +85,18 @@
                 <caption>Date Format</caption>
                 <description>Display format for selected date(s) (e.g., DD/MM/YYYY, YYYY-MM-DD)</description>
             </property>
+            <property key="borderRadius" type="string" required="false" defaultValue="16px">
+                <caption>Border Radius</caption>
+                <description>Corner roundness of input and calendar (e.g., 16px, 8px, 0px)</description>
+            </property>
+            <property key="bgBlur" type="string" required="false" defaultValue="16px">
+                <caption>Background Blur</caption>
+                <description>Glassmorphism backdrop-filter blur level (e.g., 16px, 8px, 0px to disable)</description>
+            </property>
+            <property key="popoverBg" type="string" required="false" defaultValue="rgba(255, 255, 255, 0.85)">
+                <caption>Calendar Background Color</caption>
+                <description>Background fill color of the popover calendar (e.g., rgba(255, 255, 255, 0.85), #ffffff)</description>
+            </property>
         </propertyGroup>
     </properties>
 </widget>

@@ -19,7 +19,10 @@ export function PwbDatePicker({
     accentColor,
     dateFormat,
     showPresets,
-    showEraToggle
+    showEraToggle,
+    borderRadius,
+    bgBlur,
+    popoverBg
 }: PwbDatePickerContainerProps): ReactElement {
     // Check if the inputs are read-only
     const readOnly =
@@ -65,6 +68,9 @@ export function PwbDatePicker({
             dateFormat={dateFormat}
             showPresets={showPresets}
             showEraToggle={showEraToggle}
+            borderRadius={borderRadius}
+            bgBlur={bgBlur}
+            popoverBg={popoverBg}
         />
     );
 }

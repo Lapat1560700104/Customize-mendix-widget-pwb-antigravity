@@ -1,0 +1,16 @@
+{
+  "name": "pwb-widgets-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo workspace for managing and building multiple custom Mendix Pluggable Widgets",
+  "workspaces": [
+    "pwb*"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "build:all": "npm run build --workspaces",
+    "release:all": "npm run release --workspaces",
+    "lint:all": "npm run lint --workspaces",
+    "lint:fix:all": "npm run lint:fix --workspaces"
+  }
+}

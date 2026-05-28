@@ -14,16 +14,36 @@ const widgetName = pkg.widgetName;
 const packagePath = pkg.packagePath || 'pwb';
 const projectPath = pkg.config && pkg.config.projectPath ? pkg.config.projectPath : '../../';
 
+// Generate date stamp: YYYYMMDD
+const now = new Date();
+const year = now.getFullYear();
+const month = String(now.getMonth() + 1).padStart(2, '0');
+const date = String(now.getDate()).padStart(2, '0');
+const dateStamp = `${year}${month}${date}`;
+
 const standardMpkName = `${packagePath}.${widgetName}.mpk`;
-const versionedMpkName = `${packagePath}.${widgetName}_${version}.mpk`;
+// Append version and build date to filename (e.g. pwb.PwbDatePicker_1.0.0_20260528.mpk)
+const versionedMpkName = `${packagePath}.${widgetName}_${version}_${dateStamp}.mpk`;
 
-console.log(`\n--- Post-Release Script: Versioning MPK for ${widgetName} (${version}) ---`);
+console.log(`\n--- Post-Release Script: Versioning MPK for ${widgetName} (${version}_${dateStamp}) ---`);
 
-// 1. Rename in dist/{version}/ folder
 const distDir = path.join(process.cwd(), 'dist', version);
 const distStandardMpk = path.join(distDir, standardMpkName);
 const distVersionedMpk = path.join(distDir, versionedMpkName);
 
+// 1. Clean old dated local MPK files (EXCLUDING the newly built standard one!)
+if (fs.existsSync(distDir)) {
+    const files = fs.readdirSync(distDir);
+    const prefix = `${packagePath}.${widgetName}`;
+    files.forEach(file => {
+        if (file.startsWith(prefix) && file.endsWith('.mpk') && file !== standardMpkName) {
+            console.log(`Cleaning old local dated MPK: ${file}`);
+            fs.unlinkSync(path.join(distDir, file));
+        }
+    });
+}
+
+// 2. Rename the newly compiled standard MPK in dist to the dated version
 if (fs.existsSync(distStandardMpk)) {
     console.log(`Renaming dist standard MPK to: ${versionedMpkName}`);
     fs.renameSync(distStandardMpk, distVersionedMpk);
@@ -31,7 +51,7 @@ if (fs.existsSync(distStandardMpk)) {
     console.log(`Warning: Standard MPK not found in dist folder: ${distStandardMpk}`);
 }
 
-// 2. Handle in Mendix App widgets folder
+// 3. Handle in Mendix App widgets folder
 const absoluteProjectPath = path.isAbsolute(projectPath)
     ? projectPath
     : path.resolve(process.cwd(), projectPath);
@@ -39,19 +59,21 @@ const absoluteProjectPath = path.isAbsolute(projectPath)
 const targetWidgetsDir = path.join(absoluteProjectPath, 'widgets');
 
 if (fs.existsSync(targetWidgetsDir)) {
-    const targetStandardMpk = path.join(targetWidgetsDir, standardMpkName);
-    const targetVersionedMpk = path.join(targetWidgetsDir, versionedMpkName);
+    // Dynamic clean: Delete any existing MPKs in Mendix widgets folder with the same widget prefix
+    // (This prevents having duplicate versioned/dated widgets in Mendix Studio Pro!)
+    const files = fs.readdirSync(targetWidgetsDir);
+    const prefix = `${packagePath}.${widgetName}`;
+    files.forEach(file => {
+        if (file.startsWith(prefix) && file.endsWith('.mpk')) {
+            console.log(`Cleaning old versioned MPK in Mendix widgets folder: ${file}`);
+            fs.unlinkSync(path.join(targetWidgetsDir, file));
+        }
+    });
 
-    // Delete standard old MPK if Mendix build tools copied it automatically
-    if (fs.existsSync(targetStandardMpk)) {
-        console.log(`Cleaning old standard MPK in Mendix widgets folder...`);
-        fs.unlinkSync(targetStandardMpk);
-    }
-
-    // Copy our versioned MPK into the Mendix widgets folder
+    // Copy our newly dated versioned MPK into the Mendix widgets folder
     if (fs.existsSync(distVersionedMpk)) {
-        console.log(`Copying versioned MPK to Mendix app widgets folder: ${targetVersionedMpk}`);
-        fs.copyFileSync(distVersionedMpk, targetVersionedMpk);
+        console.log(`Copying dated versioned MPK to Mendix app widgets folder: ${versionedMpkName}`);
+        fs.copyFileSync(distVersionedMpk, path.join(targetWidgetsDir, versionedMpkName));
     }
 } else {
     console.log(`Mendix app widgets folder not found at: ${targetWidgetsDir}. Skipping copy.`);

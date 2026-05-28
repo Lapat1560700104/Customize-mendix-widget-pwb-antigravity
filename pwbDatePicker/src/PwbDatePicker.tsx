@@ -4,6 +4,8 @@ import { PwbDatePickerContainerProps } from "../typings/PwbDatePickerProps";
 import "./ui/PwbDatePicker.css";
 
 export function PwbDatePicker({
+    class: className,
+    style,
     selectionMode,
     dateAttribute,
     startDateAttribute,
@@ -14,7 +16,8 @@ export function PwbDatePicker({
     maxDate,
     disableWeekends,
     placeholder,
-    accentColor
+    accentColor,
+    dateFormat
 }: PwbDatePickerContainerProps): ReactElement {
     // Check if the inputs are read-only
     const readOnly =
@@ -55,6 +58,9 @@ export function PwbDatePicker({
             placeholder={placeholder}
             accentColor={accentColor}
             readOnly={readOnly}
+            className={className}
+            style={style}
+            dateFormat={dateFormat}
         />
     );
 }

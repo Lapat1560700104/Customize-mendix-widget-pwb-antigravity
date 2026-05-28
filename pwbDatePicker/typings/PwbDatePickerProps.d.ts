@@ -24,6 +24,7 @@ export interface PwbDatePickerContainerProps {
     disableWeekends: boolean;
     placeholder: string;
     accentColor: string;
+    dateFormat: string;
 }
 
 export interface PwbDatePickerPreviewProps {
@@ -48,4 +49,5 @@ export interface PwbDatePickerPreviewProps {
     disableWeekends: boolean;
     placeholder: string;
     accentColor: string;
+    dateFormat: string;
 }

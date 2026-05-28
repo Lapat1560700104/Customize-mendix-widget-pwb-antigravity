@@ -73,6 +73,10 @@
                 <caption>Accent Color (Hex)</caption>
                 <description>Accent theme color of the DatePicker (e.g. Hex code: #3b82f6)</description>
             </property>
+            <property key="dateFormat" type="string" required="false" defaultValue="DD/MM/YYYY">
+                <caption>Date Format</caption>
+                <description>Display format for selected date(s) (e.g., DD/MM/YYYY, YYYY-MM-DD)</description>
+            </property>
         </propertyGroup>
     </properties>
 </widget>

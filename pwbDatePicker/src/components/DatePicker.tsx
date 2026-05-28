@@ -1,4 +1,4 @@
-import { ReactElement, useState, useEffect, useRef, MouseEvent as ReactMouseEvent } from "react";
+import { ReactElement, useState, useEffect, useRef, MouseEvent as ReactMouseEvent, CSSProperties } from "react";
 
 export interface DatePickerProps {
     selectionMode: "single" | "range";
@@ -15,6 +15,9 @@ export interface DatePickerProps {
     placeholder: string;
     accentColor: string;
     readOnly: boolean;
+    className?: string;
+    style?: CSSProperties;
+    dateFormat?: string;
 }
 
 export function DatePicker({
@@ -31,7 +34,10 @@ export function DatePicker({
     disableWeekends,
     placeholder,
     accentColor,
-    readOnly
+    readOnly,
+    className,
+    style,
+    dateFormat
 }: DatePickerProps): ReactElement {
     // Current viewed Month / Year in Calendar
     const [viewDate, setViewDate] = useState<Date>(() => value || startValue || new Date());
@@ -81,16 +87,25 @@ export function DatePicker({
     // Format display text
     const getDisplayText = (): string => {
         const formatDateStr = (d: Date): string => {
-            const day = String(d.getDate()).padStart(2, "0");
-            const month = String(d.getMonth() + 1).padStart(2, "0");
-            const yr = d.getFullYear() + yearOffset;
-            let timeStr = "";
-            if (showTime) {
-                const hh = String(d.getHours()).padStart(2, "0");
-                const mm = String(d.getMinutes()).padStart(2, "0");
-                timeStr = ` ${hh}:${mm}`;
+            const dayStr = String(d.getDate()).padStart(2, "0");
+            const monthStr = String(d.getMonth() + 1).padStart(2, "0");
+            const fullYear = d.getFullYear() + yearOffset;
+            const shortYear = String(fullYear).slice(-2);
+            const hhStr = String(d.getHours()).padStart(2, "0");
+            const mmStr = String(d.getMinutes()).padStart(2, "0");
+
+            let format = dateFormat || "DD/MM/YYYY";
+            if (showTime && !format.includes("hh") && !format.includes("mm")) {
+                format = `${format} hh:mm`;
             }
-            return `${day}/${month}/${yr}${timeStr}`;
+
+            return format
+                .replace("DD", dayStr)
+                .replace("MM", monthStr)
+                .replace("YYYY", String(fullYear))
+                .replace("YY", shortYear)
+                .replace("hh", hhStr)
+                .replace("mm", mmStr);
         };
 
         if (selectionMode === "single") {
@@ -390,8 +405,8 @@ export function DatePicker({
 
     return (
         <div
-            className={`pwb-datepicker-wrapper ${readOnly ? "pwb-disabled" : ""}`}
-            style={{ "--accent-color": accentColor } as any}
+            className={`pwb-datepicker-wrapper ${readOnly ? "pwb-disabled" : ""} ${className || ""}`}
+            style={{ ...style, "--accent-color": accentColor } as any}
         >
             {/* Input field display container */}
             <div
@@ -451,32 +466,48 @@ export function DatePicker({
                         {renderCalendarDays()}
                     </div>
 
-                    {/* Optional Time Picker sliders */}
+                    {/* Numerical Time Picker inputs */}
                     {showTime && (
                         <div className="pwb-time-picker-panel">
-                            <div className="pwb-time-row">
-                                <span className="pwb-time-label">ชั่วโมง / Hour:</span>
+                            <span className="pwb-time-label">เวลา / Time (HH:MM):</span>
+                            <div className="pwb-time-inputs-container">
                                 <input
-                                    type="range"
+                                    type="number"
                                     min="0"
                                     max="23"
-                                    value={hour}
-                                    onChange={e => handleHourChange(Number(e.target.value))}
-                                    className="pwb-time-slider"
+                                    value={String(hour).padStart(2, "0")}
+                                    onChange={e => {
+                                        let val = Number(e.target.value);
+                                        if (val > 23) {
+                                            val = 23;
+                                        }
+                                        if (val < 0) {
+                                            val = 0;
+                                        }
+                                        handleHourChange(val);
+                                    }}
+                                    className="pwb-time-input-field"
+                                    placeholder="HH"
                                 />
-                                <span className="pwb-time-number">{String(hour).padStart(2, "0")}</span>
-                            </div>
-                            <div className="pwb-time-row">
-                                <span className="pwb-time-label">นาที / Minute:</span>
+                                <span className="pwb-time-separator">:</span>
                                 <input
-                                    type="range"
+                                    type="number"
                                     min="0"
                                     max="59"
-                                    value={minute}
-                                    onChange={e => handleMinuteChange(Number(e.target.value))}
-                                    className="pwb-time-slider"
+                                    value={String(minute).padStart(2, "0")}
+                                    onChange={e => {
+                                        let val = Number(e.target.value);
+                                        if (val > 59) {
+                                            val = 59;
+                                        }
+                                        if (val < 0) {
+                                            val = 0;
+                                        }
+                                        handleMinuteChange(val);
+                                    }}
+                                    className="pwb-time-input-field"
+                                    placeholder="MM"
                                 />
-                                <span className="pwb-time-number">{String(minute).padStart(2, "0")}</span>
                             </div>
                         </div>
                     )}

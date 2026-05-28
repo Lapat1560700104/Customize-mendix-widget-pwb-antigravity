@@ -1,4 +1,4 @@
-import { PwbCustomWidgetPreviewProps } from "../typings/PwbCustomWidgetProps";
+import { PwbDatePickerPreviewProps } from "../typings/PwbDatePickerProps";
 
 export type Platform = "web" | "desktop";
 
@@ -100,7 +100,7 @@ export type PreviewProps =
     | DatasourceProps;
 
 export function getProperties(
-    _values: PwbCustomWidgetPreviewProps,
+    _values: PwbDatePickerPreviewProps,
     defaultProperties: Properties /* , target: Platform*/
 ): Properties {
     // Do the values manipulation here to control the visibility of properties in Studio and Studio Pro conditionally.
@@ -112,7 +112,7 @@ export function getProperties(
     return defaultProperties;
 }
 
-// export function check(_values: PwbCustomWidgetPreviewProps): Problem[] {
+// export function check(_values: PwbDatePickerPreviewProps): Problem[] {
 //     const errors: Problem[] = [];
 //     // Add errors to the above array to throw errors in Studio and Studio Pro.
 //     /* Example
@@ -127,7 +127,7 @@ export function getProperties(
 //     return errors;
 // }
 
-// export function getPreview(values: PwbCustomWidgetPreviewProps, isDarkMode: boolean, version: number[]): PreviewProps {
+// export function getPreview(values: PwbDatePickerPreviewProps, isDarkMode: boolean, version: number[]): PreviewProps {
 //     // Customize your pluggable widget appearance for Studio Pro.
 //     return {
 //         type: "Container",
@@ -135,6 +135,6 @@ export function getProperties(
 //     }
 // }
 
-// export function getCustomCaption(values: PwbCustomWidgetPreviewProps, platform: Platform): string {
-//     return "PwbCustomWidget";
+// export function getCustomCaption(values: PwbDatePickerPreviewProps, platform: Platform): string {
+//     return "PwbDatePicker";
 // }

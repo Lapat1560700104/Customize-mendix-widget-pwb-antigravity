@@ -9,7 +9,7 @@ This repository contains the source code and development environment for custom 
 ```bash
 Customize-mendix-widget-pwb-antigravity/
 ├── README.md               # Repository documentation (this file)
-└── pwbCustomWidget/        # The primary custom Mendix Pluggable Widget project
+└── pwbDatePicker/          # The custom Mendix Pluggable DatePicker widget
     ├── package.json        # Widget build configurations & npm scripts
     ├── tsconfig.json       # TypeScript configurations
     ├── src/                # Source code (TypeScript, React, CSS)
@@ -28,11 +28,11 @@ Customize-mendix-widget-pwb-antigravity/
 
 ---
 
-## 💻 Working with the Widget (`pwbCustomWidget`)
+## 💻 Working with the Widget (`pwbDatePicker`)
 
 Navigate to the widget folder to run commands:
 ```bash
-cd pwbCustomWidget
+cd pwbDatePicker
 ```
 
 ### 1. Install Dependencies
@@ -51,12 +51,12 @@ Compiles, optimizes, and bundles the widget into a `.mpk` package:
 ```bash
 npm run release
 ```
-*The output package will be created in `pwbCustomWidget/dist/1.0.0/PwbCustomWidget.mpk`.*
+*The output package will be created in `pwbDatePicker/dist/1.0.0/pwb.PwbDatePicker.mpk`.*
 
 ---
 
 ## 📄 Key Files for Customization
 
-- **Properties Definitions**: To add/edit widget configurations visible in Mendix Studio Pro, edit `pwbCustomWidget/src/PwbCustomWidget.xml`.
-- **Runtime Logic**: To build features using React Function Components & TypeScript, edit `pwbCustomWidget/src/PwbCustomWidget.tsx`.
-- **Styling**: To customize CSS stylings, edit `pwbCustomWidget/src/ui/PwbCustomWidget.css`.
+- **Properties Definitions**: To add/edit widget configurations visible in Mendix Studio Pro, edit `pwbDatePicker/src/PwbDatePicker.xml`.
+- **Runtime Logic**: To build features using React Function Components & TypeScript, edit `pwbDatePicker/src/PwbDatePicker.tsx`.
+- **Styling**: To customize CSS stylings, edit `pwbDatePicker/src/ui/PwbDatePicker.css`.

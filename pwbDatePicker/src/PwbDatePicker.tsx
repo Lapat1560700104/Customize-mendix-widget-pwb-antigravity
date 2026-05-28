@@ -1,9 +1,9 @@
 import { ReactElement } from "react";
 import { DatePicker } from "./components/DatePicker";
-import { PwbCustomWidgetContainerProps } from "../typings/PwbCustomWidgetProps";
-import "./ui/PwbCustomWidget.css";
+import { PwbDatePickerContainerProps } from "../typings/PwbDatePickerProps";
+import "./ui/PwbDatePicker.css";
 
-export function PwbCustomWidget({
+export function PwbDatePicker({
     selectionMode,
     dateAttribute,
     startDateAttribute,
@@ -15,7 +15,7 @@ export function PwbCustomWidget({
     disableWeekends,
     placeholder,
     accentColor
-}: PwbCustomWidgetContainerProps): ReactElement {
+}: PwbDatePickerContainerProps): ReactElement {
     // Check if the inputs are read-only
     const readOnly =
         selectionMode === "single"

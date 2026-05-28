@@ -1,6 +1,6 @@
 {
-  "name": "pwbcustomwidget",
-  "widgetName": "PwbCustomWidget",
+  "name": "pwbdatepicker",
+  "widgetName": "PwbDatePicker",
   "version": "1.0.0",
   "description": "Custom pluggable widget developed with React and TypeScript.",
   "copyright": "PWB 2026",

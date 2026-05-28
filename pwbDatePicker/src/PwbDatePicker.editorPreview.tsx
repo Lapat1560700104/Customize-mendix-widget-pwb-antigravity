@@ -1,11 +1,11 @@
 import { ReactElement } from "react";
-import { PwbCustomWidgetPreviewProps } from "../typings/PwbCustomWidgetProps";
+import { PwbDatePickerPreviewProps } from "../typings/PwbDatePickerProps";
 
-export function preview(props: PwbCustomWidgetPreviewProps): ReactElement {
+export function preview(props: PwbDatePickerPreviewProps): ReactElement {
     console.log("Preview Props:", props);
     return <div className="pwb-datepicker-preview">PWB Advanced DatePicker [Preview]</div>;
 }
 
 export function getPreviewCss(): string {
-    return require("./ui/PwbCustomWidget.css");
+    return require("./ui/PwbDatePicker.css");
 }

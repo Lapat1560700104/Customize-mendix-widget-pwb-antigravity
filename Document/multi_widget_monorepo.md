@@ -25,28 +25,28 @@ Customize-mendix-widget-pwb-antigravity/       # [Repository หลัก]
 │   ├── widget_usage.md
 │   └── multi_widget_monorepo.md               # เอกสารฉบับนี้ (คู่มือ Monorepo)
 │
-├── pwbCustomWidget/                           # [Widget ตัวที่ 1: DatePicker]
+├── pwbDatePicker/                             # [Widget ตัวที่ 1: DatePicker]
 │   ├── package.json                           # การตั้งค่าและ Dependencies ของตัวที่ 1
 │   ├── src/
-│   │   ├── PwbCustomWidget.xml                # XML กำหนด Properties ของตัวที่ 1
-│   │   └── PwbCustomWidget.tsx
+│   │   ├── PwbDatePicker.xml                  # XML กำหนด Properties ของตัวที่ 1
+│   │   └── PwbDatePicker.tsx
 │   └── dist/
-│       └── 1.0.0/pwb.PwbCustomWidget.mpk      # ผลลัพธ์บิลด์ของตัวที่ 1
+│       └── 1.0.0/pwb.PwbDatePicker.mpk        # ผลลัพธ์บิลด์ของตัวที่ 1
 │
-└── pwbAnotherWidget/                          # [Widget ตัวที่ 2: สร้างเพิ่มเติม]
+└── pwbComboBox/                               # [Widget ตัวที่ 2: ComboBox]
     ├── package.json                           # การตั้งค่าและ Dependencies ของตัวที่ 2
     ├── src/
-    │   ├── PwbAnotherWidget.xml               # XML กำหนด Properties ของตัวที่ 2
-    │   └── PwbAnotherWidget.tsx
+    │   ├── PwbComboBox.xml                    # XML กำหนด Properties ของตัวที่ 2
+    │   └── PwbComboBox.tsx
     └── dist/
-        └── 1.0.0/pwb.PwbAnotherWidget.mpk     # ผลลัพธ์บิลด์ของตัวที่ 2
+        └── 1.0.0/pwb.PwbComboBox.mpk          # ผลลัพธ์บิลด์ของตัวที่ 2
 ```
 
 ---
 
 ## 🔧 ขั้นตอนการเพิ่ม Widget ตัวใหม่ (Adding a New Widget)
 
-หากคุณต้องการเพิ่ม Widget ตัวที่สอง (หรือตัวถัดๆ ไป) ภายใน Repository นี้ สามารถทำได้โดย:
+หากคุณต้องการเพิ่ม Widget ตัวใหม่ (หรือตัวถัดๆ ไป) ภายใน Repository นี้ สามารถทำได้โดย:
 
 1.  เปิด Terminal ที่รูทระดับบนสุดของโปรเจค
 2.  ใช้เครื่องมือ Yeoman เพื่อสั่งสร้าง Widget ตัวใหม่โดยระบุชื่อโฟลเดอร์ปลายทางแยกจากกัน:
@@ -54,7 +54,7 @@ Customize-mendix-widget-pwb-antigravity/       # [Repository หลัก]
     npx @mendix/generator-widget pwbAnotherWidget
     ```
 3.  ป้อนค่าคุณสมบัติต่างๆ ตามขั้นตอนของ Generator จนเสร็จสิ้น
-4.  หลังจากนั้นคุณจะได้รับโฟลเดอร์โปรเจคย่อยตัวใหม่ (`pwbAnotherWidget/`) ซึ่งแยกการทำงาน ตัวแปร XML และ `.mpk` เป็นเอกเทศ
+4.  หลังจากนั้นคุณจะได้รับโฟลเดอร์โปรเจคย่อยตัวใหม่ซึ่งแยกการทำงาน ตัวแปร XML และ `.mpk` เป็นเอกเทศ
 
 ---
 
@@ -77,8 +77,10 @@ Customize-mendix-widget-pwb-antigravity/       # [Repository หลัก]
     "release:all": "npm run release --workspaces",
     "lint:all": "npm run lint --workspaces",
     "lint:fix:all": "npm run lint:fix --workspaces",
-    "build:pwbCustomWidget": "npm run build -w pwbCustomWidget",
-    "release:pwbCustomWidget": "npm run release -w pwbCustomWidget"
+    "build:pwbDatePicker": "npm run build -w pwbDatePicker",
+    "release:pwbDatePicker": "npm run release -w pwbDatePicker",
+    "build:pwbComboBox": "npm run build -w pwbComboBox",
+    "release:pwbComboBox": "npm run release -w pwbComboBox"
   }
 }
 ```
@@ -103,20 +105,22 @@ Customize-mendix-widget-pwb-antigravity/       # [Repository หลัก]
 คุณสามารถสั่งงานคอมไพล์แยกเฉพาะเจาะจงเจาะจงรายตัวจากรูทด้านนอกได้ 2 วิธี:
 
 **วิธีที่ 1: ใช้สคริปต์ทางลัดที่เราลงทะเบียนไว้ใน package.json**:
-*   บิลด์ทดสอบเฉพาะ DatePicker: `npm run build:pwbCustomWidget`
-*   บิลด์ออกไฟล์ `.mpk` เฉพาะ DatePicker: `npm run release:pwbCustomWidget`
+*   บิลด์ทดสอบเฉพาะ DatePicker: `npm run build:pwbDatePicker`
+*   บิลด์ออกไฟล์ `.mpk` เฉพาะ DatePicker: `npm run release:pwbDatePicker`
+*   บิลด์ทดสอบเฉพาะ ComboBox: `npm run build:pwbComboBox`
+*   บิลด์ออกไฟล์ `.mpk` เฉพาะ ComboBox: `npm run release:pwbComboBox`
 
-**วิธีที่ 2: ใช้คำสั่งมาตรฐานของ NPM Workspace (สำหรับโปรเจคที่สร้างขึ้นใหม่ในอนาคต)**:
-*   คุณไม่จำเป็นต้องแอดสคริปต์ใหม่ลงในรูททุกครั้ง เพียงพิมพ์คำสั่งและระบุชื่อโฟลเดอร์ผ่านธง `-w` (หรือ `--workspace`):
+**วิธีที่ 2: ใช้คำสั่งมาตรฐานของ NPM Workspace**:
+*   พิมพ์คำสั่งและระบุชื่อโฟลเดอร์ผ่านธง `-w` (หรือ `--workspace`):
     ```bash
     npm run build -w <ชื่อโฟลเดอร์-widget>
     npm run release -w <ชื่อโฟลเดอร์-widget>
     ```
-    *ตัวอย่างเช่น: `npm run release -w pwbCustomWidget`*
+    *ตัวอย่างเช่น: `npm run release -w pwbDatePicker`*
 
 ---
 
 ## 🌟 ข้อดีของการจัดโครงสร้างแบบ Monorepo ในโครงการ Mendix
 1.  **การควบคุมผ่าน Git (Single Repository)**: โค้ดทั้งหมดของทุก Widget อยู่ใน Repository เดียวกัน ทำให้ควบคุมเวอร์ชัน ตรวจสอบประวัติโค้ด (Git History) และอัปเดตงานร่วมกันได้ง่าย
-2.  **การแยก Dependency เป็นสัดส่วน (Dependency Isolation)**: Widget แต่ละตัวสามารถลง Library แยกกัน หรืออัปเกรดเวอร์ชันต่างกันได้ตามความเหมาะสม โดยไม่ส่งผลกระทบและไม่ตีกันเอง
+2.  **การแยก Dependency เป็นสัดส่วน (Dependency Isolation)**: Widgetแต่ละตัวสามารถลง Library แยกกัน หรืออัปเกรดเวอร์ชันต่างกันได้ตามความเหมาะสม โดยไม่ส่งผลกระทบและไม่ตีกันเอง
 3.  **การสร้างสรรค์ที่รวดเร็ว (Automated Orchestration)**: สั่งคอมไพล์ แพ็กเกจ และอัปเดตไฟล์เข้าไปยังโฟลเดอร์ Mendix App ปลายทางของทุก Widget ได้พร้อมกันผ่านศูนย์บัญชาการเดียวกัน

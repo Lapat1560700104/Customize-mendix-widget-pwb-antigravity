@@ -7,19 +7,19 @@ Premium high-performance Date and Range Picker pluggable widget with Thai Buddhi
 ## 📁 Project Structure (โครงสร้างไฟล์ในโปรเจค)
 
 ```bash
-pwbCustomWidget/
+pwbDatePicker/
 ├── tsconfig.json          # TypeScript configurations
 ├── package.json           # Package details, npm scripts, and Mendix settings
 ├── src/                   # Main development source folder
 │   ├── package.xml        # Packing configuration for the Mendix Pluggable Widget (.mpk)
-│   ├── PwbCustomWidget.xml # Widget properties configuration for Mendix Studio Pro
-│   ├── PwbCustomWidget.tsx # Main React container connecting to Mendix props
-│   ├── PwbCustomWidget.editorPreview.tsx # React preview for Mendix page builder
-│   ├── PwbCustomWidget.editorConfig.ts   # Property validations for Mendix editor
+│   ├── PwbDatePicker.xml  # Widget properties configuration for Mendix Studio Pro
+│   ├── PwbDatePicker.tsx  # Main React container connecting to Mendix props
+│   ├── PwbDatePicker.editorPreview.tsx # React preview for Mendix page builder
+│   ├── PwbDatePicker.editorConfig.ts   # Property validations for Mendix editor
 │   ├── components/
 │   │   └── DatePicker.tsx # Core calendar, date range, and time picker logic
 │   └── ui/
-│       └── PwbCustomWidget.css  # Widget premium glassmorphic stylings
+│       └── PwbDatePicker.css  # Widget premium glassmorphic stylings
 ```
 
 ---
@@ -27,7 +27,7 @@ pwbCustomWidget/
 ## 🛠️ Getting Started (ขั้นตอนการติดตั้งและรันโปรเจค)
 
 ### 1. Install Dependencies
-Run inside the `pwbCustomWidget` folder:
+Run inside the `pwbDatePicker` folder:
 ```bash
 npm install
 ```
@@ -44,7 +44,7 @@ To package the widget into an optimized, lightweight `.mpk` package:
 npm run release
 ```
 The compiled package will be generated inside the `dist/` directory:
-`dist/1.0.0/pwb.PwbCustomWidget.mpk` (~14.5 KB)
+`dist/1.0.0/pwb.PwbDatePicker.mpk` (~14.5 KB)
 
 ---
 

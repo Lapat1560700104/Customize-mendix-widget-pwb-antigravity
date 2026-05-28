@@ -12,8 +12,8 @@
     "release:all": "npm run release --workspaces",
     "lint:all": "npm run lint --workspaces",
     "lint:fix:all": "npm run lint:fix --workspaces",
-    "build:pwbCustomWidget": "npm run build -w pwbCustomWidget",
-    "release:pwbCustomWidget": "npm run release -w pwbCustomWidget",
+    "build:pwbDatePicker": "npm run build -w pwbDatePicker",
+    "release:pwbDatePicker": "npm run release -w pwbDatePicker",
     "build:pwbComboBox": "npm run build -w pwbComboBox",
     "release:pwbComboBox": "npm run release -w pwbComboBox"
   }

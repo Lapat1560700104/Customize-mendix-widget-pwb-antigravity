@@ -14,36 +14,41 @@ const widgetName = pkg.widgetName;
 const packagePath = pkg.packagePath || 'pwb';
 const projectPath = pkg.config && pkg.config.projectPath ? pkg.config.projectPath : '../../';
 
-// Generate date stamp: YYYYMMDD
+// Generate date and time stamp: YYYYMMDD_HHMMSS
 const now = new Date();
 const year = now.getFullYear();
 const month = String(now.getMonth() + 1).padStart(2, '0');
 const date = String(now.getDate()).padStart(2, '0');
+const hours = String(now.getHours()).padStart(2, '0');
+const minutes = String(now.getMinutes()).padStart(2, '0');
+const seconds = String(now.getSeconds()).padStart(2, '0');
+
 const dateStamp = `${year}${month}${date}`;
+const timeStamp = `${hours}${minutes}${seconds}`;
 
 const standardMpkName = `${packagePath}.${widgetName}.mpk`;
-// Append version and build date to filename (e.g. pwb.PwbDatePicker_1.0.0_20260528.mpk)
-const versionedMpkName = `${packagePath}.${widgetName}_${version}_${dateStamp}.mpk`;
+// Append version, build date, and build time to filename (e.g. pwb.PwbDatePicker_1.0.0_20260528_155225.mpk)
+const versionedMpkName = `${packagePath}.${widgetName}_${version}_${dateStamp}_${timeStamp}.mpk`;
 
-console.log(`\n--- Post-Release Script: Versioning MPK for ${widgetName} (${version}_${dateStamp}) ---`);
+console.log(`\n--- Post-Release Script: Versioning MPK for ${widgetName} (${version}_${dateStamp}_${timeStamp}) ---`);
 
 const distDir = path.join(process.cwd(), 'dist', version);
 const distStandardMpk = path.join(distDir, standardMpkName);
 const distVersionedMpk = path.join(distDir, versionedMpkName);
 
-// 1. Clean old dated local MPK files (EXCLUDING the newly built standard one!)
+// 1. Clean old dated/timed local MPK files (EXCLUDING the newly built standard one!)
 if (fs.existsSync(distDir)) {
     const files = fs.readdirSync(distDir);
     const prefix = `${packagePath}.${widgetName}`;
     files.forEach(file => {
         if (file.startsWith(prefix) && file.endsWith('.mpk') && file !== standardMpkName) {
-            console.log(`Cleaning old local dated MPK: ${file}`);
+            console.log(`Cleaning old local dated/timed MPK: ${file}`);
             fs.unlinkSync(path.join(distDir, file));
         }
     });
 }
 
-// 2. Rename the newly compiled standard MPK in dist to the dated version
+// 2. Rename the newly compiled standard MPK in dist to the dated/timed version
 if (fs.existsSync(distStandardMpk)) {
     console.log(`Renaming dist standard MPK to: ${versionedMpkName}`);
     fs.renameSync(distStandardMpk, distVersionedMpk);
@@ -70,9 +75,9 @@ if (fs.existsSync(targetWidgetsDir)) {
         }
     });
 
-    // Copy our newly dated versioned MPK into the Mendix widgets folder
+    // Copy our newly dated/timed versioned MPK into the Mendix widgets folder
     if (fs.existsSync(distVersionedMpk)) {
-        console.log(`Copying dated versioned MPK to Mendix app widgets folder: ${versionedMpkName}`);
+        console.log(`Copying dated/timed versioned MPK to Mendix app widgets folder: ${versionedMpkName}`);
         fs.copyFileSync(distVersionedMpk, path.join(targetWidgetsDir, versionedMpkName));
     }
 } else {

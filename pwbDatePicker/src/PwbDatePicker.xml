@@ -47,6 +47,14 @@
                 <caption>Thai Buddhist Year (พ.ศ.)</caption>
                 <description>Show year in Thai Buddhist Era (พ.ศ.) instead of Christian Era (ค.ศ.)</description>
             </property>
+            <property key="showPresets" type="boolean" defaultValue="true">
+                <caption>Show Presets Panel</caption>
+                <description>Show quick selection buttons for fast date pick (e.g. Today, Last 7 Days)</description>
+            </property>
+            <property key="showEraToggle" type="boolean" defaultValue="true">
+                <caption>Show Live Era Switch</caption>
+                <description>Show interactive พ.ศ. / ค.ศ. toggle on the calendar header</description>
+            </property>
         </propertyGroup>
         <propertyGroup caption="Constraints">
             <property key="minDate" type="expression" required="false">

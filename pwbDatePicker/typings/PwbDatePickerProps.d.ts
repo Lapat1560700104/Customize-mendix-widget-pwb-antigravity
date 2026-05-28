@@ -19,6 +19,8 @@ export interface PwbDatePickerContainerProps {
     endDateAttribute?: EditableValue<Date>;
     showTime: boolean;
     buddhistEra: boolean;
+    showPresets: boolean;
+    showEraToggle: boolean;
     minDate?: DynamicValue<Date>;
     maxDate?: DynamicValue<Date>;
     disableWeekends: boolean;
@@ -44,6 +46,8 @@ export interface PwbDatePickerPreviewProps {
     endDateAttribute: string;
     showTime: boolean;
     buddhistEra: boolean;
+    showPresets: boolean;
+    showEraToggle: boolean;
     minDate: string;
     maxDate: string;
     disableWeekends: boolean;

@@ -17,7 +17,9 @@ export function PwbDatePicker({
     disableWeekends,
     placeholder,
     accentColor,
-    dateFormat
+    dateFormat,
+    showPresets,
+    showEraToggle
 }: PwbDatePickerContainerProps): ReactElement {
     // Check if the inputs are read-only
     const readOnly =
@@ -61,6 +63,8 @@ export function PwbDatePicker({
             className={className}
             style={style}
             dateFormat={dateFormat}
+            showPresets={showPresets}
+            showEraToggle={showEraToggle}
         />
     );
 }

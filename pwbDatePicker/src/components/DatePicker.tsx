@@ -18,6 +18,8 @@ export interface DatePickerProps {
     className?: string;
     style?: CSSProperties;
     dateFormat?: string;
+    showPresets?: boolean;
+    showEraToggle?: boolean;
 }
 
 export function DatePicker({
@@ -37,8 +39,12 @@ export function DatePicker({
     readOnly,
     className,
     style,
-    dateFormat
+    dateFormat,
+    showPresets = true,
+    showEraToggle = true
 }: DatePickerProps): ReactElement {
+    const [isBuddhistEra, setIsBuddhistEra] = useState(buddhistEra);
+
     // Current viewed Month / Year in Calendar
     const [viewDate, setViewDate] = useState<Date>(() => value || startValue || new Date());
     const [isOpen, setIsOpen] = useState(false);
@@ -51,11 +57,15 @@ export function DatePicker({
     const popoverRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLDivElement>(null);
 
-    const yearOffset = buddhistEra ? 543 : 0;
+    const yearOffset = isBuddhistEra ? 543 : 0;
     const viewMonth = viewDate.getMonth();
     const viewYear = viewDate.getFullYear();
 
     // Sync view date if external value changes
+    useEffect(() => {
+        setIsBuddhistEra(buddhistEra);
+    }, [buddhistEra]);
+
     useEffect(() => {
         if (selectionMode === "single" && value) {
             setViewDate(value);
@@ -320,7 +330,7 @@ export function DatePicker({
         "ธันวาคม / December"
     ];
 
-    const weekDays = buddhistEra ? ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"] : ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+    const weekDays = isBuddhistEra ? ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"] : ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
     // Render days grid
     const renderCalendarDays = (): ReactElement[] => {
@@ -454,6 +464,26 @@ export function DatePicker({
                         </button>
                     </div>
 
+                    {/* Live Era Toggle Switch */}
+                    {showEraToggle && (
+                        <div className="pwb-era-toggle-container">
+                            <button
+                                type="button"
+                                className={`pwb-era-btn ${isBuddhistEra ? "" : "pwb-era-btn-active"}`}
+                                onClick={() => setIsBuddhistEra(false)}
+                            >
+                                ค.ศ. (A.D.)
+                            </button>
+                            <button
+                                type="button"
+                                className={`pwb-era-btn ${isBuddhistEra ? "pwb-era-btn-active" : ""}`}
+                                onClick={() => setIsBuddhistEra(true)}
+                            >
+                                พ.ศ. (B.E.)
+                            </button>
+                        </div>
+                    )}
+
                     <div className="pwb-calendar-weekdays">
                         {weekDays.map((day, idx) => (
                             <div key={idx} className="pwb-weekday-col">
@@ -509,6 +539,137 @@ export function DatePicker({
                                     placeholder="MM"
                                 />
                             </div>
+                        </div>
+                    )}
+
+                    {/* Quick Select Presets Panel */}
+                    {showPresets && (
+                        <div className="pwb-presets-panel">
+                            {selectionMode === "single" ? (
+                                <>
+                                    <button
+                                        type="button"
+                                        className="pwb-preset-btn"
+                                        onClick={() => {
+                                            const today = new Date(
+                                                new Date().getFullYear(),
+                                                new Date().getMonth(),
+                                                new Date().getDate(),
+                                                hour,
+                                                minute
+                                            );
+                                            onChange(today);
+                                            setIsOpen(false);
+                                        }}
+                                    >
+                                        วันนี้ (Today)
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="pwb-preset-btn pwb-preset-clear"
+                                        onClick={handleClear}
+                                    >
+                                        ล้างค่า (Clear)
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        type="button"
+                                        className="pwb-preset-btn"
+                                        onClick={() => {
+                                            const today = new Date();
+                                            const start = new Date(
+                                                today.getFullYear(),
+                                                today.getMonth(),
+                                                today.getDate(),
+                                                hour,
+                                                minute
+                                            );
+                                            const end = new Date(
+                                                today.getFullYear(),
+                                                today.getMonth(),
+                                                today.getDate(),
+                                                23,
+                                                59
+                                            );
+                                            onRangeChange(start, end);
+                                            setIsOpen(false);
+                                        }}
+                                    >
+                                        วันนี้
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="pwb-preset-btn"
+                                        onClick={() => {
+                                            const today = new Date();
+                                            const end = new Date(
+                                                today.getFullYear(),
+                                                today.getMonth(),
+                                                today.getDate(),
+                                                23,
+                                                59
+                                            );
+                                            const start = new Date(
+                                                today.getFullYear(),
+                                                today.getMonth(),
+                                                today.getDate() - 6,
+                                                hour,
+                                                minute
+                                            );
+                                            onRangeChange(start, end);
+                                            setIsOpen(false);
+                                        }}
+                                    >
+                                        7 วันล่าสุด
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="pwb-preset-btn"
+                                        onClick={() => {
+                                            const today = new Date();
+                                            const end = new Date(
+                                                today.getFullYear(),
+                                                today.getMonth(),
+                                                today.getDate(),
+                                                23,
+                                                59
+                                            );
+                                            const start = new Date(
+                                                today.getFullYear(),
+                                                today.getMonth(),
+                                                today.getDate() - 29,
+                                                hour,
+                                                minute
+                                            );
+                                            onRangeChange(start, end);
+                                            setIsOpen(false);
+                                        }}
+                                    >
+                                        30 วันล่าสุด
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="pwb-preset-btn"
+                                        onClick={() => {
+                                            const today = new Date();
+                                            const start = new Date(
+                                                today.getFullYear(),
+                                                today.getMonth(),
+                                                1,
+                                                hour,
+                                                minute
+                                            );
+                                            const end = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59);
+                                            onRangeChange(start, end);
+                                            setIsOpen(false);
+                                        }}
+                                    >
+                                        เดือนนี้
+                                    </button>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>

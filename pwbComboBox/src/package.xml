@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<package xmlns="http://www.mendix.com/package/1.0/">
+    <clientModule name="PwbComboBox" version="1.0.0" xmlns="http://www.mendix.com/clientModule/1.0/">
+        <widgetFiles>
+            <widgetFile path="PwbComboBox.xml"/>
+        </widgetFiles>
+        <files>
+            <file path="pwb/pwbcombobox"/>
+        </files>
+    </clientModule>
+</package>

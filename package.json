@@ -13,6 +13,8 @@
     "lint:all": "npm run lint --workspaces",
     "lint:fix:all": "npm run lint:fix --workspaces",
     "build:pwbCustomWidget": "npm run build -w pwbCustomWidget",
-    "release:pwbCustomWidget": "npm run release -w pwbCustomWidget"
+    "release:pwbCustomWidget": "npm run release -w pwbCustomWidget",
+    "build:pwbComboBox": "npm run build -w pwbComboBox",
+    "release:pwbComboBox": "npm run release -w pwbComboBox"
   }
 }

@@ -1,6 +1,6 @@
-# PwbCustomWidget 🚀
+# PWB Advanced DatePicker 📅🚀
 
-Custom pluggable widget developed with React and TypeScript. This widget is built using modern JavaScript tools and is fully optimized for Mendix Studio Pro.
+Premium high-performance Date and Range Picker pluggable widget with Thai Buddhist Era (พ.ศ.) support, interactive time selectors, weekend disabling, and dynamic min/max date constraints.
 
 ---
 
@@ -13,21 +13,21 @@ pwbCustomWidget/
 ├── src/                   # Main development source folder
 │   ├── package.xml        # Packing configuration for the Mendix Pluggable Widget (.mpk)
 │   ├── PwbCustomWidget.xml # Widget properties configuration for Mendix Studio Pro
-│   ├── PwbCustomWidget.tsx # Main React runtime component
+│   ├── PwbCustomWidget.tsx # Main React container connecting to Mendix props
 │   ├── PwbCustomWidget.editorPreview.tsx # React preview for Mendix page builder
 │   ├── PwbCustomWidget.editorConfig.ts   # Property validations for Mendix editor
 │   ├── components/
-│   │   └── HelloWorldSample.tsx # Custom React sub-components
+│   │   └── DatePicker.tsx # Core calendar, date range, and time picker logic
 │   └── ui/
-│       └── PwbCustomWidget.css  # Widget custom styles
+│       └── PwbCustomWidget.css  # Widget premium glassmorphic stylings
 ```
 
 ---
 
 ## 🛠️ Getting Started (ขั้นตอนการติดตั้งและรันโปรเจค)
 
-### 1. Install Dependencies (ติดตั้งโมดูลที่เกี่ยวข้อง)
-Ensure you have **Node.js** installed, then run inside the widget root folder:
+### 1. Install Dependencies
+Run inside the `pwbCustomWidget` folder:
 ```bash
 npm install
 ```
@@ -37,27 +37,24 @@ To run a local watch server that automatically recompiles your code whenever you
 ```bash
 npm run dev
 ```
-*(Or use `npm start` to run the widget package watcher).*
 
 ### 3. Production Release & Bundling (สร้างแพ็กเกจนำไปใช้จริง)
-To package the widget into a production-ready `.mpk` file:
+To package the widget into an optimized, lightweight `.mpk` package:
 ```bash
 npm run release
 ```
-The compiled `.mpk` package will be generated inside the `dist/` directory (e.g. `dist/1.0.0/PwbCustomWidget.mpk`). You can copy this file directly into the `widgets/` folder of your target Mendix project.
+The compiled package will be generated inside the `dist/` directory:
+`dist/1.0.0/pwb.PwbCustomWidget.mpk` (~14.5 KB)
 
 ---
 
-## ✨ Features & Architecture
+## ✨ Features & Constraints (ฟังก์ชันการใช้งาน)
 
-- **React Functional Components & Hooks**: Modern component structure for high performance and maintainable UI state management.
-- **Strict TypeScript (TSX)**: Full type safety, auto-completion, and developer-friendly IDE integration.
-- **Tailored CSS Styling**: Clean UI design utilizing vanilla CSS modules under `src/ui/`.
-- **Mendix Pluggable Widget Compliant**: Seamlessly integrates into Mendix Studio Pro page builders.
-
----
-
-## 💡 Developer Tips
-
-- **Customizing properties**: If you need to add custom fields, text inputs, drop-downs, or data sources visible in Mendix Studio Pro, configure them in `src/PwbCustomWidget.xml`.
-- **Styling**: Add your styles in `src/ui/PwbCustomWidget.css`. Mendix automatically bundles and loads this CSS when the widget is rendered.
+- **Selection Modes**: Supports standard `Single Date` selection or start/end `Date Range` picker.
+- **Thai Buddhist Era (พ.ศ.)**: Toggle between A.D. and B.E. years display (+543 Offset). Internally stores Gregorian Dates.
+- **Show Time Selection**: Hours and Minutes sliders for custom time picking.
+- **Dynamic Constraints**:
+  - `Min Date` constraint (DateTime Expression)
+  - `Max Date` constraint (DateTime Expression)
+  - `Disable Weekends` (Saturdays & Sundays locked)
+- **High-End Styling**: Premium HSL harmonies, frosted glass blurs, subtle glowing shadows, and micro-animations for month-switching.

@@ -3,14 +3,75 @@
         supportedPlatform="Web"
         xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
-    <name>Pwb Custom Widget</name>
-    <description>Custom pluggable widget developed with React and TypeScript.</description>
+    <name>PWB Advanced DatePicker</name>
+    <description>Premium high-performance Date and Range Picker with B.E. support and time sliders.</description>
     <icon/>
     <properties>
         <propertyGroup caption="General">
-            <property key="sampleText" type="string" required="false">
-                <caption>Default value</caption>
-                <description>Sample text input</description>
+            <property key="selectionMode" type="enumeration" defaultValue="single">
+                <caption>Selection Mode</caption>
+                <description>Choose single date selection or start/end date range selection</description>
+                <enumerationValues>
+                    <enumerationValue key="single">Single Date</enumerationValue>
+                    <enumerationValue key="range">Date Range</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="dateAttribute" type="attribute" required="false">
+                <caption>Date Attribute</caption>
+                <description>DateTime attribute for Single selection mode</description>
+                <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
+            <property key="startDateAttribute" type="attribute" required="false">
+                <caption>Start Date Attribute</caption>
+                <description>DateTime attribute for Range start date</description>
+                <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
+            <property key="endDateAttribute" type="attribute" required="false">
+                <caption>End Date Attribute</caption>
+                <description>DateTime attribute for Range end date</description>
+                <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Features">
+            <property key="showTime" type="boolean" defaultValue="false">
+                <caption>Show Time Picker</caption>
+                <description>Enable time selection (hours and minutes)</description>
+            </property>
+            <property key="buddhistEra" type="boolean" defaultValue="false">
+                <caption>Thai Buddhist Year (พ.ศ.)</caption>
+                <description>Show year in Thai Buddhist Era (พ.ศ.) instead of Christian Era (ค.ศ.)</description>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Constraints">
+            <property key="minDate" type="expression" required="false">
+                <caption>Min Date</caption>
+                <description>Minimum date allowed</description>
+                <returnType type="DateTime"/>
+            </property>
+            <property key="maxDate" type="expression" required="false">
+                <caption>Max Date</caption>
+                <description>Maximum date allowed</description>
+                <returnType type="DateTime"/>
+            </property>
+            <property key="disableWeekends" type="boolean" defaultValue="false">
+                <caption>Disable Weekends</caption>
+                <description>Disable selection of Saturdays and Sundays</description>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Aesthetics">
+            <property key="placeholder" type="string" required="false" defaultValue="Select date...">
+                <caption>Placeholder Text</caption>
+                <description>Input placeholder text</description>
+            </property>
+            <property key="accentColor" type="string" required="false" defaultValue="#3b82f6">
+                <caption>Accent Color (Hex)</caption>
+                <description>Accent theme color of the DatePicker (e.g. Hex code: #3b82f6)</description>
             </property>
         </propertyGroup>
     </properties>

@@ -4,13 +4,26 @@
  * @author Mendix Widgets Framework Team
  */
 import { CSSProperties } from "react";
+import { DynamicValue, EditableValue } from "mendix";
+
+export type SelectionModeEnum = "single" | "range";
 
 export interface PwbCustomWidgetContainerProps {
     name: string;
     class: string;
     style?: CSSProperties;
     tabIndex?: number;
-    sampleText: string;
+    selectionMode: SelectionModeEnum;
+    dateAttribute?: EditableValue<Date>;
+    startDateAttribute?: EditableValue<Date>;
+    endDateAttribute?: EditableValue<Date>;
+    showTime: boolean;
+    buddhistEra: boolean;
+    minDate?: DynamicValue<Date>;
+    maxDate?: DynamicValue<Date>;
+    disableWeekends: boolean;
+    placeholder: string;
+    accentColor: string;
 }
 
 export interface PwbCustomWidgetPreviewProps {
@@ -24,5 +37,15 @@ export interface PwbCustomWidgetPreviewProps {
     readOnly: boolean;
     renderMode: "design" | "xray" | "structure";
     translate: (text: string) => string;
-    sampleText: string;
+    selectionMode: SelectionModeEnum;
+    dateAttribute: string;
+    startDateAttribute: string;
+    endDateAttribute: string;
+    showTime: boolean;
+    buddhistEra: boolean;
+    minDate: string;
+    maxDate: string;
+    disableWeekends: boolean;
+    placeholder: string;
+    accentColor: string;
 }

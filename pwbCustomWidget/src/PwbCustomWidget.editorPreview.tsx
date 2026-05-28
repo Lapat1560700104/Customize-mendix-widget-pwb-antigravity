@@ -1,9 +1,9 @@
 import { ReactElement } from "react";
-import { HelloWorldSample } from "./components/HelloWorldSample";
 import { PwbCustomWidgetPreviewProps } from "../typings/PwbCustomWidgetProps";
 
-export function preview({ sampleText }: PwbCustomWidgetPreviewProps): ReactElement {
-    return <HelloWorldSample sampleText={sampleText} />;
+export function preview(props: PwbCustomWidgetPreviewProps): ReactElement {
+    console.log("Preview Props:", props);
+    return <div className="pwb-datepicker-preview">PWB Advanced DatePicker [Preview]</div>;
 }
 
 export function getPreviewCss(): string {

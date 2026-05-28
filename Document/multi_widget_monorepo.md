@@ -69,30 +69,50 @@ Customize-mendix-widget-pwb-antigravity/       # [Repository หลัก]
   "version": "1.0.0",
   "private": true,
   "workspaces": [
-    "pwbCustomWidget",
-    "pwbAnotherWidget"
+    "pwb*"
   ],
   "scripts": {
     "install:all": "npm install",
     "build:all": "npm run build --workspaces",
-    "release:all": "npm run release --workspaces"
+    "release:all": "npm run release --workspaces",
+    "lint:all": "npm run lint --workspaces",
+    "lint:fix:all": "npm run lint:fix --workspaces",
+    "build:pwbCustomWidget": "npm run build -w pwbCustomWidget",
+    "release:pwbCustomWidget": "npm run release -w pwbCustomWidget"
   }
 }
 ```
 
-### คำสั่งศูนย์กลางที่ใช้งานได้ทันที (จากโฟลเดอร์นอกจากสุด):
+### คำสั่งศูนย์กลางที่ใช้งานได้ทันที (จากโฟลเดอร์นอกสุด):
+
+#### A. สั่งการพร้อมกันทุก Widget (All Workspaces):
 *   **ติดตั้ง Dependencies ทุกโครงการพร้อมกัน**:
     ```bash
     npm run install:all
     ```
-*   **คอมไพล์ทดสอบ (Development Build) ทุกตัวพร้อมกัน**:
+*   **บิลด์ทดสอบ (Development Build) ทุกตัวพร้อมกัน**:
     ```bash
     npm run build:all
     ```
-*   **สร้างไฟล์ `.mpk` (Production Release) ของทุกโปรเจคแยกกันพร้อมกัน**:
+*   **สร้างไฟล์ `.mpk` (Production Release) ทุกตัวพร้อมกัน**:
     ```bash
     npm run release:all
     ```
+
+#### B. สั่งการแยกกันทีละ Widget (Individual Workspace):
+คุณสามารถสั่งงานคอมไพล์แยกเฉพาะเจาะจงเจาะจงรายตัวจากรูทด้านนอกได้ 2 วิธี:
+
+**วิธีที่ 1: ใช้สคริปต์ทางลัดที่เราลงทะเบียนไว้ใน package.json**:
+*   บิลด์ทดสอบเฉพาะ DatePicker: `npm run build:pwbCustomWidget`
+*   บิลด์ออกไฟล์ `.mpk` เฉพาะ DatePicker: `npm run release:pwbCustomWidget`
+
+**วิธีที่ 2: ใช้คำสั่งมาตรฐานของ NPM Workspace (สำหรับโปรเจคที่สร้างขึ้นใหม่ในอนาคต)**:
+*   คุณไม่จำเป็นต้องแอดสคริปต์ใหม่ลงในรูททุกครั้ง เพียงพิมพ์คำสั่งและระบุชื่อโฟลเดอร์ผ่านธง `-w` (หรือ `--workspace`):
+    ```bash
+    npm run build -w <ชื่อโฟลเดอร์-widget>
+    npm run release -w <ชื่อโฟลเดอร์-widget>
+    ```
+    *ตัวอย่างเช่น: `npm run release -w pwbCustomWidget`*
 
 ---
 

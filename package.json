@@ -11,6 +11,8 @@
     "build:all": "npm run build --workspaces",
     "release:all": "npm run release --workspaces",
     "lint:all": "npm run lint --workspaces",
-    "lint:fix:all": "npm run lint:fix --workspaces"
+    "lint:fix:all": "npm run lint:fix --workspaces",
+    "build:pwbCustomWidget": "npm run build -w pwbCustomWidget",
+    "release:pwbCustomWidget": "npm run release -w pwbCustomWidget"
   }
 }

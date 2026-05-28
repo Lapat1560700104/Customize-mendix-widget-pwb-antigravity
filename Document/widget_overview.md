@@ -19,10 +19,10 @@ Widget นี้ทำงานในลักษณะ **Unidirectional Data Fl
 
 ```mermaid
 graph TD
-    M[Mendix Studio Pro / Config Panel] -- กรอกข้อความ sampleText --> XML[PwbCustomWidget.xml]
-    XML -- รับข้อมูลผ่าน Properties --> TSX[PwbCustomWidget.tsx]
-    TSX -- ตรวจสอบค่าเริ่มต้น -> COMP[HelloWorldSample.tsx]
-    COMP -- เรนเดอร์ HTML DOM --> Browser[เว็บเบราว์เซอร์ของผู้ใช้งาน]
+    M["Mendix Studio Pro / Config Panel"] -- "กรอกข้อความ sampleText" --> XML["PwbCustomWidget.xml"]
+    XML -- "รับข้อมูลผ่าน Properties" --> TSX["PwbCustomWidget.tsx"]
+    TSX -- "ตรวจสอบค่าเริ่มต้น" --> COMP["HelloWorldSample.tsx"]
+    COMP -- "เรนเดอร์ HTML DOM" --> Browser["เว็บเบราว์เซอร์ของผู้ใช้งาน"]
 ```
 
 1.  **การตั้งค่าใน Mendix (Configuration)**: นักพัฒนาของ Mendix จะกรอกข้อความในช่องตั้งค่า **"Default value"** ในแผงการตั้งค่าของ Widget

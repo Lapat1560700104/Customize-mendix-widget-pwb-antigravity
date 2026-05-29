@@ -1,72 +1,98 @@
 # รายละเอียดและการทำงานของ Mendix Custom Widget (PwbDatePicker)
 
-เอกสารฉบับนี้อธิบายถึงโครงสร้าง สถาปัตยกรรม และตรรกะการทำงานของ **PwbDatePicker** ซึ่งเป็น Pluggable Widget ที่ถูกสร้างขึ้นเพื่อขยายความสามารถด้าน UI/UX ในโปรเจค Mendix Studio Pro
+เอกสารฉบับนี้อธิบายถึงสถาปัตยกรรม โครงสร้าง โฟลว์การไหลของข้อมูล และตรรกะการทำงานของ **PWB Advanced DatePicker (v1.0.5)** ซึ่งเป็น Pluggable Widget คุณภาพสูงสำหรับขยายขีดความสามารถ UI/UX ของการเลือกวันที่และเวลาภายในโครงการ Mendix Studio Pro
 
 ---
 
 ## 🚀 ภาพรวมของ Widget (Widget Overview)
 
-* **ชื่ออย่างเป็นทางการ**: `PWB Advanced DatePicker`
-* **Widget ID**: `pwb.pwbdatepicker.PwbDatePicker`
-* **สถาปัตยกรรมที่ใช้**: React (Function Components & Hooks) ร่วมกับ TypeScript
-* **เป้าหมายการรัน**: รองรับแพลตฟอร์ม Web และ Hybrid Mobile Apps
+*   **ชื่ออย่างเป็นทางการ:** `PWB Advanced DatePicker`
+*   **Widget ID:** `pwb.pwbdatepicker.PwbDatePicker`
+*   **สถาปัตยกรรมเทคโนโลยี:** React 19 (Function Components & State Hooks) + TypeScript 5
+*   **แพลตฟอร์มเป้าหมาย:** Web Browser (Desktop / Mobile Responsive)
+*   **คอนเซปต์ UI/UX:** Glassmorphic Premium Design (ดีไซน์กระจกฝ้าหรูหราทันสมัย พร้อมแอนิเมชันเปลี่ยนผ่านสมูทลื่นไหล)
 
 ---
 
-## 🛠️ หลักการทำงาน (Logic & Data Flow)
+## 🛠️ สถาปัตยกรรมและโฟลว์ข้อมูล (Data Flow & React Node Injection)
 
-Widget นี้ทำงานในลักษณะ **Unidirectional Data Flow** (การไหลของข้อมูลทิศทางเดียว) จากแพลตฟอร์ม Mendix เข้าสู่คอมโพเนนต์ React ดังแผนภาพด้านล่างนี้:
+วิดเจ็ตนี้ทำงานโดยใช้สถาปัตยกรรมแยกส่วนบทบาทหน้าที่อย่างชัดเจน (Decoupled Presentational Architecture) เพื่อลดการพึ่งพาระบบรันไทม์หลังบ้านของ Mendix ส่งผลให้คุณสามารถเปิดรันทดสอบบนโลคอลเบราว์เซอร์เดี่ยว ๆ ได้ทันทีผ่านเครื่องมือ **Vite Playground Dashboard**
+
+แผนภาพการไหลเวียนของข้อมูลและส่วนประกอบ:
 
 ```mermaid
 graph TD
-    M["Mendix Studio Pro / Config Panel"] -- "กรอกข้อความ sampleText" --> XML["PwbDatePicker.xml"]
-    XML -- "รับข้อมูลผ่าน Properties" --> TSX["PwbDatePicker.tsx"]
-    TSX -- "ตรวจสอบค่าเริ่มต้น" --> COMP["DatePicker.tsx"]
-    COMP -- "เรนเดอร์ HTML DOM" --> Browser["เว็บเบราว์เซอร์ของผู้ใช้งาน"]
+    MendixAttr["Mendix Database Attributes<br>(DateTime / DynamicValue)"] --> Wrapper["PwbDatePicker.tsx<br>(React Container Wrapper)"]
+    MendixIcon["Mendix Custom Icon Prop<br>(calendarIcon: WebIcon)"] --> Wrapper
+    
+    subgraph Mendix Platform Runtime Only
+        Wrapper --> MendixIconRender["Icon Component<br>(mendix/components/Icon)"]
+    end
+    
+    MendixIconRender -- "React.ReactNode Injection" --> Presenter["DatePicker.tsx<br>(Presentational Core Component)"]
+    Wrapper -- "Pure JS Primitive Data Types<br>(Date, Boolean, string)" --> Presenter
+    
+    Presenter -- "Dynamic Local CSS Variables" --> CSS["PwbDatePicker.css<br>(Styling System)"]
+    Presenter -- "Interactive UI DOM Render" --> Browser["เว็บเบราว์เซอร์ของผู้ใช้งาน"]
 ```
 
-1. **การตั้งค่าใน Mendix (Configuration)**: นักพัฒนาของ Mendix จะกรอกข้อความในช่องตั้งค่า **"Default value"** ในแผงการตั้งค่า of Widget
-2. **การผ่านข้อมูลเข้าสู่โค้ด (Data Pipeline)**: ข้อมูลจากช่องตั้งค่าดังกล่าวจะถูกเก็บและส่งผ่านตัวแปร `sampleText`
-3. **การตรวจสอบตรรกะเริ่มต้น (Logical Evaluation)**:
-    * ถ้าผู้ใช้งานมีการพิมพ์ข้อความเข้ามา -> ส่งข้อความนั้นไปแสดงผล
-    * ถ้าไม่มีการพิมพ์ข้อความใดๆ -> ใช้คำเริ่มต้นว่า `"World"`
-4. **การแสดงผลสู่หน้าจอ (Rendering)**: React จะเรนเดอร์โครงสร้าง `div` เพื่อนำคำทักทายออกไปแสดงผลผ่านเบราว์เซอร์ในรูปแบบ `Hello [ข้อความ]`
+### 1. บทบาทของ Container Wrapper ([PwbDatePicker.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.tsx))
+- ทำหน้าที่เป็นสะพานเชื่อมต่อโดยตรงกับ Mendix Platform Runtime
+- ทำการแกะค่า (Extract) ข้อมูลดิบจากฐานข้อมูล Mendix เช่น `dateAttribute.value`, `calendarIcon.value`
+- จัดการแปลงข้อขัดข้องการเรียกนำเข้าคอมโพเนนต์ Mendix (ซึ่งจะส่งผลให้โปรแกรมแครชเมื่อรันข้างนอก) ด้วยการประมวลผลโมดูล `<Icon>` ในเลเยอร์นี้ แล้วส่งข้ามไปด้วยเทคนิค **React Node Injection Pattern (ผ่านตัวแปร `customIcon`)** ทำให้ตัวคอมโพเนนต์แกนหลักทำงานได้อย่างเป็นอิสระ
+
+### 2. บทบาทของคอมโพเนนต์นำเสนอแกนหลัก ([DatePicker.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/components/DatePicker.tsx))
+- เป็นหัวใจหลักของฟังก์ชันปฏิทิน ไม่มีการนำเข้าแพ็คเกจหรือโมดูลใด ๆ ของ Mendix เพื่อรักษาความเป็นอิสระสูงสุด (Pure Presentational Component)
+- ควบคุมสถานะภายในทั้งหมด ได้แก่ ปี พ.ศ. (Offset +543), หน้าต่างกรอกชั่วโมง/นาทีป้อนตรง, ระบบกดเปลี่ยนเดือนด้วยแอนิเมชันแบบสไลด์ข้าง, แผงตารางเลือกเดือน-ปีแบบด่วน (Month/Year Quick Jump), และตารางปุ่มลัดวันที่ (Presets Panel)
+- รองรับการทำงานในแบบ **Single Mode** และ **Airbnb Pill Range Selection Mode**
+
+### 3. บทบาทของไฟล์ตกแต่งรูปลักษณ์ ([PwbDatePicker.css](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/ui/PwbDatePicker.css))
+- ใช้ระบบควบคุมสไตล์ผ่านคุณสมบัติตัวแปรโลคอล CSS (CSS Custom Properties) โดยเชื่อมค่าโดยตรงมาจากแท็บ Aesthetics ใน Mendix ทำให้สามารถดัดแปลงความโค้งมน, เอฟเฟกต์เบลอกระจก, สีสันของธีม หรือความใสของสีพื้นหลังได้อย่างรวดเร็ว
 
 ---
 
-## 📁 โค้ดที่ควบคุมการทำงานหลัก (Source Code Implementation)
+## ⚙️ โครงสร้างการตั้งค่าแผงควบคุม Properties (XML Schema)
 
-### 1. ส่วนนิยามคุณสมบัติ (Property Definitions)
+คุณสมบัติทั้งหมดที่ถูกนิยามไว้ใน [PwbDatePicker.xml](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.xml) เพื่อแสดงผลในหน้าจอตั้งค่าของโปรแกรม Mendix Studio Pro:
 
-* **ไฟล์**: [PwbDatePicker.xml](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.xml)
-* **หน้าที่**: กำหนดฟิลด์ให้ฝั่ง Mendix สามารถส่งค่าเข้ามายัง Widget ได้
+### 1. General (การเลือกโหมดและผูกตัวแปรฐานข้อมูล)
+*   `selectionMode`: ตัวเลือกว่าจะใช้ระบบปฏิทินเลือกวันเดียว (`single`) หรือเลือกช่วงวันเริ่มต้น-สิ้นสุด (`range`)
+*   `dateAttribute`: ฟิลด์ตัวแปรประเภท DateTime จากฐานข้อมูลสำหรับเก็บวันเลือกในโหมดวันเดียว
+*   `startDateAttribute` / `endDateAttribute`: ฟิลด์ตัวแปรป้อนช่วงวันที่เริ่มต้นและสิ้นสุด
+
+### 2. Features (การเปิด-ปิดความสามารถยืดหยุ่น)
+*   `showTime`: สวิตช์ Boolean เปิดทำงานช่องกรอกพิมพ์เวลาตัวเลขชั่วโมงและนาทีโดยตรง
+*   `buddhistEra`: ตั้งค่าเริ่มต้นแสดงผลปีปฏิทินในรูปแบบปี พ.ศ. ไทย (+543 ปี)
+*   `showPresets`: สวิตช์เปิด-ปิดแถบปุ่มลัดรวดเร็ว (วันนี้, 7 วันล่าสุด, เดือนนี้)
+*   `showEraToggle`: เปิดแสดงสวิตช์แลกเปลี่ยนปีแบบสด "พ.ศ. / ค.ศ." บนหัวปฏิทิน
+
+### 3. Constraints (ระบบล็อกกรอบความปลอดภัย)
+*   `minDate` / `maxDate`: กำหนดขอบเขตจำกัดวันที่ห้ามเลือก ต่ำสุด-สูงสุด ผ่าน Expression
+*   `disableWeekends`: บล็อกห้ามผู้ใช้คลิกเลือกวันเสาร์และวันอาทิตย์
+
+### 4. Aesthetics (การกำหนดรูปลักษณ์ภายนอกระดับพรีเมียม)
+*   `placeholder`: ข้อความแสดงผลเมื่อช่องกรอกมีค่าว่างเปล่า
+*   `accentColor`: รหัสสี Hex กำหนดชุดสีเด่นของปฏิทิน (เช่น `#3b82f6` หรือสีแบรนด์ของคุณ)
+*   `borderRadius`: กำหนดความโค้งมนของกล่องปฏิทิน (เช่น `16px`, `8px`, `0px`)
+*   `bgBlur`: กำหนดความเข้มข้นของการเบลอกลุ่มกระจกฝ้า (Backdrop-filter blur)
+*   `popoverBg`: กำหนดสีและระดับความโปร่งใสของพื้นหลังการ์ดปฏิทิน (เช่น `rgba(15, 23, 42, 0.85)`)
+*   `calendarIcon` (ประเภท `icon`): ฟิลด์คลิกเปิดกล่อง Mendix Icon Selector เพื่อเปลี่ยนรูปสัญลักษณ์ในกล่องป้อนข้อมูล สามารถอัปโหลดรูปภาพ SVG ของคุณเอง หรือคลิกจิ้มไอคอน Glyphicon / FontAwesome มาตรฐานได้ทันที
+
+### 5. Validation (ระบบตรวจความถูกต้องของข้อมูล)
+*   `required` / `requiredMessage`: บังคับความจำเป็นต้องเลือกข้อมูล และกำหนดคำเตือนความผิดพลาด
+*   `validationExpression` / `customValidationMessage`: เขียนกฎสูตร Boolean Expression ส่วนตัวในการประเมินวันที่ถูกเลือก และป้อนคำเตือนเฉพาะกรณีไม่ผ่านเงื่อนไขกฎดังกล่าว
+
+### 6. Translations (ระบบ Batch Translate)
+*   รองรับคำแปลแยก 7 ฟิลด์ เพื่อเชื่อมเข้ากับระบบแปลภาษาหลักของ Mendix Studio Pro:
+    `timeLabel`, `todayPresetLabel`, `clearPresetLabel`, `selectMonthLabel`, `last7DaysPresetLabel`, `last30DaysPresetLabel`, `thisMonthPresetLabel`
 
 ---
 
-### 2. คอมโพเนนต์หลักที่ควบคุมระบบ (Container Component)
+## 🎨 การแสดงผลบนตัวออกแบบหน้าเพจ Mendix (Upgraded Studio Pro Editor Preview)
 
-* **ไฟล์**: [PwbDatePicker.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.tsx)
-* **หน้าที่**: รับข้อมูล Props และเชื่อมโยง CSS สำหรับจัดแต่งรูปทรงของหน้าตา Widget
-
----
-
-### 3. ส่วนเรนเดอร์ UI ย่อย (Presentational Component)
-
-* **ไฟล์**: [DatePicker.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/components/DatePicker.tsx)
-* **หน้าที่**: แปลงข้อมูลที่ประมวลผลแล้วให้อยู่ในรูป HTML `div` เพื่อขึ้นแสดงบนหน้าจอของผู้ใช้งาน
-
----
-
-## 🎨 สไตล์และการตกแต่งหน้าตา (Styling Guide)
-
-ความสวยงามของ Widget นี้สามารถจัดแต่งได้อย่างอิสระผ่านไฟล์ CSS ที่ [PwbDatePicker.css](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/ui/PwbDatePicker.css)
-
----
-
-## 💡 แนวทางการขยายความสามารถในอนาคต (Future Enhancements Guide)
-
-เมื่อต้องการปรับปรุงหรือพัฒนาความสามารถของ Widget เพิ่มขึ้น แนะนำให้ปฏิบัติตามขั้นตอนต่อไปนี้:
-
-1. **การเพิ่ม Properties ใหม่**: เข้าไปเพิ่มฟิลด์ใน `<properties>` ของไฟล์ XML จากนั้นให้ทำการสั่งรันคำสั่งคอมไพล์ เพื่อสร้างประเภทตัวแปร TypeScript (Typings) ตัวใหม่ในโฟลเดอร์ `typings/` โดยอัตโนมัติ
-2. **การเรียกใช้งานฟังก์ชันซับซ้อน**: แนะนำให้สร้างคอมโพเนนต์ย่อยแยกออกมาไว้ภายใต้โฟลเดอร์ `src/components/` เพื่อแยกบทบาทความรับผิดชอบของโค้ดให้ชัดเจนและเป็นระเบียบ (Single Responsibility Principle)
-3. **การเปลี่ยนรูปแบบให้รองรับระดับ Native Mobile**: หากต้องการให้ Widget รันได้ทั้งบนระบบ Web และ iOS/Android แบบ Native ให้เปลี่ยนค่า `supportedPlatform` ในไฟล์ XML และเปลี่ยนโฟลเดอร์สไตล์ให้เป็น JavaScript Stylesheet ของ React Native แทน
+ความสมบูรณ์แบบของวิดเจ็ตเวอร์ชัน v1.0.5 ได้ถูกเพิ่มเติมในไฟล์ [PwbDatePicker.editorPreview.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.editorPreview.tsx):
+- เมื่อคุณลากวางวิดเจ็ตลงในหน้าต่างออกแบบ (Design View) ของ Mendix Studio Pro ระบบจะแสดงผล **Mockup กล่องกรอกข้อมูลจำลอง** ที่มีความสวยงามทันสมัย มีลักษณะขอบโค้งมนตามจริง แสดงชื่อโหมดและฟิลด์ไอคอนจำลอง
+- รองรับการเรนเดอร์ไอคอนตรงหน้าแผงออกแบบ:
+  - หากเลือกอัปโหลดรูปไอคอนส่วนตัว (`type === "image"`) จะดึงภาพ Preview ขนาดเล็กมาแสดง
+  - หากเลือกคลาสไอคอนฟอนต์ (`type === "glyph"` หรือ `"icon"`) จะแสดงไอคอนตามคลาสนั้น ๆ
+  - หากทิ้งค่าว่างไว้ จะดึงไอคอนเส้นเวกเตอร์ปฏิทินจาง ๆ มาขึ้นพรีวิวให้เห็น สอดคล้องกับภาพจริงเมื่อผู้ใช้นำไปเปิดใช้งานจริงในระบบครับ

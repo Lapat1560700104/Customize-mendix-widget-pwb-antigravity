@@ -19,8 +19,11 @@ export interface PwbComboBoxContainerProps {
     optionsSource: ListValue;
     optionLabel: ListExpressionValue<string>;
     optionDetail?: ListExpressionValue<string>;
+    optionGroup?: ListExpressionValue<string>;
+    optionImage?: ListExpressionValue<string>;
     selectionMode: SelectionModeEnum;
     tagStyle: TagStyleEnum;
+    tagColorExpression?: ListExpressionValue<string>;
     selectedAttribute?: EditableValue<string | Big>;
     delimiter: string;
     selectedAssociation?: ReferenceValue | ReferenceSetValue;
@@ -53,8 +56,11 @@ export interface PwbComboBoxPreviewProps {
     optionsSource: {} | { caption: string } | { type: string } | null;
     optionLabel: string;
     optionDetail: string;
+    optionGroup: string;
+    optionImage: string;
     selectionMode: SelectionModeEnum;
     tagStyle: TagStyleEnum;
+    tagColorExpression: string;
     selectedAttribute: string;
     delimiter: string;
     selectedAssociation: string;

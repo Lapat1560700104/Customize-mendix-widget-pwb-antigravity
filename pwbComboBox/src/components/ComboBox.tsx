@@ -4,6 +4,9 @@ export interface ComboBoxOption {
     id: string;
     label: string;
     subtitle?: string;
+    groupName?: string;
+    colorCode?: string;
+    imageUrl?: string;
     rawObject: any;
 }
 
@@ -58,6 +61,8 @@ export function ComboBox({
     const [searchText, setSearchText] = useState("");
     const [focusedIndex, setFocusedIndex] = useState(-1);
     const [visibleCount, setVisibleCount] = useState(50);
+    const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+    const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
 
     const popoverRef = useRef<HTMLDivElement>(null);
     const inputContainerRef = useRef<HTMLDivElement>(null);
@@ -122,7 +127,93 @@ export function ComboBox({
     };
 
     const filteredOptions = getFilteredOptions();
-    const slicedOptions = filteredOptions.slice(0, visibleCount);
+
+    // Grouping calculations:
+    // Extract unique group names and sort them alphabetically, keeping empty group at the end
+    const groupNames = Array.from(new Set(filteredOptions.map(o => o.groupName || "")));
+    const sortedGroupNames = groupNames.sort((a, b) => {
+        if (a === "") {
+            return 1;
+        }
+        if (b === "") {
+            return -1;
+        }
+        return a.localeCompare(b);
+    });
+
+    // Compute visible options (excluding collapsed groups) for keyboard navigation
+    const visibleFilteredOptions: ComboBoxOption[] = [];
+    sortedGroupNames.forEach(gName => {
+        const isCollapsed = !!collapsedGroups[gName];
+        if (!isCollapsed) {
+            const optsInGroup = filteredOptions.filter(o => (o.groupName || "") === gName);
+            visibleFilteredOptions.push(...optsInGroup);
+        }
+    });
+
+    // Generate renderable items list (combines group headers and sliced options)
+    interface RenderableItem {
+        type: "header" | "option";
+        groupName?: string;
+        count?: number;
+        isCollapsed?: boolean;
+        option?: ComboBoxOption;
+        index?: number;
+        isSelected?: boolean;
+        isFocused?: boolean;
+    }
+
+    const renderableItems: RenderableItem[] = [];
+    let optionIndex = 0;
+
+    sortedGroupNames.forEach(gName => {
+        const optsInGroup = filteredOptions.filter(o => (o.groupName || "") === gName);
+        if (optsInGroup.length === 0) {
+            return;
+        }
+
+        const isCollapsed = !!collapsedGroups[gName];
+
+        if (gName !== "") {
+            renderableItems.push({
+                type: "header",
+                groupName: gName,
+                count: optsInGroup.length,
+                isCollapsed
+            });
+        }
+
+        if (!isCollapsed) {
+            optsInGroup.forEach(opt => {
+                if (optionIndex < visibleCount) {
+                    renderableItems.push({
+                        type: "option",
+                        option: opt,
+                        index: optionIndex,
+                        isSelected: selectedIds.includes(opt.id),
+                        isFocused: optionIndex === focusedIndex
+                    });
+                }
+                optionIndex++;
+            });
+        }
+    });
+
+    const toggleGroup = (gName: string): void => {
+        setCollapsedGroups(prev => ({
+            ...prev,
+            [gName]: !prev[gName]
+        }));
+    };
+
+    const handleImageError = (id: string): void => {
+        setBrokenImages(prev => ({
+            ...prev,
+            [id]: true
+        }));
+    };
+
+    const shouldShowOptionAvatars = options.some(o => !!o.imageUrl) || tagStyle === "avatar";
 
     // Handle lazy scroll loading
     const handleDropdownScroll = (e: UIEvent<HTMLDivElement>): void => {
@@ -154,17 +245,17 @@ export function ComboBox({
             if (!isOpen) {
                 setIsOpen(true);
             } else {
-                setFocusedIndex(prev => (prev < filteredOptions.length - 1 ? prev + 1 : 0));
+                setFocusedIndex(prev => (prev < visibleFilteredOptions.length - 1 ? prev + 1 : 0));
             }
         } else if (e.key === "ArrowUp") {
             e.preventDefault();
             if (isOpen) {
-                setFocusedIndex(prev => (prev > 0 ? prev - 1 : filteredOptions.length - 1));
+                setFocusedIndex(prev => (prev > 0 ? prev - 1 : visibleFilteredOptions.length - 1));
             }
         } else if (e.key === "Enter") {
             e.preventDefault();
-            if (isOpen && focusedIndex >= 0 && focusedIndex < filteredOptions.length) {
-                handleSelectOption(filteredOptions[focusedIndex].id);
+            if (isOpen && focusedIndex >= 0 && focusedIndex < visibleFilteredOptions.length) {
+                handleSelectOption(visibleFilteredOptions[focusedIndex].id);
             } else if (!isOpen) {
                 setIsOpen(true);
             }
@@ -247,19 +338,41 @@ export function ComboBox({
                             if (!option) {
                                 return null;
                             }
+
+                            const hasAvatar = tagStyle === "avatar" || !!option.imageUrl;
+                            const tagStyleObject = option.colorCode
+                                ? {
+                                      borderColor: option.colorCode,
+                                      color: option.colorCode,
+                                      backgroundColor: `color-mix(in srgb, ${option.colorCode} 8%, transparent)`
+                                  }
+                                : {};
+
                             return (
                                 <div
                                     key={id}
-                                    className={`pwb-combobox-tag-pill ${
-                                        tagStyle === "avatar" ? "pwb-tag-avatar-style" : ""
-                                    }`}
+                                    className={`pwb-combobox-tag-pill ${hasAvatar ? "pwb-tag-avatar-style" : ""}`}
+                                    style={tagStyleObject}
                                 >
-                                    {tagStyle === "avatar" && (
+                                    {hasAvatar && (
                                         <span
                                             className="pwb-combobox-tag-avatar"
-                                            style={{ backgroundColor: accentColor }}
+                                            style={
+                                                option.colorCode
+                                                    ? { backgroundColor: option.colorCode }
+                                                    : { backgroundColor: accentColor }
+                                            }
                                         >
-                                            {getInitials(option.label)}
+                                            {option.imageUrl && !brokenImages[option.id] ? (
+                                                <img
+                                                    src={option.imageUrl}
+                                                    className="pwb-combobox-tag-img"
+                                                    alt={option.label}
+                                                    onError={() => handleImageError(option.id)}
+                                                />
+                                            ) : (
+                                                getInitials(option.label)
+                                            )}
                                         </span>
                                     )}
                                     <span className="pwb-combobox-tag-text">{option.label}</span>
@@ -271,6 +384,7 @@ export function ComboBox({
                                                 e.stopPropagation();
                                                 onRemove(id);
                                             }}
+                                            style={option.colorCode ? { color: option.colorCode } : {}}
                                             aria-label={`Remove tag ${option.label}`}
                                         >
                                             &times;
@@ -378,9 +492,44 @@ export function ComboBox({
                             onScroll={handleDropdownScroll}
                         >
                             <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
-                                {slicedOptions.map((opt, idx) => {
-                                    const isSelected = selectedIds.includes(opt.id);
-                                    const isFocused = idx === focusedIndex;
+                                {renderableItems.map(item => {
+                                    if (item.type === "header") {
+                                        const groupName = item.groupName || "";
+                                        const isCollapsed = !!item.isCollapsed;
+                                        return (
+                                            <li
+                                                key={`header-${groupName}`}
+                                                className="pwb-combobox-group-header"
+                                                onClick={e => {
+                                                    e.stopPropagation();
+                                                    toggleGroup(groupName);
+                                                }}
+                                            >
+                                                <div className="pwb-combobox-group-header-content">
+                                                    <span>{renderOptionLabel(groupName, searchText)}</span>
+                                                    <span className="pwb-combobox-group-count">{item.count}</span>
+                                                </div>
+                                                <svg
+                                                    className={`pwb-combobox-group-chevron ${
+                                                        isCollapsed ? "pwb-collapsed" : ""
+                                                    }`}
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2.5"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                >
+                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                </svg>
+                                            </li>
+                                        );
+                                    }
+
+                                    const opt = item.option!;
+                                    const idx = item.index!;
+                                    const isSelected = !!item.isSelected;
+                                    const isFocused = !!item.isFocused;
 
                                     return (
                                         <li
@@ -395,6 +544,37 @@ export function ComboBox({
                                             role="option"
                                             aria-selected={isSelected}
                                         >
+                                            {shouldShowOptionAvatars && (
+                                                <div
+                                                    className="pwb-combobox-option-avatar-container"
+                                                    style={
+                                                        opt.colorCode
+                                                            ? {
+                                                                  backgroundColor: `color-mix(in srgb, ${opt.colorCode} 12%, transparent)`,
+                                                                  color: opt.colorCode,
+                                                                  borderColor: `color-mix(in srgb, ${opt.colorCode} 30%, transparent)`
+                                                              }
+                                                            : {
+                                                                  backgroundColor: `color-mix(in srgb, ${accentColor} 12%, transparent)`,
+                                                                  color: accentColor,
+                                                                  borderColor: `color-mix(in srgb, ${accentColor} 30%, transparent)`
+                                                              }
+                                                    }
+                                                >
+                                                    {opt.imageUrl && !brokenImages[opt.id] ? (
+                                                        <img
+                                                            src={opt.imageUrl}
+                                                            className="pwb-combobox-option-avatar-img"
+                                                            onError={() => handleImageError(opt.id)}
+                                                            alt={opt.label}
+                                                        />
+                                                    ) : (
+                                                        <span className="pwb-combobox-option-avatar-initials">
+                                                            {getInitials(opt.label)}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
                                             <div
                                                 style={{
                                                     flex: 1,

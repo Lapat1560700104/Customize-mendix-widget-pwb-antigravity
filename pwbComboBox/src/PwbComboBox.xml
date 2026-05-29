@@ -22,6 +22,16 @@
                 <description>Optional secondary text displayed below the option label (e.g. Email under Name)</description>
                 <returnType type="String"/>
             </property>
+            <property key="optionGroup" type="expression" dataSource="optionsSource" required="false">
+                <caption>Option Group Category</caption>
+                <description>Optional expression to group option items by a category name (e.g. $currentObject/Category)</description>
+                <returnType type="String"/>
+            </property>
+            <property key="optionImage" type="expression" dataSource="optionsSource" required="false">
+                <caption>Option Image URL</caption>
+                <description>Optional expression to display a circular avatar image thumbnail (e.g. $currentObject/AvatarUrl)</description>
+                <returnType type="String"/>
+            </property>
         </propertyGroup>
 
         <propertyGroup caption="Selection">
@@ -40,6 +50,11 @@
                     <enumerationValue key="pill">Standard Pill</enumerationValue>
                     <enumerationValue key="avatar">Avatar Circle</enumerationValue>
                 </enumerationValues>
+            </property>
+            <property key="tagColorExpression" type="expression" dataSource="optionsSource" required="false">
+                <caption>Tag Color (Hex/CSS)</caption>
+                <description>Optional expression returning a dynamic color code or name to style tag badges individually (e.g. $currentObject/Color)</description>
+                <returnType type="String"/>
             </property>
             <property key="selectedAttribute" type="attribute" required="false">
                 <caption>Selected Attribute (Single/Multi-Delimited)</caption>

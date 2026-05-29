@@ -6,12 +6,20 @@ import "../src/ui/PwbComboBox.css";
 // ----------------------------------------------------
 // Generate Massive Dataset dynamically (1,000 items)
 // ----------------------------------------------------
-const MASSIVE_DATASET = Array.from({ length: 1000 }).map((_, index) => ({
-    id: `m_${index}`,
-    label: `รายการตัวเลือกที่ ${index + 1} 🚀`,
-    subtitle: `รหัสสินค้า: OP-${10000 + index} | สินค้านำเข้าหมวดหมู่พรีเมียม`,
-    rawObject: { id: `m_${index}`, index }
-}));
+const MASSIVE_DATASET = Array.from({ length: 1000 }).map((_, index) => {
+    const isEven = index % 2 === 0;
+    return {
+        id: `m_${index}`,
+        label: `รายการตัวเลือกที่ ${index + 1} 🚀`,
+        subtitle: `รหัสสินค้า: OP-${10000 + index} | สินค้านำเข้าหมวดหมู่พรีเมียม`,
+        groupName: isEven ? "สินค้าพรีเมียม (Premium)" : "สินค้าขายดี (Best Seller)",
+        colorCode: isEven ? "#10b981" : "#3b82f6",
+        imageUrl: isEven 
+            ? "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=100&q=80"
+            : "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=100&q=80",
+        rawObject: { id: `m_${index}`, index }
+    };
+});
 
 // ----------------------------------------------------
 // Mock Datasets with dynamic subtitles
@@ -22,60 +30,90 @@ const DATASETS = {
             id: "1",
             label: "Apple 🍎",
             subtitle: "ผลไม้แอปเปิ้ลสดสีแดง | Cal: 52 kcal",
+            groupName: "หวาน / Sweet",
+            colorCode: "#ef4444",
+            imageUrl: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "1", val: "apple" }
         },
         {
             id: "2",
             label: "Banana 🍌",
             subtitle: "กล้วยหอมทองอุดมโพแทสเซียม | Cal: 89 kcal",
+            groupName: "หวาน / Sweet",
+            colorCode: "#eab308",
+            imageUrl: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "2", val: "banana" }
         },
         {
             id: "3",
             label: "Orange 🍊",
             subtitle: "ส้มสายน้ำผึ้งรสเปรี้ยวหวาน | Cal: 47 kcal",
+            groupName: "เปรี้ยว / Sour",
+            colorCode: "#f97316",
+            imageUrl: "https://images.unsplash.com/photo-1547514701-42782101795e?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "3", val: "orange" }
         },
         {
             id: "4",
             label: "Mango 🥭",
             subtitle: "มะม่วงอกร่องสีเหลืองทอง | Cal: 60 kcal",
+            groupName: "หวาน / Sweet",
+            colorCode: "#facc15",
+            imageUrl: "https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "4", val: "mango" }
         },
         {
             id: "5",
             label: "Grape 🍇",
             subtitle: "องุ่นไร้เมล็ดสีม่วงเข้ม | Cal: 67 kcal",
+            groupName: "หวาน / Sweet",
+            colorCode: "#8b5cf6",
+            imageUrl: "https://images.unsplash.com/photo-1537640538966-79f369143f8f?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "5", val: "grape" }
         },
         {
             id: "6",
             label: "Strawberry 🍓",
             subtitle: "สตรอว์เบอร์รี่สดจากเชียงใหม่ | Cal: 33 kcal",
+            groupName: "เปรี้ยว / Sour",
+            colorCode: "#f43f5e",
+            imageUrl: "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "6", val: "strawberry" }
         },
         {
             id: "7",
             label: "Pineapple 🍍",
             subtitle: "สับปะรดภูแลหวานกรอบ | Cal: 50 kcal",
+            groupName: "เปรี้ยว / Sour",
+            colorCode: "#eab308",
+            imageUrl: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "7", val: "pineapple" }
         },
         {
             id: "8",
             label: "Watermelon 🍉",
             subtitle: "แตงโมตอร์ปิโดเนื้อหวานฉ่ำ | Cal: 30 kcal",
+            groupName: "หวาน / Sweet",
+            colorCode: "#10b981",
+            imageUrl: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "8", val: "watermelon" }
         },
         {
             id: "9",
             label: "Peach 🍑",
             subtitle: "ลูกพีชนำเข้าจากญี่ปุ่นกลิ่นหอม | Cal: 39 kcal",
+            groupName: "หวาน / Sweet",
+            colorCode: "#f472b6",
+            imageUrl: "https://images.unsplash.com/photo-1595124253363-c59659b19350?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "9", val: "peach" }
         },
         {
             id: "10",
             label: "Kiwi 🥝",
             subtitle: "กีวี่สีทองรสชาติกลมกล่อม | Cal: 61 kcal",
+            groupName: "เปรี้ยว / Sour",
+            colorCode: "#84cc16",
+            imageUrl: "https://images.unsplash.com/photo-1585059895524-72359e061381?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "10", val: "kiwi" }
         }
     ],
@@ -84,60 +122,90 @@ const DATASETS = {
             id: "t1",
             label: "React",
             subtitle: "Frontend JavaScript Library | Creator: Meta",
+            groupName: "Frontend Stacks",
+            colorCode: "#06b6d4",
+            imageUrl: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "t1", val: "react" }
         },
         {
             id: "t2",
             label: "Vue.js",
             subtitle: "Progressive Web Framework | Creator: Evan You",
+            groupName: "Frontend Stacks",
+            colorCode: "#10b981",
+            imageUrl: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "t2", val: "vue" }
         },
         {
             id: "t3",
             label: "Angular",
             subtitle: "Enterprise MVC Platform | Creator: Google",
+            groupName: "Frontend Stacks",
+            colorCode: "#ef4444",
+            imageUrl: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "t3", val: "angular" }
         },
         {
             id: "t4",
             label: "Next.js",
             subtitle: "Fullstack React SSR Framework | Creator: Vercel",
+            groupName: "Frontend Stacks",
+            colorCode: "#ffffff",
+            imageUrl: "https://images.unsplash.com/photo-1618401471353-b98aedd07871?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "t4", val: "next" }
         },
         {
             id: "t5",
             label: "Vite",
             subtitle: "Next Generation Fast Build Tool | Creator: Evan You",
+            groupName: "Frontend Stacks",
+            colorCode: "#8b5cf6",
+            imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "t5", val: "vite" }
         },
         {
             id: "t6",
             label: "Mendix Pluggable Widgets",
             subtitle: "Low-code Custom Extension | Powered by React",
+            groupName: "Frontend Stacks",
+            colorCode: "#3b82f6",
+            imageUrl: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "t6", val: "mendix" }
         },
         {
             id: "t7",
             label: "TypeScript",
             subtitle: "Typed Superset of JavaScript | Creator: Microsoft",
+            groupName: "Frontend Stacks",
+            colorCode: "#2563eb",
+            imageUrl: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "t7", val: "ts" }
         },
         {
             id: "t8",
             label: "Go (Golang)",
             subtitle: "High Performance Backend Language | Creator: Google",
+            groupName: "Backend Stacks",
+            colorCode: "#00add8",
+            imageUrl: "https://images.unsplash.com/photo-1607799279861-4dd421887fb3?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "t8", val: "go" }
         },
         {
             id: "t9",
             label: "Python",
             subtitle: "AI and Data Science Scripting | Syntax: Simple",
+            groupName: "Backend Stacks",
+            colorCode: "#eab308",
+            imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "t9", val: "python" }
         },
         {
             id: "t10",
             label: "Rust Programming",
             subtitle: "Safe and Ultra Fast Systems Language | Memory: Safe",
+            groupName: "Backend Stacks",
+            colorCode: "#f97316",
+            imageUrl: "https://images.unsplash.com/photo-1607799279861-4dd421887fb3?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "t10", val: "rust" }
         }
     ],
@@ -146,36 +214,54 @@ const DATASETS = {
             id: "p1",
             label: "กรุงเทพมหานคร (Bangkok)",
             subtitle: "เมืองหลวงของประเทศไทย | ภูมิภาค: ภาคกลาง",
+            groupName: "ภาคกลาง (Central)",
+            colorCode: "#ef4444",
+            imageUrl: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "p1", val: "bkk" }
         },
         {
             id: "p2",
             label: "เชียงใหม่ (Chiang Mai)",
             subtitle: "ศูนย์กลางวัฒนธรรมและการท่องเที่ยว | ภูมิภาค: ภาคเหนือ",
+            groupName: "ภาคเหนือ (North)",
+            colorCode: "#10b981",
+            imageUrl: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "p2", val: "cm" }
         },
         {
             id: "p3",
             label: "ภูเก็ต (Phuket)",
             subtitle: "เกาะไข่มุกแห่งอันดามันยอดนิยม | ภูมิภาค: ภาคใต้",
+            groupName: "ภาคใต้ (South)",
+            colorCode: "#3b82f6",
+            imageUrl: "https://images.unsplash.com/photo-1589308078059-be1415eab4c3?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "p3", val: "pkt" }
         },
         {
             id: "p4",
             label: "ขอนแก่น (Khon Kaen)",
             subtitle: "ศูนย์กลางเศรษฐกิจและการศึกษา | ภูมิภาค: ภาคอีสาน",
+            groupName: "ภาคอีสาน (Northeast)",
+            colorCode: "#eab308",
+            imageUrl: "https://images.unsplash.com/photo-1558409038-f3d9b1a5518b?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "p4", val: "kk" }
         },
         {
             id: "p5",
             label: "ชลบุรี (Chonburi)",
             subtitle: "เมืองพัทยาและอุตสาหกรรมฝั่งตะวันออก | ภูมิภาค: ภาคตะวันออก",
+            groupName: "ภาคตะวันออก (East)",
+            colorCode: "#f97316",
+            imageUrl: "https://images.unsplash.com/photo-1534008897995-27a23e859048?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "p5", val: "cb" }
         },
         {
             id: "p6",
             label: "นครราชสีมา (Korat)",
             subtitle: "ประตูสู่อีสานเมืองย่าโมสุดยิ่งใหญ่ | ภูมิภาค: ภาคอีสาน",
+            groupName: "ภาคอีสาน (Northeast)",
+            colorCode: "#a855f7",
+            imageUrl: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=100&q=80",
             rawObject: { id: "p6", val: "km" }
         }
     ],
@@ -192,6 +278,9 @@ function App() {
     // Premium upgrades simulator states
     const [tagStyle, setTagStyle] = useState<"pill" | "avatar">("pill");
     const [showSubtitles, setShowSubtitles] = useState(true);
+    const [showGroups, setShowGroups] = useState(true);
+    const [showAvatars, setShowAvatars] = useState(true);
+    const [showColors, setShowColors] = useState(true);
 
     // Delimited String simulator states
     const [delimiter, setDelimiter] = useState(",");
@@ -229,8 +318,11 @@ function App() {
         ? []
         : DATASETS[datasetKey].map(opt => ({
               ...opt,
-              // Dynamically strip subtitle if toggled off to simulate optional mapping
-              subtitle: showSubtitles ? opt.subtitle : undefined
+              // Dynamically strip properties if toggled off to simulate optional mapping
+              subtitle: showSubtitles ? opt.subtitle : undefined,
+              groupName: showGroups ? (opt as any).groupName : undefined,
+              imageUrl: showAvatars ? (opt as any).imageUrl : undefined,
+              colorCode: showColors ? (opt as any).colorCode : undefined
           }));
 
     // Reset selected IDs when changing selection modes to prevent overflow
@@ -592,6 +684,61 @@ function App() {
                                     />
                                     <span>Show Subtitles (แสดงรายละเอียดแถวย่อย)</span>
                                 </label>
+
+                                <label
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        fontSize: "12px",
+                                        color: "#cbd5e1",
+                                        cursor: "pointer"
+                                    }}
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={showGroups}
+                                        onChange={e => setShowGroups(e.target.checked)}
+                                    />
+                                    <span>Group Options by Category (จัดกลุ่มตัวเลือกตามประเภท)</span>
+                                </label>
+
+                                <label
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        fontSize: "12px",
+                                        color: "#cbd5e1",
+                                        cursor: "pointer"
+                                    }}
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={showAvatars}
+                                        onChange={e => setShowAvatars(e.target.checked)}
+                                    />
+                                    <span>Render Avatar Images (แสดงภาพอวาตาร์จริง)</span>
+                                </label>
+
+                                <label
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        fontSize: "12px",
+                                        color: "#cbd5e1",
+                                        cursor: "pointer"
+                                    }}
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={showColors}
+                                        onChange={e => setShowColors(e.target.checked)}
+                                    />
+                                    <span>Dynamic Tag Colors (ระบายสีตามประเภท)</span>
+                                </label>
+
                                 <span
                                     style={{
                                         fontSize: "11px",
@@ -600,9 +747,8 @@ function App() {
                                         lineHeight: "1.4"
                                     }}
                                 >
-                                    💡 เมื่อเปิดใช้งาน ช่องค้นหาจะทำหารสแกนและไฮไลต์ตัวอักษรค้นหาพร้อมกันทั้งบน
-                                    <b>หัวข้อหลัก (Label)</b> และ<b>รายละเอียดแถวย่อย (Subtitle)</b>{" "}
-                                    ได้ทันทีอย่างสวยงาม!
+                                    💡 ฟีเจอร์พรีเมียมแบบ Enterprise (v3.0.0): จัดกลุ่มสินค้าโดย collapsible headers,
+                                    ระบายสีแท็กด้วย colors expression และรองรับรูปภาพ Profile/Product จริงพร้อมระบบ initials fallback!
                                 </span>
 
                                 <div

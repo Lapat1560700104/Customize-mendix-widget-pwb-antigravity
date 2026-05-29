@@ -420,3 +420,108 @@
     white-space: nowrap;
 }
 
+/* ==========================================
+   🚀 UPGRADES (v3.0.0): OPTION GROUPING & REAL AVATARS
+   ========================================== */
+
+/* Collapsible Group Headers */
+.pwb-combobox-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--slate-400);
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.2s, background-color 0.2s;
+    background: transparent;
+    border-top: 1px solid var(--slate-100);
+    margin-top: 4px;
+}
+
+.pwb-combobox-group-header:first-of-type {
+    border-top: none;
+    margin-top: 0;
+}
+
+.pwb-combobox-group-header:hover {
+    color: var(--slate-700);
+}
+
+.pwb-combobox-group-header-content {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pwb-combobox-group-count {
+    font-size: 10px;
+    background: var(--slate-100);
+    color: var(--slate-500);
+    padding: 1px 5px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.pwb-combobox-group-chevron {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.2s ease;
+    color: var(--slate-400);
+}
+
+.pwb-combobox-group-header:hover .pwb-combobox-group-chevron {
+    color: var(--slate-600);
+}
+
+.pwb-combobox-group-chevron.pwb-collapsed {
+    transform: rotate(-90deg);
+}
+
+/* Real Tag Avatar Image */
+.pwb-combobox-tag-img {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+/* List Option Real Avatars */
+.pwb-combobox-option-avatar-container {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-right: 10px;
+    overflow: hidden;
+    border: 1px solid transparent;
+    transition: all 0.25s ease;
+    background-color: var(--slate-100);
+}
+
+.pwb-combobox-option-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pwb-combobox-option-avatar-initials {
+    line-height: 1;
+}
+
+/* RTL Support for Option Avatar */
+.pwb-combobox-wrapper[dir="rtl"] .pwb-combobox-option-avatar-container {
+    margin-right: 0;
+    margin-left: 10px;
+}
+

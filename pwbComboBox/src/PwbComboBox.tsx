@@ -9,8 +9,11 @@ export function PwbComboBox({
     optionsSource,
     optionLabel,
     optionDetail,
+    optionGroup,
+    optionImage,
     selectionMode,
     tagStyle,
+    tagColorExpression,
     selectedAttribute,
     delimiter,
     selectedAssociation,
@@ -45,6 +48,9 @@ export function PwbComboBox({
               id: item.id,
               label: optionLabel.get(item).value || "",
               subtitle: optionDetail ? optionDetail.get(item).value || "" : undefined,
+              groupName: optionGroup ? optionGroup.get(item).value : undefined,
+              colorCode: tagColorExpression ? tagColorExpression.get(item).value : undefined,
+              imageUrl: optionImage ? optionImage.get(item).value : undefined,
               rawObject: item
           }))
         : [];

@@ -1,6 +1,8 @@
 # PWB ComboBox 📅🚀 (v2.0.0)
 
-**PWB ComboBox** is a premium, high-performance pluggable widget designed for Mendix Studio Pro. It delivers a modern, glassmorphic dropdown search autocomplete interface with full native support for **Single-Select** and **Multi-Select Tag mode**, highlighted search segments, WCAG 2.1 AA screen-reader compliance, and zero-code CSS configurations.
+**PWB ComboBox** is a premium, high-performance pluggable widget designed for Mendix Studio Pro. It delivers a modern,
+glassmorphic dropdown search autocomplete interface with full native support for **Single-Select** and **Multi-Select
+Tag mode**, highlighted search segments, WCAG 2.1 AA screen-reader compliance, and zero-code CSS configurations.
 
 ---
 
@@ -48,7 +50,9 @@ To launch the interactive **Vite Properties Simulator Dashboard** locally in you
 npm run playground
 ```
 
-*This starts a local dev server at `http://localhost:3001/` and opens it in your default browser. It allows you to toggle and simulate Mendix properties (Selection Modes, Accent Colors, Loading state, Read Only state, and Translations) dynamically and see how the ComboBox updates in real-time without having to compile an `.mpk` or launch Mendix!*
+_This starts a local dev server at `http://localhost:3001/` and opens it in your default browser. It allows you to
+toggle and simulate Mendix properties (Selection Modes, Accent Colors, Loading state, Read Only state, and Translations)
+dynamically and see how the ComboBox updates in real-time without having to compile an `.mpk` or launch Mendix!_
 
 ### 3. Standalone Code Compilation (ตรวจเช็คโค้ด)
 
@@ -66,15 +70,18 @@ To compile and package the production widget cleanly:
 npm run release
 ```
 
-*This automatically builds the production JavaScript bundles, runs validations, packages everything into `pwb.PwbComboBox_1.0.5_...mpk` inside `dist/`, and copies the dated/timed package straight into your Mendix project's `widgets/` folder!*
+_This automatically builds the production JavaScript bundles, runs validations, packages everything into
+`pwb.PwbComboBox_1.0.5_...mpk` inside `dist/`, and copies the dated/timed package straight into your Mendix project's
+`widgets/` folder!_
 
 ---
 
 ## ⚙️ Properties Configuration Summary
 
-- **optionsSource**: Dynamic list of objects to populate the dropdown.
-- **optionLabel**: Text expression to display for each option item.
-- **selectionMode**: Choose between `Single Select` and `Multi Select` tags mode.
-- **selectedAttribute**: Attribute to store single selected value (String/Integer).
-- **selectedAssociation**: Reference/ReferenceSet association to store selected object(s).
-- **Aesthetic Parameters**: Corner roundness (`Border Radius`), backdrop-blur (`Background Blur`), and colors customizable straight from Mendix.
+-   **optionsSource**: Dynamic list of objects to populate the dropdown.
+-   **optionLabel**: Text expression to display for each option item.
+-   **selectionMode**: Choose between `Single Select` and `Multi Select` tags mode.
+-   **selectedAttribute**: Attribute to store single selected value (String/Integer).
+-   **selectedAssociation**: Reference/ReferenceSet association to store selected object(s).
+-   **Aesthetic Parameters**: Corner roundness (`Border Radius`), backdrop-blur (`Background Blur`), and colors
+    customizable straight from Mendix.

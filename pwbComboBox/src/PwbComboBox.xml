@@ -17,6 +17,11 @@
                 <description>Expression to display text for each option item (e.g. $currentObject/AttributeName)</description>
                 <returnType type="String"/>
             </property>
+            <property key="optionDetail" type="expression" dataSource="optionsSource" required="false">
+                <caption>Option Detail (Subtitle)</caption>
+                <description>Optional secondary text displayed below the option label (e.g. Email under Name)</description>
+                <returnType type="String"/>
+            </property>
         </propertyGroup>
 
         <propertyGroup caption="Selection">
@@ -26,6 +31,14 @@
                 <enumerationValues>
                     <enumerationValue key="single">Single Select</enumerationValue>
                     <enumerationValue key="multi">Multi Select</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="tagStyle" type="enumeration" defaultValue="pill">
+                <caption>Tag Badge Style</caption>
+                <description>Select UI layout style of selected tags in Multi Select mode</description>
+                <enumerationValues>
+                    <enumerationValue key="pill">Standard Pill</enumerationValue>
+                    <enumerationValue key="avatar">Avatar Circle</enumerationValue>
                 </enumerationValues>
             </property>
             <property key="selectedAttribute" type="attribute" required="false">

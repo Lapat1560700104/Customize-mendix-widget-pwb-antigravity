@@ -9,6 +9,8 @@ import { Big } from "big.js";
 
 export type SelectionModeEnum = "single" | "multi";
 
+export type TagStyleEnum = "pill" | "avatar";
+
 export interface PwbComboBoxContainerProps {
     name: string;
     class: string;
@@ -16,7 +18,9 @@ export interface PwbComboBoxContainerProps {
     tabIndex?: number;
     optionsSource: ListValue;
     optionLabel: ListExpressionValue<string>;
+    optionDetail?: ListExpressionValue<string>;
     selectionMode: SelectionModeEnum;
+    tagStyle: TagStyleEnum;
     selectedAttribute?: EditableValue<string | Big>;
     delimiter: string;
     selectedAssociation?: ReferenceValue | ReferenceSetValue;
@@ -48,7 +52,9 @@ export interface PwbComboBoxPreviewProps {
     translate: (text: string) => string;
     optionsSource: {} | { caption: string } | { type: string } | null;
     optionLabel: string;
+    optionDetail: string;
     selectionMode: SelectionModeEnum;
+    tagStyle: TagStyleEnum;
     selectedAttribute: string;
     delimiter: string;
     selectedAssociation: string;

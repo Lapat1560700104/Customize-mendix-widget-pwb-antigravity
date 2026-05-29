@@ -1,8 +1,9 @@
-import { ReactElement, useState, useEffect, useRef, KeyboardEvent as ReactKeyboardEvent } from "react";
+import { ReactElement, useState, useEffect, useRef, KeyboardEvent as ReactKeyboardEvent, UIEvent } from "react";
 
 export interface ComboBoxOption {
     id: string;
     label: string;
+    subtitle?: string;
     rawObject: any;
 }
 
@@ -10,6 +11,7 @@ export interface ComboBoxProps {
     options: ComboBoxOption[];
     selectedIds: string[];
     selectionMode: "single" | "multi";
+    tagStyle?: "pill" | "avatar";
     onSelect: (id: string) => void;
     onRemove: (id: string) => void;
     onClear: () => void;
@@ -33,6 +35,7 @@ export function ComboBox({
     options,
     selectedIds,
     selectionMode,
+    tagStyle = "pill",
     onSelect,
     onRemove,
     onClear,
@@ -54,6 +57,7 @@ export function ComboBox({
     const [isOpen, setIsOpen] = useState(false);
     const [searchText, setSearchText] = useState("");
     const [focusedIndex, setFocusedIndex] = useState(-1);
+    const [visibleCount, setVisibleCount] = useState(50);
 
     const popoverRef = useRef<HTMLDivElement>(null);
     const inputContainerRef = useRef<HTMLDivElement>(null);
@@ -72,6 +76,18 @@ export function ComboBox({
         }
     }, [isOpen, selectedIds, selectionMode, options]);
 
+    // Reset visible count when search text changes
+    useEffect(() => {
+        setVisibleCount(50);
+    }, [searchText]);
+
+    // Automatically expand visible count when keyboard focuses near the end of visible list
+    useEffect(() => {
+        if (focusedIndex >= visibleCount - 2) {
+            setVisibleCount(prev => Math.max(prev, focusedIndex + 10));
+        }
+    }, [focusedIndex, visibleCount]);
+
     // Handle outside clicks to close popover
     useEffect(() => {
         function handleClickOutside(event: MouseEvent): void {
@@ -88,18 +104,33 @@ export function ComboBox({
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Filter options in real-time
+    // Filter options in real-time (matching primary label or secondary subtitle)
     const getFilteredOptions = (): ComboBoxOption[] => {
+        const query = searchText.toLowerCase().trim();
+        const matches = (opt: ComboBoxOption): boolean => {
+            return (
+                opt.label.toLowerCase().includes(query) ||
+                (!!opt.subtitle && opt.subtitle.toLowerCase().includes(query))
+            );
+        };
+
         if (selectionMode === "multi") {
             // In multi mode, do not show already selected options
-            return options.filter(
-                opt => !selectedIds.includes(opt.id) && opt.label.toLowerCase().includes(searchText.toLowerCase())
-            );
+            return options.filter(opt => !selectedIds.includes(opt.id) && matches(opt));
         }
-        return options.filter(opt => opt.label.toLowerCase().includes(searchText.toLowerCase()));
+        return options.filter(matches);
     };
 
     const filteredOptions = getFilteredOptions();
+    const slicedOptions = filteredOptions.slice(0, visibleCount);
+
+    // Handle lazy scroll loading
+    const handleDropdownScroll = (e: UIEvent<HTMLDivElement>): void => {
+        const target = e.currentTarget;
+        if (target.scrollHeight - target.scrollTop <= target.clientHeight + 40) {
+            setVisibleCount(prev => prev + 50);
+        }
+    };
 
     // Select an option
     const handleSelectOption = (id: string): void => {
@@ -170,6 +201,17 @@ export function ComboBox({
         );
     };
 
+    const getInitials = (label: string): string => {
+        const clean = label
+            .replace(
+                /[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]/g,
+                ""
+            )
+            .replace(/[^\w\s\u0e00-\u0e7f]/g, "")
+            .trim();
+        return clean ? clean.charAt(0).toUpperCase() : "?";
+    };
+
     const hasSelection = selectedIds.length > 0;
 
     return (
@@ -206,8 +248,21 @@ export function ComboBox({
                                 return null;
                             }
                             return (
-                                <div key={id} className="pwb-combobox-tag-pill">
-                                    <span>{option.label}</span>
+                                <div
+                                    key={id}
+                                    className={`pwb-combobox-tag-pill ${
+                                        tagStyle === "avatar" ? "pwb-tag-avatar-style" : ""
+                                    }`}
+                                >
+                                    {tagStyle === "avatar" && (
+                                        <span
+                                            className="pwb-combobox-tag-avatar"
+                                            style={{ backgroundColor: accentColor }}
+                                        >
+                                            {getInitials(option.label)}
+                                        </span>
+                                    )}
+                                    <span className="pwb-combobox-tag-text">{option.label}</span>
                                     {!readOnly && (
                                         <button
                                             type="button"
@@ -317,41 +372,66 @@ export function ComboBox({
                             <span>{noOptionsMessage}</span>
                         </div>
                     ) : (
-                        <ul className="pwb-combobox-options-list" style={{ maxHeight: maxDropdownHeight }}>
-                            {filteredOptions.map((opt, idx) => {
-                                const isSelected = selectedIds.includes(opt.id);
-                                const isFocused = idx === focusedIndex;
+                        <div
+                            className="pwb-combobox-options-list"
+                            style={{ maxHeight: maxDropdownHeight }}
+                            onScroll={handleDropdownScroll}
+                        >
+                            <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+                                {slicedOptions.map((opt, idx) => {
+                                    const isSelected = selectedIds.includes(opt.id);
+                                    const isFocused = idx === focusedIndex;
 
-                                return (
-                                    <li
-                                        key={opt.id}
-                                        className={`pwb-combobox-option-item ${
-                                            isSelected ? "pwb-option-selected" : ""
-                                        } ${isFocused ? "pwb-option-focused" : ""}`}
-                                        onClick={() => handleSelectOption(opt.id)}
-                                        onMouseEnter={() => setFocusedIndex(idx)}
-                                        role="option"
-                                        aria-selected={isSelected}
-                                    >
-                                        {renderOptionLabel(opt.label, searchText)}
-                                        {isSelected && (
-                                            <svg
-                                                width="16"
-                                                height="16"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth="3"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
+                                    return (
+                                        <li
+                                            key={opt.id}
+                                            className={`pwb-combobox-option-item ${
+                                                isSelected ? "pwb-option-selected" : ""
+                                            } ${isFocused ? "pwb-option-focused" : ""} ${
+                                                opt.subtitle ? "pwb-option-two-line" : ""
+                                            }`}
+                                            onClick={() => handleSelectOption(opt.id)}
+                                            onMouseEnter={() => setFocusedIndex(idx)}
+                                            role="option"
+                                            aria-selected={isSelected}
+                                        >
+                                            <div
+                                                style={{
+                                                    flex: 1,
+                                                    display: "flex",
+                                                    flexDirection: "column",
+                                                    minWidth: 0
+                                                }}
                                             >
-                                                <polyline points="20 6 9 17 4 12"></polyline>
-                                            </svg>
-                                        )}
-                                    </li>
-                                );
-                            })}
-                        </ul>
+                                                <div className="pwb-combobox-option-label">
+                                                    {renderOptionLabel(opt.label, searchText)}
+                                                </div>
+                                                {opt.subtitle && (
+                                                    <div className="pwb-combobox-option-subtitle">
+                                                        {renderOptionLabel(opt.subtitle, searchText)}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {isSelected && (
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="3"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    style={{ flexShrink: 0, marginLeft: "8px" }}
+                                                >
+                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                </svg>
+                                            )}
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        </div>
                     )}
                 </div>
             )}

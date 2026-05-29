@@ -8,7 +8,9 @@ export function PwbComboBox({
     style,
     optionsSource,
     optionLabel,
+    optionDetail,
     selectionMode,
+    tagStyle,
     selectedAttribute,
     delimiter,
     selectedAssociation,
@@ -42,6 +44,7 @@ export function PwbComboBox({
         ? optionsSource.items.map(item => ({
               id: item.id,
               label: optionLabel.get(item).value || "",
+              subtitle: optionDetail ? optionDetail.get(item).value || "" : undefined,
               rawObject: item
           }))
         : [];
@@ -212,6 +215,7 @@ export function PwbComboBox({
                 options={options}
                 selectedIds={selectedIds}
                 selectionMode={selectionMode}
+                tagStyle={tagStyle}
                 onSelect={handleSelect}
                 onRemove={handleRemove}
                 onClear={handleClear}

@@ -4,41 +4,182 @@ import { ComboBox, ComboBoxOption } from "../src/components/ComboBox";
 import "../src/ui/PwbComboBox.css";
 
 // ----------------------------------------------------
-// Mock Datasets
+// Generate Massive Dataset dynamically (1,000 items)
+// ----------------------------------------------------
+const MASSIVE_DATASET = Array.from({ length: 1000 }).map((_, index) => ({
+    id: `m_${index}`,
+    label: `รายการตัวเลือกที่ ${index + 1} 🚀`,
+    subtitle: `รหัสสินค้า: OP-${10000 + index} | สินค้านำเข้าหมวดหมู่พรีเมียม`,
+    rawObject: { id: `m_${index}`, index }
+}));
+
+// ----------------------------------------------------
+// Mock Datasets with dynamic subtitles
 // ----------------------------------------------------
 const DATASETS = {
     fruits: [
-        { id: "1", label: "Apple 🍎", rawObject: { id: "1", val: "apple" } },
-        { id: "2", label: "Banana 🍌", rawObject: { id: "2", val: "banana" } },
-        { id: "3", label: "Orange 🍊", rawObject: { id: "3", val: "orange" } },
-        { id: "4", label: "Mango 🥭", rawObject: { id: "4", val: "mango" } },
-        { id: "5", label: "Grape 🍇", rawObject: { id: "5", val: "grape" } },
-        { id: "6", label: "Strawberry 🍓", rawObject: { id: "6", val: "strawberry" } },
-        { id: "7", label: "Pineapple 🍍", rawObject: { id: "7", val: "pineapple" } },
-        { id: "8", label: "Watermelon 🍉", rawObject: { id: "8", val: "watermelon" } },
-        { id: "9", label: "Peach 🍑", rawObject: { id: "9", val: "peach" } },
-        { id: "10", label: "Kiwi 🥝", rawObject: { id: "10", val: "kiwi" } }
+        {
+            id: "1",
+            label: "Apple 🍎",
+            subtitle: "ผลไม้แอปเปิ้ลสดสีแดง | Cal: 52 kcal",
+            rawObject: { id: "1", val: "apple" }
+        },
+        {
+            id: "2",
+            label: "Banana 🍌",
+            subtitle: "กล้วยหอมทองอุดมโพแทสเซียม | Cal: 89 kcal",
+            rawObject: { id: "2", val: "banana" }
+        },
+        {
+            id: "3",
+            label: "Orange 🍊",
+            subtitle: "ส้มสายน้ำผึ้งรสเปรี้ยวหวาน | Cal: 47 kcal",
+            rawObject: { id: "3", val: "orange" }
+        },
+        {
+            id: "4",
+            label: "Mango 🥭",
+            subtitle: "มะม่วงอกร่องสีเหลืองทอง | Cal: 60 kcal",
+            rawObject: { id: "4", val: "mango" }
+        },
+        {
+            id: "5",
+            label: "Grape 🍇",
+            subtitle: "องุ่นไร้เมล็ดสีม่วงเข้ม | Cal: 67 kcal",
+            rawObject: { id: "5", val: "grape" }
+        },
+        {
+            id: "6",
+            label: "Strawberry 🍓",
+            subtitle: "สตรอว์เบอร์รี่สดจากเชียงใหม่ | Cal: 33 kcal",
+            rawObject: { id: "6", val: "strawberry" }
+        },
+        {
+            id: "7",
+            label: "Pineapple 🍍",
+            subtitle: "สับปะรดภูแลหวานกรอบ | Cal: 50 kcal",
+            rawObject: { id: "7", val: "pineapple" }
+        },
+        {
+            id: "8",
+            label: "Watermelon 🍉",
+            subtitle: "แตงโมตอร์ปิโดเนื้อหวานฉ่ำ | Cal: 30 kcal",
+            rawObject: { id: "8", val: "watermelon" }
+        },
+        {
+            id: "9",
+            label: "Peach 🍑",
+            subtitle: "ลูกพีชนำเข้าจากญี่ปุ่นกลิ่นหอม | Cal: 39 kcal",
+            rawObject: { id: "9", val: "peach" }
+        },
+        {
+            id: "10",
+            label: "Kiwi 🥝",
+            subtitle: "กีวี่สีทองรสชาติกลมกล่อม | Cal: 61 kcal",
+            rawObject: { id: "10", val: "kiwi" }
+        }
     ],
     tech: [
-        { id: "t1", label: "React", rawObject: { id: "t1", val: "react" } },
-        { id: "t2", label: "Vue.js", rawObject: { id: "t2", val: "vue" } },
-        { id: "t3", label: "Angular", rawObject: { id: "t3", val: "angular" } },
-        { id: "t4", label: "Next.js", rawObject: { id: "t4", val: "next" } },
-        { id: "t5", label: "Vite", rawObject: { id: "t5", val: "vite" } },
-        { id: "t6", label: "Mendix Pluggable Widgets", rawObject: { id: "t6", val: "mendix" } },
-        { id: "t7", label: "TypeScript", rawObject: { id: "t7", val: "ts" } },
-        { id: "t8", label: "Go (Golang)", rawObject: { id: "t8", val: "go" } },
-        { id: "t9", label: "Python", rawObject: { id: "t9", val: "python" } },
-        { id: "t10", label: "Rust Programming", rawObject: { id: "t10", val: "rust" } }
+        {
+            id: "t1",
+            label: "React",
+            subtitle: "Frontend JavaScript Library | Creator: Meta",
+            rawObject: { id: "t1", val: "react" }
+        },
+        {
+            id: "t2",
+            label: "Vue.js",
+            subtitle: "Progressive Web Framework | Creator: Evan You",
+            rawObject: { id: "t2", val: "vue" }
+        },
+        {
+            id: "t3",
+            label: "Angular",
+            subtitle: "Enterprise MVC Platform | Creator: Google",
+            rawObject: { id: "t3", val: "angular" }
+        },
+        {
+            id: "t4",
+            label: "Next.js",
+            subtitle: "Fullstack React SSR Framework | Creator: Vercel",
+            rawObject: { id: "t4", val: "next" }
+        },
+        {
+            id: "t5",
+            label: "Vite",
+            subtitle: "Next Generation Fast Build Tool | Creator: Evan You",
+            rawObject: { id: "t5", val: "vite" }
+        },
+        {
+            id: "t6",
+            label: "Mendix Pluggable Widgets",
+            subtitle: "Low-code Custom Extension | Powered by React",
+            rawObject: { id: "t6", val: "mendix" }
+        },
+        {
+            id: "t7",
+            label: "TypeScript",
+            subtitle: "Typed Superset of JavaScript | Creator: Microsoft",
+            rawObject: { id: "t7", val: "ts" }
+        },
+        {
+            id: "t8",
+            label: "Go (Golang)",
+            subtitle: "High Performance Backend Language | Creator: Google",
+            rawObject: { id: "t8", val: "go" }
+        },
+        {
+            id: "t9",
+            label: "Python",
+            subtitle: "AI and Data Science Scripting | Syntax: Simple",
+            rawObject: { id: "t9", val: "python" }
+        },
+        {
+            id: "t10",
+            label: "Rust Programming",
+            subtitle: "Safe and Ultra Fast Systems Language | Memory: Safe",
+            rawObject: { id: "t10", val: "rust" }
+        }
     ],
     provinces: [
-        { id: "p1", label: "กรุงเทพมหานคร (Bangkok)", rawObject: { id: "p1", val: "bkk" } },
-        { id: "p2", label: "เชียงใหม่ (Chiang Mai)", rawObject: { id: "p2", val: "cm" } },
-        { id: "p3", label: "ภูเก็ต (Phuket)", rawObject: { id: "p3", val: "pkt" } },
-        { id: "p4", label: "ขอนแก่น (Khon Kaen)", rawObject: { id: "p4", val: "kk" } },
-        { id: "p5", label: "ชลบุรี (Chonburi)", rawObject: { id: "p5", val: "cb" } },
-        { id: "p6", label: "นครราชสีมา (Korat)", rawObject: { id: "p6", val: "km" } }
-    ]
+        {
+            id: "p1",
+            label: "กรุงเทพมหานคร (Bangkok)",
+            subtitle: "เมืองหลวงของประเทศไทย | ภูมิภาค: ภาคกลาง",
+            rawObject: { id: "p1", val: "bkk" }
+        },
+        {
+            id: "p2",
+            label: "เชียงใหม่ (Chiang Mai)",
+            subtitle: "ศูนย์กลางวัฒนธรรมและการท่องเที่ยว | ภูมิภาค: ภาคเหนือ",
+            rawObject: { id: "p2", val: "cm" }
+        },
+        {
+            id: "p3",
+            label: "ภูเก็ต (Phuket)",
+            subtitle: "เกาะไข่มุกแห่งอันดามันยอดนิยม | ภูมิภาค: ภาคใต้",
+            rawObject: { id: "p3", val: "pkt" }
+        },
+        {
+            id: "p4",
+            label: "ขอนแก่น (Khon Kaen)",
+            subtitle: "ศูนย์กลางเศรษฐกิจและการศึกษา | ภูมิภาค: ภาคอีสาน",
+            rawObject: { id: "p4", val: "kk" }
+        },
+        {
+            id: "p5",
+            label: "ชลบุรี (Chonburi)",
+            subtitle: "เมืองพัทยาและอุตสาหกรรมฝั่งตะวันออก | ภูมิภาค: ภาคตะวันออก",
+            rawObject: { id: "p5", val: "cb" }
+        },
+        {
+            id: "p6",
+            label: "นครราชสีมา (Korat)",
+            subtitle: "ประตูสู่อีสานเมืองย่าโมสุดยิ่งใหญ่ | ภูมิภาค: ภาคอีสาน",
+            rawObject: { id: "p6", val: "km" }
+        }
+    ],
+    massive: MASSIVE_DATASET
 };
 
 function App() {
@@ -47,6 +188,10 @@ function App() {
     // ----------------------------------------------------
     const [selectionMode, setSelectionMode] = useState<"single" | "multi">("single");
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+    // Premium upgrades simulator states
+    const [tagStyle, setTagStyle] = useState<"pill" | "avatar">("pill");
+    const [showSubtitles, setShowSubtitles] = useState(true);
 
     // Delimited String simulator states
     const [delimiter, setDelimiter] = useState(",");
@@ -80,7 +225,13 @@ function App() {
     const [openTab, setOpenTab] = useState<string>("general");
 
     // Get Active Options list based on simulation controls
-    const activeOptions = isEmpty ? [] : DATASETS[datasetKey];
+    const activeOptions = isEmpty
+        ? []
+        : DATASETS[datasetKey].map(opt => ({
+              ...opt,
+              // Dynamically strip subtitle if toggled off to simulate optional mapping
+              subtitle: showSubtitles ? opt.subtitle : undefined
+          }));
 
     // Reset selected IDs when changing selection modes to prevent overflow
     useEffect(() => {
@@ -276,6 +427,35 @@ function App() {
                                             color: "#94a3b8"
                                         }}
                                     >
+                                        <span>Tag Pill Style (สไตล์ของป้ายแท็ก)</span>
+                                        <select
+                                            value={tagStyle}
+                                            onChange={e => setTagStyle(e.target.value as "pill" | "avatar")}
+                                            style={{
+                                                background: "#1e293b",
+                                                color: "#f8fafc",
+                                                border: "1px solid rgba(255,255,255,0.06)",
+                                                borderRadius: "8px",
+                                                padding: "8px",
+                                                outline: "none"
+                                            }}
+                                        >
+                                            <option value="pill">Standard Pill (ป้ายแท็กปกติ)</option>
+                                            <option value="avatar">Avatar Circle (มีวงกลมรูปอักษรย่อ)</option>
+                                        </select>
+                                    </label>
+                                )}
+
+                                {selectionMode === "multi" && (
+                                    <label
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "6px",
+                                            fontSize: "12px",
+                                            color: "#94a3b8"
+                                        }}
+                                    >
                                         <span>Delimiter (เครื่องหมายคั่น String)</span>
                                         <select
                                             value={delimiter}
@@ -321,6 +501,7 @@ function App() {
                                         <option value="fruits">Fruits & Sweets 🍎🍌🍊</option>
                                         <option value="tech">Developer Tech Stacks ⚛️🐍🚀</option>
                                         <option value="provinces">Thai Provinces 🇹🇭🏙️🌴</option>
+                                        <option value="massive">Large Dataset Simulator (1,000 items) ⚡📦</option>
                                     </select>
                                 </label>
 
@@ -364,7 +545,101 @@ function App() {
                         )}
                     </div>
 
-                    {/* Category 2: Dynamic Attribute Binding Simulator (NEW) */}
+                    {/* Category 2: Spectacular Upgrades Customizer (NEW v2.2.0) */}
+                    <div
+                        style={{
+                            marginBottom: "10px",
+                            borderRadius: "10px",
+                            overflow: "hidden",
+                            background: openTab === "spectacular" ? "rgba(255,255,255,0.02)" : "transparent"
+                        }}
+                    >
+                        <button
+                            onClick={() => setOpenTab(openTab === "spectacular" ? "" : "spectacular")}
+                            style={{
+                                width: "100%",
+                                padding: "12px",
+                                border: "none",
+                                background: "rgba(255,255,255,0.04)",
+                                color: "#cbd5e1",
+                                display: "flex",
+                                justifyContent: "space-between",
+                                cursor: "pointer",
+                                fontSize: "13px",
+                                fontWeight: "bold",
+                                textAlign: "left"
+                            }}
+                        >
+                            <span>2. Spectacular Upgrades 🚀</span>
+                            <span>{openTab === "spectacular" ? "▲" : "▼"}</span>
+                        </button>
+                        {openTab === "spectacular" && (
+                            <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                                <label
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        fontSize: "12px",
+                                        color: "#cbd5e1",
+                                        cursor: "pointer"
+                                    }}
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={showSubtitles}
+                                        onChange={e => setShowSubtitles(e.target.checked)}
+                                    />
+                                    <span>Show Subtitles (แสดงรายละเอียดแถวย่อย)</span>
+                                </label>
+                                <span
+                                    style={{
+                                        fontSize: "11px",
+                                        color: "#64748b",
+                                        fontStyle: "italic",
+                                        lineHeight: "1.4"
+                                    }}
+                                >
+                                    💡 เมื่อเปิดใช้งาน ช่องค้นหาจะทำหารสแกนและไฮไลต์ตัวอักษรค้นหาพร้อมกันทั้งบน
+                                    <b>หัวข้อหลัก (Label)</b> และ<b>รายละเอียดแถวย่อย (Subtitle)</b>{" "}
+                                    ได้ทันทีอย่างสวยงาม!
+                                </span>
+
+                                <div
+                                    style={{
+                                        borderTop: "1px solid rgba(255,255,255,0.05)",
+                                        paddingTop: "10px",
+                                        marginTop: "4px"
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            fontSize: "11px",
+                                            color: "#10b981",
+                                            fontWeight: "bold",
+                                            textTransform: "uppercase"
+                                        }}
+                                    >
+                                        ⚡ Large List Lazy Loading:
+                                    </div>
+                                    <div
+                                        style={{
+                                            fontSize: "11px",
+                                            color: "#64748b",
+                                            marginTop: "4px",
+                                            lineHeight: "1.4"
+                                        }}
+                                    >
+                                        เมื่อเลือกชุดข้อมูล **Large Dataset (1,000 items)**
+                                        แคนวาสด้านขวาจะโหลดลิสต์ขึ้นมาทันทีและใช้สไลซ์เลดี้โหลด (Lazy-scroll)
+                                        ช่วยให้การแสดงผลลื่นไหล 60 FPS ไร้อาการสะดุด
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Category 3: Delimited String Attribute Simulator */}
                     <div
                         style={{
                             marginBottom: "10px",
@@ -389,7 +664,7 @@ function App() {
                                 textAlign: "left"
                             }}
                         >
-                            <span>2. Delimited String Attribute Simulator</span>
+                            <span>3. Delimited String Attribute Simulator</span>
                             <span>{openTab === "attribute" ? "▲" : "▼"}</span>
                         </button>
                         {openTab === "attribute" && (
@@ -440,7 +715,7 @@ function App() {
                         )}
                     </div>
 
-                    {/* Category 3: Aesthetics */}
+                    {/* Category 4: Aesthetics */}
                     <div
                         style={{
                             marginBottom: "10px",
@@ -465,7 +740,7 @@ function App() {
                                 textAlign: "left"
                             }}
                         >
-                            <span>3. Aesthetics (ความสวยงาม)</span>
+                            <span>4. Aesthetics (ความสวยงาม)</span>
                             <span>{openTab === "aesthetics" ? "▲" : "▼"}</span>
                         </button>
                         {openTab === "aesthetics" && (
@@ -619,7 +894,7 @@ function App() {
                         )}
                     </div>
 
-                    {/* Category 4: Readonly & Validation */}
+                    {/* Category 5: Readonly & Validation */}
                     <div
                         style={{
                             marginBottom: "10px",
@@ -644,7 +919,7 @@ function App() {
                                 textAlign: "left"
                             }}
                         >
-                            <span>4. Validation & States</span>
+                            <span>5. Validation & States</span>
                             <span>{openTab === "validation" ? "▲" : "▼"}</span>
                         </button>
                         {openTab === "validation" && (
@@ -737,7 +1012,7 @@ function App() {
                         )}
                     </div>
 
-                    {/* Category 5: Translations */}
+                    {/* Category 6: Translations */}
                     <div
                         style={{
                             marginBottom: "10px",
@@ -762,7 +1037,7 @@ function App() {
                                 textAlign: "left"
                             }}
                         >
-                            <span>5. Translations (แปลภาษา)</span>
+                            <span>6. Translations (แปลภาษา)</span>
                             <span>{openTab === "translations" ? "▲" : "▼"}</span>
                         </button>
                         {openTab === "translations" && (
@@ -902,8 +1177,8 @@ function App() {
                         PWB ComboBox Live Playground Canvas ⚡
                     </h1>
                     <p style={{ color: "#94a3b8", fontSize: "13px", margin: 0 }}>
-                        ปรับแต่งคุณลักษณะที่ฝั่งแผงควบคุมซ้ายมือ เพื่อจำลองการตัดและประกอบคำ String แบบ Comma
-                        คั่นอัตโนมัติ
+                        ทดสอบฟีเจอร์คำบรรยายแถวย่อย (Subtitles), ป้าย Avatar, และการเลื่อนโหลดรายการ Lazy-load 60 FPS
+                        ฝั่งขวามือแบบเรียลไทม์
                     </p>
                 </div>
 
@@ -963,6 +1238,7 @@ function App() {
                             options={activeOptions}
                             selectedIds={selectedIds}
                             selectionMode={selectionMode}
+                            tagStyle={tagStyle}
                             onSelect={handleSelect}
                             onRemove={handleRemove}
                             onClear={handleClear}
@@ -1008,7 +1284,7 @@ function App() {
                         การจำลองการเขียนข้อมูลลง Entity (Selected State Output)
                     </span>
 
-                    {/* Simulated Delimited String Attribute Visualizer (NEW) */}
+                    {/* Simulated Delimited String Attribute Visualizer */}
                     <div
                         style={{
                             marginTop: "12px",

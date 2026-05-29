@@ -53,6 +53,7 @@
 | `borderRadius` | Border Radius | String | No | `16px` | Roundness of input borders & popover calendar (`16px`, `8px`, `0px`) |
 | `bgBlur` | Background Blur | String | No | `16px` | Backdrop-filter glassmorphic blur power (`16px`, `8px`, `0px`) |
 | `popoverBg` | Calendar Background Color | String | No | `rgba(...)` | Fill color of popover pop-up (`rgba(255,255,255,0.85)`, `#ffffff`) |
+| `calendarIcon` | Custom Calendar Icon | Icon | No | - | Custom Mendix Icon (Glyphicon, FontAwesome, or uploaded SVG/Image) |
 
 ### 5. Validation
 
@@ -105,3 +106,27 @@ The widget exposes a highly organized layout structured with local CSS Custom Pr
 * `.pwb-time-input-field`: Direct numerical HH/MM text entry fields.
 * `.pwb-era-btn-active`: Live Era Toggle active switch states.
 * `.pwb-validation-message`: Slide-down red validation warning alerts.
+* `.pwb-custom-calendar-icon`: Styled wrapper for the custom calendar icon container.
+
+---
+
+## 🎨 คู่มือการอัปโหลดและใช้งานไอคอนปฏิทินของตนเอง (Custom Icon Guide)
+
+ในการอัปโหลดและเปลี่ยนไอคอนที่ช่องกรอกวัน (Input Box) ของวิดเจ็ตนี้ตามความต้องการของคุณ คุณสามารถตั้งค่าได้ง่าย ๆ ใน **Mendix Studio Pro**:
+
+### 1. วิธีอัปโหลดภาพไอคอนของคุณเอง (SVG / PNG):
+* **แนะนำให้ใช้รูปแบบ SVG:** เพื่อความคมชัดสูงสุดเมื่อแสดงผลบนจอภาพทุกระดับความละเอียด (Retina / 4K) หรือคุณจะใช้รูปแบบไฟล์ **PNG ที่มีขอบโปร่งแสง (Transparent Background)** ก็ได้
+* **ขั้นตอนการทำ:**
+  1. สร้างหรือเปิด **Image Collection** (ตัวรวบรวมไฟล์ภาพ) ภายในแอปพลิเคชัน Mendix ของคุณ
+  2. ลากไฟล์ภาพไอคอนของคุญ (เช่น `.svg` หรือ `.png`) เข้าไปใส่ใน Image Collection ดังกล่าวเพื่อลงทะเบียนรูปภาพ
+  3. ดับเบิลคลิกที่วิดเจ็ต `PwbDatePicker` บนหน้า Page ของคุณเพื่อเปิดหน้า Properties
+  4. มองหาตัวเลือกชื่อ **Custom Calendar Icon** ในหมวด **Aesthetics** แล้วกดคลิกปุ่ม Select
+  5. เลือกไฟล์รูปไอคอนปฏิทินที่คุณอัปโหลดไว้ได้ทันที!
+
+### 2. วิธีใช้งานไอคอนมาตรฐาน (Glyphicon / FontAwesome):
+* คุณสามารถเลือกตัวเลือกไอคอนเว็บบนระบบมาตรฐานที่มีอยู่ใน Mendix Studio Pro ได้ทันทีเช่นกัน โดยเลือกจาก Glyphicon หรือ FontAwesome เพื่อเปลี่ยนรูปลักษณ์ได้ตามต้องการ
+
+### 3. การรันตรวจสอบการทำงานไอคอนบนหน้า Playground Simulator (แบบ Local):
+* หน้าจอจำลอง **Vite Playground** (ที่เปิดด้วยคำสั่ง `npm run playground`) ได้รับการติดตั้ง **สวิตช์จำลองไอคอนแบบสไตล์ SVG 5Preset** (Default, Rounded Calendar, Clock, User, Checkmark) เพื่อให้นักพัฒนาสามารถทดลองกดเลือกดูการดัดแปลงและขนาดสเกลของรูปกล่องข้อความได้แบบสด ๆ ทันทีโดยไม่ต้องรัน Mendix App!
+* หากคุณมี SVG ใหม่ที่อยากนำมาเทสใน Playground คุณสามารถแก้สโคดเวกเตอร์เพิ่มได้โดยตรงในไฟล์ [playground/main.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/playground/main.tsx) (บรรทัดที่ 38)
+

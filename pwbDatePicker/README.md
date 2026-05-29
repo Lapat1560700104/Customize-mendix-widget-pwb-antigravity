@@ -102,3 +102,22 @@ The widget features an integrated `"Translations"` property group, making it **1
 - Exposes 7 customizable string fields: `timeLabel`, `todayPresetLabel`, `clearPresetLabel`, `selectMonthLabel`, `last7DaysPresetLabel`, `last30DaysPresetLabel`, `thisMonthPresetLabel`.
 - Provides built-in premium bilingual fallbacks (Thai/English) if Mendix properties are left blank, ensuring visual stability.
 - Allows developers to manage all user-facing widget text centrally via Mendix's native translation tables.
+
+---
+
+## 🎨 Dynamic Icon Selection & Custom Uploads (ระบบไอคอนปรับเปลี่ยนได้ตามต้องการ)
+
+In addition to translation controls, the widget now features **Dynamic Calendar Icon selection** natively inside Mendix's properties:
+- **Custom Calendar Icon Property**: Exposes `calendarIcon` (type `icon`) under the **Aesthetics** property group.
+- **Support Formats**: Fully supports Mendix standard Glyphicons, FontAwesome glyphs, as well as **custom uploaded images (SVG, PNG, JPG)**.
+- **SVG Upload Support**: Highly recommended for crisp scaling at Retina/4K resolutions.
+
+### 🚀 How to Upload and Use Custom Icons inside Mendix:
+1. **Upload into Image Collection**: In your Mendix project, import your custom SVG or PNG icon into a Mendix **Image Collection**.
+2. **Assign in Studio Pro**: Double-click `PwbDatePicker` on your page, navigate to **Aesthetics**, and under the **Custom Calendar Icon** property, click Select and choose your uploaded image.
+3. **Automatic Adaptation**: The widget automatically adjusts boundaries, heights, image alignments, and hover highlights to fit your custom icon perfectly.
+
+### 🖥️ Local Playground Simulator Simulation:
+* Our local standalone simulator (launched with `npm run playground` at `http://localhost:3000/`) contains an **Interactive Custom Icon Preset Dropdown** under **4. Aesthetics**.
+* This lets you instantly toggle and test how different SVG vector shapes (Rounded Calendar, Clock, User, and Checkmark) look inside the input bar in real-time, verifying visual alignment with zero delay!
+

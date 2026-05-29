@@ -33,7 +33,8 @@ function App() {
     const [borderRadius, setBorderRadius] = useState("16px");
     const [bgBlur, setBgBlur] = useState("16px");
     const [popoverBg, setPopoverBg] = useState("rgba(15, 23, 42, 0.85)");
-    const [simulatedIcon, setSimulatedIcon] = useState<"default" | "clock" | "user" | "checkmark" | "calendar-alt">("default");
+    const [simulatedIcon, setSimulatedIcon] = useState<"default" | "clock" | "user" | "checkmark" | "calendar-alt" | "uploaded">("default");
+    const [customUploadedIcon, setCustomUploadedIcon] = useState<string | undefined>(undefined);
 
     // SVG icon mapper for simulation
     const getSimulatedIconNode = (): React.ReactNode => {
@@ -65,6 +66,25 @@ function App() {
                         <line x1="16" y1="2" x2="16" y2="6" />
                         <line x1="8" y1="2" x2="8" y2="6" />
                         <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                );
+            case "uploaded":
+                return customUploadedIcon ? (
+                    <img 
+                        src={customUploadedIcon} 
+                        alt="Uploaded Custom Icon" 
+                        style={{ 
+                            width: "16px", 
+                            height: "16px", 
+                            objectFit: "contain",
+                            transition: "opacity 0.2s ease"
+                        }} 
+                    />
+                ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
                     </svg>
                 );
             default:
@@ -249,8 +269,84 @@ function App() {
                                         <option value="clock">Clock Icon (ไอคอนนาฬิกา)</option>
                                         <option value="user">User Icon (ไอคอนบุคคล)</option>
                                         <option value="checkmark">Checkmark Icon (ไอคอนเช็คถูก)</option>
+                                        <option value="uploaded">Uploaded Custom Icon (ไอคอนที่อัพโหลดเอง)</option>
                                     </select>
                                 </label>
+                                {simulatedIcon === "uploaded" && (
+                                    <div style={{ 
+                                        display: "flex", 
+                                        flexDirection: "column", 
+                                        gap: "8px", 
+                                        marginTop: "4px", 
+                                        padding: "12px", 
+                                        background: "rgba(255,255,255,0.02)", 
+                                        borderRadius: "8px", 
+                                        border: "1px dashed rgba(255,255,255,0.12)" 
+                                    }}>
+                                        <span style={{ fontSize: "11px", color: "#cbd5e1", fontWeight: "bold" }}>📤 อัพโหลดไฟล์ไอคอนส่วนตัว:</span>
+                                        <span style={{ fontSize: "10px", color: "#94a3b8" }}>รองรับ SVG, PNG, JPG (แนะนำไฟล์ SVG เพื่อความชัดเจนสูงสุด)</span>
+                                        
+                                        <input 
+                                            type="file" 
+                                            accept="image/svg+xml, image/png, image/jpeg, image/gif" 
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) {
+                                                    const reader = new FileReader();
+                                                    reader.onload = (event) => {
+                                                        if (event.target?.result) {
+                                                            setCustomUploadedIcon(event.target.result as string);
+                                                        }
+                                                    };
+                                                    reader.readAsDataURL(file);
+                                                }
+                                            }}
+                                            style={{ 
+                                                fontSize: "11px", 
+                                                color: "#cbd5e1", 
+                                                background: "#1e293b", 
+                                                padding: "6px", 
+                                                borderRadius: "6px", 
+                                                border: "1px solid rgba(255,255,255,0.06)", 
+                                                cursor: "pointer",
+                                                width: "100%"
+                                            }}
+                                        />
+                                        {customUploadedIcon && (
+                                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginTop: "4px", background: "rgba(16, 185, 129, 0.06)", padding: "6px 10px", borderRadius: "6px", border: "1px solid rgba(16, 185, 129, 0.2)" }}>
+                                                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                                    <span style={{ color: "#10b981", fontSize: "11px", fontWeight: "bold" }}>✓ อัพโหลดสำเร็จ</span>
+                                                    <img 
+                                                        src={customUploadedIcon} 
+                                                        alt="Uploaded Preview" 
+                                                        style={{ 
+                                                            width: "18px", 
+                                                            height: "18px", 
+                                                            objectFit: "contain",
+                                                            background: "rgba(255,255,255,0.08)", 
+                                                            borderRadius: "4px",
+                                                            padding: "2px"
+                                                        }} 
+                                                    />
+                                                </div>
+                                                <button 
+                                                    onClick={() => setCustomUploadedIcon(undefined)}
+                                                    style={{ 
+                                                        background: "none", 
+                                                        border: "none", 
+                                                        color: "#ef4444", 
+                                                        fontSize: "10px", 
+                                                        cursor: "pointer", 
+                                                        textDecoration: "underline",
+                                                        padding: 0
+                                                    }}
+                                                >
+                                                    ลบไฟล์
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>

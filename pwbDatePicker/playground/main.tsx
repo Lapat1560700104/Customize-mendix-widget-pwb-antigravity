@@ -33,6 +33,44 @@ function App() {
     const [borderRadius, setBorderRadius] = useState("16px");
     const [bgBlur, setBgBlur] = useState("16px");
     const [popoverBg, setPopoverBg] = useState("rgba(15, 23, 42, 0.85)");
+    const [simulatedIcon, setSimulatedIcon] = useState<"default" | "clock" | "user" | "checkmark" | "calendar-alt">("default");
+
+    // SVG icon mapper for simulation
+    const getSimulatedIconNode = (): React.ReactNode => {
+        switch (simulatedIcon) {
+            case "clock":
+                return (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "color 0.2s ease" }}>
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                );
+            case "user":
+                return (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "color 0.2s ease" }}>
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                );
+            case "checkmark":
+                return (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "color 0.2s ease" }}>
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                );
+            case "calendar-alt":
+                return (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "color 0.2s ease" }}>
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                );
+            default:
+                return undefined;
+        }
+    };
 
     // Translations (Mendix Batch Translate)
     const [timeLabel, setTimeLabel] = useState("");
@@ -199,6 +237,20 @@ function App() {
                                     <span>Calendar Background</span>
                                     <input type="text" value={popoverBg} onChange={(e) => setPopoverBg(e.target.value)} style={{ background: "#1e293b", color: "#f8fafc", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "6px", padding: "6px", outline: "none", fontSize: "13px" }} />
                                 </label>
+                                <label style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "12px", color: "#94a3b8" }}>
+                                    <span>Custom Input Icon (ไอคอนกล่องข้อความจำลอง)</span>
+                                    <select 
+                                        value={simulatedIcon} 
+                                        onChange={(e: any) => setSimulatedIcon(e.target.value)}
+                                        style={{ background: "#1e293b", color: "#f8fafc", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "6px", padding: "8px", outline: "none", fontSize: "13px", cursor: "pointer" }}
+                                    >
+                                        <option value="default">Default Calendar Icon (ไอคอนหลัก)</option>
+                                        <option value="calendar-alt">Alternative Calendar (ปฏิทินแบบมน)</option>
+                                        <option value="clock">Clock Icon (ไอคอนนาฬิกา)</option>
+                                        <option value="user">User Icon (ไอคอนบุคคล)</option>
+                                        <option value="checkmark">Checkmark Icon (ไอคอนเช็คถูก)</option>
+                                    </select>
+                                </label>
                             </div>
                         )}
                     </div>
@@ -323,7 +375,7 @@ function App() {
                             onChange={setSingleValue}
                             onRangeChange={(start, end) => {
                                 setStartValue(start);
-                                setEndDate(end);
+                                setEndValue(end);
                             }}
                             showTime={showTime}
                             buddhistEra={buddhistEra}
@@ -348,6 +400,9 @@ function App() {
                             last7DaysPresetLabel={last7DaysPresetLabel}
                             last30DaysPresetLabel={last30DaysPresetLabel}
                             thisMonthPresetLabel={thisMonthPresetLabel}
+                            
+                            // Custom Icon
+                            customIcon={getSimulatedIconNode()}
                         />
                     </div>
                 </div>

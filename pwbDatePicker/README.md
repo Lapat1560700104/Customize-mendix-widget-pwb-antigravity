@@ -33,29 +33,39 @@ pwbDatePicker/
 We have established a comprehensive, ultra-fast developer workflow:
 
 ### 1. Install Dependencies
+
 Navigate to the `pwbDatePicker` directory and run:
+
 ```bash
 npm install
 ```
 
 ### 2. Standalone Testing Playground (แผงทดสอบจำลอง - แนะนำ!)
+
 To launch the interactive **Vite Properties Simulator Dashboard** locally in your browser in milliseconds:
+
 ```bash
 npm run playground
 ```
+
 *This starts a local dev server at `http://localhost:3000/` and opens it in your default browser. It allows you to toggle Mendix properties (Selection Mode, Accent Colors, Time Picker, and Translations) dynamically and see how the DatePicker updates in real-time without having to compile an `.mpk` or launch Mendix!*
 
 ### 3. Development Mode (โหมดซิงค์เชื่อมต่อ Mendix)
+
 Builds the widget and watches for source file changes in real-time. Changes are hot-compiled and automatically synced into your Mendix app's widgets folder:
+
 ```bash
 npm run dev
 ```
 
 ### 4. Production Release & Bundling (บิวด์เพื่อนำไปใช้จริง)
+
 Compiles, lint-checks, minifies, and packages the widget into an optimized, lightweight `.mpk` package:
+
 ```bash
 npm run release
 ```
+
 *The output package will be generated inside `dist/1.0.5/pwb.PwbDatePicker_1.0.5_YYYYMMDD_HHMMSS.mpk` and automatically copied to your Mendix project's `widgets/` folder.*
 
 ---
@@ -78,20 +88,25 @@ npm run release
 We have recently upgraded the widget's UX and aesthetics with 5 major premium features:
 
 ### 1. Airbnb-Style Visual Pill Range Selection (แถบเลือกช่วงวันที่ต่อกันไร้รอยต่อ)
+
 - **What it does**: When selecting a date range, the day boxes merge into a continuous, sleek colored banner. The start date has a rounded left edge, the end date has a rounded right edge, and in-between dates connect seamlessly without gaps.
 - **Hover effects**: The visual pill adjusts dynamically while you hover your cursor to choose the range end.
 
 ### 2. Sleek SVG Chevrons for Navigation (ไอคอนเปลี่ยนเดือนเส้นเวกเตอร์แบบบาง)
+
 - **What it does**: Replaced standard text arrows (`<` and `>`) with minimalist, modern SVG Chevron icons that smoothly scale up on mouse hover for a high-end desktop feel.
 
 ### 3. Month & Year Quick Jump Grids (แผงตารางเลือกเดือนและปีด่วน)
+
 - **What it does**: Clicking on the month or year name in the calendar header switches the display into a **3x4 Month Select Grid** or **3x4 Year Select Grid** (with `<<` and `>>` fast-scroll wrappers to skip years by 12).
 - **Benefit**: Resolves the classic pain point of clicking month navigation arrows dozens of times to select far-away dates.
 
 ### 4. Fluid Month Slide Animations (แอนิเมชันเปลี่ยนเดือนแบบสไลด์ข้าง)
+
 - **What it does**: Changing months triggers an elegant horizontal sliding keyframe transition (`slideLeftIn` / `slideRightIn`) matching the user's click direction for a natural, fluid interface flow.
 
 ### 5. Arrow Key Keyboard Navigation (การควบคุมปฏิทินผ่านแป้นพิมพ์)
+
 - **What it does**: Full accessibility navigation using keyboard arrows (`ArrowLeft`, `ArrowRight`, `ArrowUp`, `ArrowDown`) to move focus around calendar days. Displays a visually distinct flashing focus ring (`.pwb-day-focused`) and supports pressing `Enter` or `Space` to confirm selection, and `Escape` to close.
 
 ---
@@ -99,6 +114,7 @@ We have recently upgraded the widget's UX and aesthetics with 5 major premium fe
 ## 🌐 Mendix Batch Translate Compatibility (รองรับระบบระบบหลายภาษา)
 
 The widget features an integrated `"Translations"` property group, making it **100% compatible** with Mendix Studio Pro's **Batch Translate** and **Language Manager**:
+
 - Exposes 7 customizable string fields: `timeLabel`, `todayPresetLabel`, `clearPresetLabel`, `selectMonthLabel`, `last7DaysPresetLabel`, `last30DaysPresetLabel`, `thisMonthPresetLabel`.
 - Provides built-in premium bilingual fallbacks (Thai/English) if Mendix properties are left blank, ensuring visual stability.
 - Allows developers to manage all user-facing widget text centrally via Mendix's native translation tables.
@@ -108,16 +124,28 @@ The widget features an integrated `"Translations"` property group, making it **1
 ## 🎨 Dynamic Icon Selection & Custom Uploads (ระบบไอคอนปรับเปลี่ยนได้ตามต้องการ)
 
 In addition to translation controls, the widget now features **Dynamic Calendar Icon selection** natively inside Mendix's properties:
+
 - **Custom Calendar Icon Property**: Exposes `calendarIcon` (type `icon`) under the **Aesthetics** property group.
 - **Support Formats**: Fully supports Mendix standard Glyphicons, FontAwesome glyphs, as well as **custom uploaded images (SVG, PNG, JPG)**.
 - **SVG Upload Support**: Highly recommended for crisp scaling at Retina/4K resolutions.
 
-### 🚀 How to Upload and Use Custom Icons inside Mendix:
-1. **Upload into Image Collection**: In your Mendix project, import your custom SVG or PNG icon into a Mendix **Image Collection**.
-2. **Assign in Studio Pro**: Double-click `PwbDatePicker` on your page, navigate to **Aesthetics**, and under the **Custom Calendar Icon** property, click Select and choose your uploaded image.
-3. **Automatic Adaptation**: The widget automatically adjusts boundaries, heights, image alignments, and hover highlights to fit your custom icon perfectly.
+### 1. วิธีใช้และอัพโหลดไอคอนของคุณเองใน Mendix Studio Pro (การใช้งานจริง)
 
-### 🖥️ Local Playground Simulator Simulation:
-* Our local standalone simulator (launched with `npm run playground` at `http://localhost:3000/`) contains an **Interactive Custom Icon Preset Dropdown** under **4. Aesthetics**.
-* This lets you instantly toggle and test how different SVG vector shapes (Rounded Calendar, Clock, User, and Checkmark) look inside the input bar in real-time, verifying visual alignment with zero delay!
+เมื่อคุณนำ Widget นี้ไปใช้ในโครงการ Mendix คุณสามารถอัพโหลดไอคอนของตัวเองขึ้นไปใช้ได้ทันทีผ่านขั้นตอนปกติของ Mendix Studio Pro:
 
+#### อัพโหลดรูปภาพของตัวเอง (SVG / PNG / JPG)
+
+- **สร้าง Image Collection** ขึ้นมาในโมดูลของแอป Mendix (หรือใช้ Image Collection ที่มีอยู่แล้ว)
+- **อัพโหลดรูปไอคอนของคุณ**เข้าไปเก็บไว้ใน Image Collection นั้น (แนะนำอย่างยิ่งให้ใช้ไฟล์ `.svg` เพราะจะคมชัดและย่อขยายขนาดได้สวยงามโดยไม่แตก หรือสามารถใช้ไฟล์ `.png` แบบพื้นหลังโปร่งใส ก็ได้เช่นกัน)
+- **ดับเบิลคลิกที่วิดเจ็ต PwbDatePicker** บนหน้า Page ของ Mendix จากนั้นที่หัวข้อ Custom Calendar Icon ในแท็บ Aesthetics ให้คลิกปุ่ม Select
+- **เลือกรูปภาพจาก Image Collection**ที่คุณอัพโหลดไว้ได้ทันทีครับ! ตัววิดเจ็ตจะประมวลผลและปรับขนาดการแสดงผลลงไปในปุ่มกดให้สวยงามพอดีโดยอัตโนมัติ
+
+#### เลือกใช้ไอคอนระบบมาตรฐาน (Glyphicon / FontAwesome)
+
+- นอกเหนือจากการอัพโหลดรูปภาพเองแล้ว หากคุณต้องการใช้ไอคอนสัญลักษณ์ทั่วไป คุณก็สามารถเลือกจากชุดไอคอนมาตรฐานของ Mendix หรือไอคอนจาก FontAwesome ผ่านหน้าต่างเลือกไอคอนแบบปกติได้ทันทีด้วยเช่นกันครับ
+
+### 2. การรันตรวจสอบการทำงานไอคอนบนหน้า Playground Simulator (แบบ Local)
+
+- หน้าจอจำลอง **Vite Playground** (ที่เปิดด้วยคำสั่ง `npm run playground` ที่ `http://localhost:3000/`) ได้รับการติดตั้ง **สวิตช์จำลองไอคอนแบบสไตล์ SVG 5 Preset** (Default, Rounded Calendar, Clock, User, Checkmark) เพื่อให้นักพัฒนาสามารถทดลองกดเลือกดูการดัดแปลงและขนาดสเกลของรูปกล่องข้อความได้แบบสด ๆ ทันทีโดยไม่ต้องรัน Mendix App!
+
+- หากคุณมี SVG ใหม่ที่อยากนำมาเทสใน Playground คุณสามารถแก้สโคดเวกเตอร์เพิ่มได้โดยตรงในไฟล์ [playground/main.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/playground/main.tsx) (บรรทัดที่ 38)

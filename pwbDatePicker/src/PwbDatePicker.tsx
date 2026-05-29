@@ -1,6 +1,7 @@
 import { ReactElement } from "react";
 import { DatePicker } from "./components/DatePicker";
 import { PwbDatePickerContainerProps } from "../typings/PwbDatePickerProps";
+import { Icon } from "mendix/components/Icon";
 import "./ui/PwbDatePicker.css";
 
 export function PwbDatePicker({
@@ -33,7 +34,8 @@ export function PwbDatePicker({
     selectMonthLabel,
     last7DaysPresetLabel,
     last30DaysPresetLabel,
-    thisMonthPresetLabel
+    thisMonthPresetLabel,
+    calendarIcon
 }: PwbDatePickerContainerProps): ReactElement {
     // Check if the inputs are read-only
     const readOnly =
@@ -73,6 +75,8 @@ export function PwbDatePicker({
         }
     };
 
+    const customIconNode = calendarIcon && calendarIcon.value ? <Icon icon={calendarIcon.value} /> : undefined;
+
     return (
         <DatePicker
             selectionMode={selectionMode}
@@ -107,6 +111,7 @@ export function PwbDatePicker({
             last7DaysPresetLabel={last7DaysPresetLabel}
             last30DaysPresetLabel={last30DaysPresetLabel}
             thisMonthPresetLabel={thisMonthPresetLabel}
+            customIcon={customIconNode}
         />
     );
 }

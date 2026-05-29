@@ -97,6 +97,10 @@
                 <caption>Calendar Background Color</caption>
                 <description>Background fill color of the popover calendar (e.g., rgba(255, 255, 255, 0.85), #ffffff)</description>
             </property>
+            <property key="calendarIcon" type="icon" required="false">
+                <caption>Custom Calendar Icon</caption>
+                <description>Choose a custom Mendix icon to display in the input box instead of the default</description>
+            </property>
         </propertyGroup>
         <propertyGroup caption="Validation">
             <property key="required" type="boolean" defaultValue="false">

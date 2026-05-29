@@ -84,6 +84,28 @@
     color: var(--accent-color);
 }
 
+.pwb-custom-calendar-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    color: var(--slate-400);
+    font-size: 16px;
+    transition: color 0.2s;
+}
+
+.pwb-custom-calendar-icon img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
+.pwb-datepicker-input:hover .pwb-custom-calendar-icon,
+.pwb-input-active .pwb-custom-calendar-icon {
+    color: var(--accent-color);
+}
+
 .pwb-clear-btn {
     border: none;
     background: none;

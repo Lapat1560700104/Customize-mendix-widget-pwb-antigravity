@@ -4,7 +4,7 @@
  * @author Mendix Widgets Framework Team
  */
 import { CSSProperties } from "react";
-import { DynamicValue, EditableValue } from "mendix";
+import { DynamicValue, EditableValue, WebIcon } from "mendix";
 
 export type SelectionModeEnum = "single" | "range";
 
@@ -30,6 +30,7 @@ export interface PwbDatePickerContainerProps {
     borderRadius: string;
     bgBlur: string;
     popoverBg: string;
+    calendarIcon?: DynamicValue<WebIcon>;
     required: boolean;
     requiredMessage: string;
     validationExpression?: DynamicValue<boolean>;
@@ -71,6 +72,7 @@ export interface PwbDatePickerPreviewProps {
     borderRadius: string;
     bgBlur: string;
     popoverBg: string;
+    calendarIcon: { type: "glyph"; iconClass: string; } | { type: "image"; imageUrl: string; iconUrl: string; } | { type: "icon"; iconClass: string; } | undefined;
     required: boolean;
     requiredMessage: string;
     validationExpression: string;

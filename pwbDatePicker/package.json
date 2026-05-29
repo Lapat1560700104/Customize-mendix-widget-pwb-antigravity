@@ -22,11 +22,14 @@
     "lint": "pluggable-widgets-tools lint",
     "lint:fix": "pluggable-widgets-tools lint:fix",
     "prerelease": "npm run lint",
-    "release": "pluggable-widgets-tools release:web && node ../scripts/rename_mpk.js"
+    "release": "pluggable-widgets-tools release:web && node ../scripts/rename_mpk.js",
+    "playground": "vite playground"
   },
   "devDependencies": {
     "@mendix/pluggable-widgets-tools": "^11.6.0",
-    "@types/big.js": "^6.0.2"
+    "@types/big.js": "^6.0.2",
+    "@vitejs/plugin-react": "^4.2.0",
+    "vite": "^5.0.0"
   },
   "dependencies": {
     "classnames": "^2.2.6"

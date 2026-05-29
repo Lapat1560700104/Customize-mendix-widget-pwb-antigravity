@@ -10,6 +10,10 @@
 pwbDatePicker/
 ├── tsconfig.json          # TypeScript compilation parameters
 ├── package.json           # Package details, npm workspaces config, and scripts
+├── playground/            # Standing interactive test dashboard & simulator
+│   ├── index.html         # Developer testing website entrypoint
+│   ├── main.tsx           # React dashboard combining properties simulator and canvas
+│   └── vite.config.ts     # Super-fast Vite compiler server configuration
 ├── src/                   # Main development source folder
 │   ├── package.xml        # Packing configuration for the Mendix Pluggable Widget (.mpk)
 │   ├── PwbDatePicker.xml  # Widget Properties configuration visible inside Mendix Studio Pro
@@ -24,32 +28,34 @@ pwbDatePicker/
 
 ---
 
-## 🛠️ Getting Started (ขั้นตอนการติดตั้งและรันพัฒนา)
+## 🛠️ Developer Lifecycle Commands (คู่มือรันพัฒนาและสร้างชิ้นงาน)
+
+We have established a comprehensive, ultra-fast developer workflow:
 
 ### 1. Install Dependencies
-
 Navigate to the `pwbDatePicker` directory and run:
-
 ```bash
 npm install
 ```
 
-### 2. Development Mode (โหมดพัฒนา)
+### 2. Standalone Testing Playground (แผงทดสอบจำลอง - แนะนำ!)
+To launch the interactive **Vite Properties Simulator Dashboard** locally in your browser in milliseconds:
+```bash
+npm run playground
+```
+*This starts a local dev server at `http://localhost:3000/` and opens it in your default browser. It allows you to toggle Mendix properties (Selection Mode, Accent Colors, Time Picker, and Translations) dynamically and see how the DatePicker updates in real-time without having to compile an `.mpk` or launch Mendix!*
 
-Builds the widget and watches for source file changes in real-time. Changes are hot-compiled into your Mendix app widgets folder:
-
+### 3. Development Mode (โหมดซิงค์เชื่อมต่อ Mendix)
+Builds the widget and watches for source file changes in real-time. Changes are hot-compiled and automatically synced into your Mendix app's widgets folder:
 ```bash
 npm run dev
 ```
 
-### 3. Production Release & Bundling (บิวด์เพื่อนำไปใช้จริง)
-
-Compiles, lint-checks, minifies, and packages the widget into an optimized `.mpk` package:
-
+### 4. Production Release & Bundling (บิวด์เพื่อนำไปใช้จริง)
+Compiles, lint-checks, minifies, and packages the widget into an optimized, lightweight `.mpk` package:
 ```bash
 npm run release
 ```
-
 *The output package will be generated inside `dist/1.0.5/pwb.PwbDatePicker_1.0.5_YYYYMMDD_HHMMSS.mpk` and automatically copied to your Mendix project's `widgets/` folder.*
 
 ---
@@ -72,23 +78,27 @@ npm run release
 We have recently upgraded the widget's UX and aesthetics with 5 major premium features:
 
 ### 1. Airbnb-Style Visual Pill Range Selection (แถบเลือกช่วงวันที่ต่อกันไร้รอยต่อ)
-
 - **What it does**: When selecting a date range, the day boxes merge into a continuous, sleek colored banner. The start date has a rounded left edge, the end date has a rounded right edge, and in-between dates connect seamlessly without gaps.
 - **Hover effects**: The visual pill adjusts dynamically while you hover your cursor to choose the range end.
 
 ### 2. Sleek SVG Chevrons for Navigation (ไอคอนเปลี่ยนเดือนเส้นเวกเตอร์แบบบาง)
-
 - **What it does**: Replaced standard text arrows (`<` and `>`) with minimalist, modern SVG Chevron icons that smoothly scale up on mouse hover for a high-end desktop feel.
 
 ### 3. Month & Year Quick Jump Grids (แผงตารางเลือกเดือนและปีด่วน)
-
 - **What it does**: Clicking on the month or year name in the calendar header switches the display into a **3x4 Month Select Grid** or **3x4 Year Select Grid** (with `<<` and `>>` fast-scroll wrappers to skip years by 12).
 - **Benefit**: Resolves the classic pain point of clicking month navigation arrows dozens of times to select far-away dates.
 
 ### 4. Fluid Month Slide Animations (แอนิเมชันเปลี่ยนเดือนแบบสไลด์ข้าง)
-
 - **What it does**: Changing months triggers an elegant horizontal sliding keyframe transition (`slideLeftIn` / `slideRightIn`) matching the user's click direction for a natural, fluid interface flow.
 
 ### 5. Arrow Key Keyboard Navigation (การควบคุมปฏิทินผ่านแป้นพิมพ์)
-
 - **What it does**: Full accessibility navigation using keyboard arrows (`ArrowLeft`, `ArrowRight`, `ArrowUp`, `ArrowDown`) to move focus around calendar days. Displays a visually distinct flashing focus ring (`.pwb-day-focused`) and supports pressing `Enter` or `Space` to confirm selection, and `Escape` to close.
+
+---
+
+## 🌐 Mendix Batch Translate Compatibility (รองรับระบบระบบหลายภาษา)
+
+The widget features an integrated `"Translations"` property group, making it **100% compatible** with Mendix Studio Pro's **Batch Translate** and **Language Manager**:
+- Exposes 7 customizable string fields: `timeLabel`, `todayPresetLabel`, `clearPresetLabel`, `selectMonthLabel`, `last7DaysPresetLabel`, `last30DaysPresetLabel`, `thisMonthPresetLabel`.
+- Provides built-in premium bilingual fallbacks (Thai/English) if Mendix properties are left blank, ensuring visual stability.
+- Allows developers to manage all user-facing widget text centrally via Mendix's native translation tables.

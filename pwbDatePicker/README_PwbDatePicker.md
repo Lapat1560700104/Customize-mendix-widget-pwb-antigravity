@@ -63,6 +63,18 @@
 | `validationExpression` | Custom Validation Rule | Expression (Boolean) | No | - | Mendix expression returning Boolean. Must evaluate to True to be valid |
 | `customValidationMessage` | Custom Validation Message | String | No | `Date selection...` | Custom alert message displayed when Custom Validation Rule returns False |
 
+### 6. Translations (Batch Translate)
+
+| Property Key | Caption | Type | Required | Default Value | Description |
+| :--- | :--- | :--- | :---: | :--- | :--- |
+| `timeLabel` | Time Picker Label | String | No | `เวลา / Time (HH:MM):` | Label displayed in the custom time picker section |
+| `todayPresetLabel` | Today Preset Button Label | String | No | `วันนี้ (Today)` | Label for the Today shortcut preset button |
+| `clearPresetLabel` | Clear Preset Button Label | String | No | `ล้างค่า (Clear)` | Label for the Clear/Reset shortcut button |
+| `selectMonthLabel` | Select Month View Title | String | No | `เลือกเดือน / Select Month` | Header title displayed in the month selection view |
+| `last7DaysPresetLabel` | Last 7 Days Preset Label | String | No | `7 วันล่าสุด` | Label for the 7 Days range shortcut button |
+| `last30DaysPresetLabel` | Last 30 Days Preset Label | String | No | `30 วันล่าสุด` | Label for the 30 Days range shortcut button |
+| `thisMonthPresetLabel` | This Month Preset Label | String | No | `เดือนนี้` | Label for the This Month range shortcut button |
+
 ---
 
 ## 🎨 CSS Styling Architecture

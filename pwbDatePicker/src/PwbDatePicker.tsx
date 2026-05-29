@@ -37,6 +37,28 @@ export function PwbDatePicker({
     thisMonthPresetLabel,
     calendarIcon
 }: PwbDatePickerContainerProps): ReactElement {
+    // Validate accentColor (must be a valid hex, rgb, rgba, hsl, hsla, or standard color name)
+    const colorRegex =
+        /^(#([0-9a-fA-F]{3}){1,2}|rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*(?:,\s*[0-9.]+\s*)?\)|hsla?\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%\s*(?:,\s*[0-9.]+\s*)?\)|[a-zA-Z]+)$/;
+    const safeAccentColor = accentColor && colorRegex.test(accentColor.trim()) ? accentColor.trim() : "#3b82f6";
+
+    // Standardize border radius format (add 'px' if numeric, default to 16px if empty)
+    let safeBorderRadius = "16px";
+    if (borderRadius) {
+        const trimmed = borderRadius.trim();
+        safeBorderRadius = /^\d+$/.test(trimmed) ? `${trimmed}px` : trimmed;
+    }
+
+    // Standardize bgBlur (add 'px' if numeric, default to 16px if empty)
+    let safeBgBlur = "16px";
+    if (bgBlur) {
+        const trimmed = bgBlur.trim();
+        safeBgBlur = /^\d+$/.test(trimmed) ? `${trimmed}px` : trimmed;
+    }
+
+    // Validate popoverBg, default to rgba(255, 255, 255, 0.85) if empty
+    const safePopoverBg = popoverBg && popoverBg.trim() ? popoverBg.trim() : "rgba(255, 255, 255, 0.85)";
+
     // Check if the inputs are read-only
     const readOnly =
         selectionMode === "single"
@@ -91,16 +113,16 @@ export function PwbDatePicker({
             maxDate={maxDate?.value}
             disableWeekends={disableWeekends}
             placeholder={placeholder}
-            accentColor={accentColor}
+            accentColor={safeAccentColor}
             readOnly={readOnly}
             className={className}
             style={style}
             dateFormat={dateFormat}
             showPresets={showPresets}
             showEraToggle={showEraToggle}
-            borderRadius={borderRadius}
-            bgBlur={bgBlur}
-            popoverBg={popoverBg}
+            borderRadius={safeBorderRadius}
+            bgBlur={safeBgBlur}
+            popoverBg={safePopoverBg}
             required={required}
             requiredMessage={requiredMessage}
             mendixValidationError={activeValidationError}

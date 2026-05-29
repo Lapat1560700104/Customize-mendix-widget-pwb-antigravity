@@ -689,3 +689,89 @@
 .animate-fade-in {
     animation: fadeIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
+
+/* ==========================================
+   🌐 RIGHT-TO-LEFT (RTL) STYLING SUPPORT
+   ========================================== */
+
+/* Outer wrapper RTL align */
+.pwb-datepicker-wrapper[dir="rtl"] {
+    text-align: right;
+}
+
+/* Input layout inversion */
+.pwb-datepicker-wrapper[dir="rtl"] .pwb-datepicker-input {
+    flex-direction: row-reverse;
+}
+
+/* Icon placement inversion */
+.pwb-datepicker-wrapper[dir="rtl"] .pwb-icon-container {
+    flex-direction: row-reverse;
+}
+
+/* Popover right-aligned default position */
+.pwb-datepicker-wrapper[dir="rtl"] .pwb-datepicker-popover {
+    left: auto;
+    right: 0;
+    text-align: right;
+}
+
+/* Reverse chevron directions */
+.pwb-datepicker-wrapper[dir="rtl"] .pwb-nav-icon {
+    transform: scaleX(-1);
+}
+
+.pwb-datepicker-wrapper[dir="rtl"] .pwb-nav-btn:hover .pwb-nav-icon {
+    transform: scaleX(-1) scale(1.15);
+}
+
+/* Preset and action grids alignment */
+.pwb-datepicker-wrapper[dir="rtl"] .pwb-presets-container {
+    border-left: none;
+    border-right: 1px solid var(--slate-100);
+    padding-left: 0;
+    padding-right: 12px;
+}
+
+.pwb-datepicker-wrapper[dir="rtl"] .pwb-datepicker-popover-inner {
+    flex-direction: row-reverse;
+}
+
+/* Continuous range pill flipping */
+.pwb-datepicker-wrapper[dir="rtl"] .pwb-day-range-start {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-top-right-radius: calc(var(--border-radius) * 0.5) !important;
+    border-bottom-right-radius: calc(var(--border-radius) * 0.5) !important;
+}
+
+.pwb-datepicker-wrapper[dir="rtl"] .pwb-day-range-start::before {
+    left: 0;
+    right: auto;
+}
+
+.pwb-datepicker-wrapper[dir="rtl"] .pwb-day-range-end {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-top-left-radius: calc(var(--border-radius) * 0.5) !important;
+    border-bottom-left-radius: calc(var(--border-radius) * 0.5) !important;
+}
+
+.pwb-datepicker-wrapper[dir="rtl"] .pwb-day-range-end::before {
+    right: 0;
+    left: auto;
+}
+
+.pwb-datepicker-wrapper[dir="rtl"] .pwb-calendar-days-grid .pwb-day-in-range:nth-child(7n+1) {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-top-right-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+}
+
+.pwb-datepicker-wrapper[dir="rtl"] .pwb-calendar-days-grid .pwb-day-in-range:nth-child(7n) {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-top-left-radius: 8px !important;
+    border-bottom-left-radius: 8px !important;
+}

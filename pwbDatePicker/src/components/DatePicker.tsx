@@ -8,6 +8,7 @@ import {
     CSSProperties,
     ReactNode
 } from "react";
+import { getDaysInMonth, getFirstDayOfMonth, isWeekend, formatDateStr } from "../utils/dateUtils";
 
 export interface DatePickerProps {
     selectionMode: "single" | "range";
@@ -150,43 +151,19 @@ export function DatePicker({
 
     // Format display text
     const getDisplayText = (): string => {
-        const formatDateStr = (d: Date): string => {
-            const dayStr = String(d.getDate()).padStart(2, "0");
-            const monthStr = String(d.getMonth() + 1).padStart(2, "0");
-            const fullYear = d.getFullYear() + yearOffset;
-            const shortYear = String(fullYear).slice(-2);
-            const hhStr = String(d.getHours()).padStart(2, "0");
-            const mmStr = String(d.getMinutes()).padStart(2, "0");
-
-            let format = dateFormat || "DD/MM/YYYY";
-            if (showTime && !format.includes("hh") && !format.includes("mm")) {
-                format = `${format} hh:mm`;
-            }
-
-            return format
-                .replace("DD", dayStr)
-                .replace("MM", monthStr)
-                .replace("YYYY", String(fullYear))
-                .replace("YY", shortYear)
-                .replace("hh", hhStr)
-                .replace("mm", mmStr);
-        };
+        const formatHelper = (d: Date): string => formatDateStr(d, dateFormat, yearOffset, showTime);
 
         if (selectionMode === "single") {
-            return value ? formatDateStr(value) : "";
+            return value ? formatHelper(value) : "";
         } else {
             if (startValue && endValue) {
-                return `${formatDateStr(startValue)} - ${formatDateStr(endValue)}`;
+                return `${formatHelper(startValue)} - ${formatHelper(endValue)}`;
             } else if (startValue) {
-                return `${formatDateStr(startValue)} - ...`;
+                return `${formatHelper(startValue)} - ...`;
             }
             return "";
         }
     };
-
-    // Calendar generation helpers
-    const getDaysInMonth = (y: number, m: number): number => new Date(y, m + 1, 0).getDate();
-    const getFirstDayOfMonth = (y: number, m: number): number => new Date(y, m, 1).getDay();
 
     const handlePrevMonth = (): void => {
         setTransitionDirection("left");
@@ -216,11 +193,8 @@ export function DatePicker({
             }
         }
         // 3. Weekend Check
-        if (disableWeekends) {
-            const day = d.getDay();
-            if (day === 0 || day === 6) {
-                return true;
-            }
+        if (disableWeekends && isWeekend(d)) {
+            return true;
         }
         return false;
     };
@@ -503,6 +477,51 @@ export function DatePicker({
         const prevMonthVal = viewMonth === 0 ? 11 : viewMonth - 1;
         const daysInPrevMonth = getDaysInMonth(prevMonthYear, prevMonthVal);
 
+        const getAriaLabel = (date: Date): string => {
+            const daysTh = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+            const daysEn = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const monthsTh = [
+                "มกราคม",
+                "กุมภาพันธ์",
+                "มีนาคม",
+                "เมษายน",
+                "พฤษภาคม",
+                "มิถุนายน",
+                "กรกฎาคม",
+                "สิงหาคม",
+                "กันยายน",
+                "ตุลาคม",
+                "พฤศจิกายน",
+                "ธันวาคม"
+            ];
+            const monthsEn = [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December"
+            ];
+
+            const dayName = isBuddhistEra ? daysTh[date.getDay()] : daysEn[date.getDay()];
+            const dateNum = date.getDate();
+            const monthName = isBuddhistEra ? monthsTh[date.getMonth()] : monthsEn[date.getMonth()];
+            const yearNum = date.getFullYear() + (isBuddhistEra ? 543 : 0);
+
+            return isBuddhistEra
+                ? `วัน${dayName}ที่ ${dateNum} ${monthName} พ.ศ. ${yearNum}`
+                : `${dayName}, ${monthName} ${dateNum}, ${yearNum}`;
+        };
+
+        const isSameDay = (d1: Date, d2: Date): boolean =>
+            d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear();
+
         for (let i = firstDay - 1; i >= 0; i--) {
             const dayNum = daysInPrevMonth - i;
             const thisDate = new Date(prevMonthYear, prevMonthVal, dayNum);
@@ -516,6 +535,11 @@ export function DatePicker({
                     className={`pwb-day-other ${getDayClasses(thisDate, selected, inRange, disabled)}`}
                     onClick={() => !disabled && handleDateSelect(dayNum, true, false)}
                     onMouseEnter={() => !disabled && setHoveredDate(thisDate)}
+                    role="gridcell"
+                    aria-selected={selected}
+                    aria-disabled={disabled}
+                    aria-label={getAriaLabel(thisDate)}
+                    tabIndex={focusedDate && isSameDay(thisDate, focusedDate) ? 0 : -1}
                 >
                     {dayNum}
                 </div>
@@ -535,6 +559,11 @@ export function DatePicker({
                     className={getDayClasses(thisDate, selected, inRange, disabled)}
                     onClick={() => !disabled && handleDateSelect(i)}
                     onMouseEnter={() => !disabled && setHoveredDate(thisDate)}
+                    role="gridcell"
+                    aria-selected={selected}
+                    aria-disabled={disabled}
+                    aria-label={getAriaLabel(thisDate)}
+                    tabIndex={focusedDate && isSameDay(thisDate, focusedDate) ? 0 : -1}
                 >
                     {i}
                 </div>
@@ -558,6 +587,11 @@ export function DatePicker({
                     className={`pwb-day-other ${getDayClasses(thisDate, selected, inRange, disabled)}`}
                     onClick={() => !disabled && handleDateSelect(i, false, true)}
                     onMouseEnter={() => !disabled && setHoveredDate(thisDate)}
+                    role="gridcell"
+                    aria-selected={selected}
+                    aria-disabled={disabled}
+                    aria-label={getAriaLabel(thisDate)}
+                    tabIndex={focusedDate && isSameDay(thisDate, focusedDate) ? 0 : -1}
                 >
                     {i}
                 </div>
@@ -589,6 +623,23 @@ export function DatePicker({
                     hasError ? "pwb-input-error" : ""
                 }`}
                 onClick={() => !readOnly && setIsOpen(!isOpen)}
+                role="combobox"
+                aria-expanded={isOpen}
+                aria-haspopup="dialog"
+                aria-disabled={readOnly}
+                aria-required={required}
+                aria-invalid={hasError}
+                aria-describedby={hasError ? `pwb-error-${viewYear}-${viewMonth}` : undefined}
+                tabIndex={readOnly ? -1 : 0}
+                onKeyDown={e => {
+                    if (readOnly) {
+                        return;
+                    }
+                    if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown") {
+                        e.preventDefault();
+                        setIsOpen(true);
+                    }
+                }}
             >
                 <span className={getDisplayText() ? "pwb-value" : "pwb-placeholder"}>
                     {getDisplayText() || placeholder}
@@ -596,7 +647,12 @@ export function DatePicker({
 
                 <div className="pwb-icon-container">
                     {getDisplayText() && !readOnly && (
-                        <button className="pwb-clear-btn" onClick={handleClear} title="Clear selection">
+                        <button
+                            className="pwb-clear-btn"
+                            onClick={handleClear}
+                            title="Clear selection"
+                            aria-label="Clear selection"
+                        >
                             &times;
                         </button>
                     )}
@@ -609,6 +665,7 @@ export function DatePicker({
                             fill="none"
                             stroke="currentColor"
                             strokeWidth="2"
+                            aria-hidden="true"
                         >
                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                             <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -621,7 +678,12 @@ export function DatePicker({
 
             {/* Validation Message */}
             {hasError && (
-                <div className="pwb-validation-message animate-slide-down">
+                <div
+                    id={`pwb-error-${viewYear}-${viewMonth}`}
+                    className="pwb-validation-message animate-slide-down"
+                    role="alert"
+                    aria-live="assertive"
+                >
                     <svg
                         className="pwb-warning-icon"
                         viewBox="0 0 24 24"
@@ -641,7 +703,11 @@ export function DatePicker({
             {isOpen && (
                 <div
                     ref={popoverRef}
+                    id={`pwb-popover-${viewYear}-${viewMonth}`}
                     className="pwb-datepicker-popover animate-slide-up"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="DatePicker calendar popover"
                     tabIndex={0}
                     onKeyDown={handleKeyDown}
                     style={{ outline: "none" }}
@@ -650,7 +716,12 @@ export function DatePicker({
                     <div className="pwb-calendar-header">
                         {activeView === "calendar" && (
                             <>
-                                <button type="button" className="pwb-nav-btn" onClick={handlePrevMonth}>
+                                <button
+                                    type="button"
+                                    className="pwb-nav-btn"
+                                    onClick={handlePrevMonth}
+                                    aria-label="Previous Month"
+                                >
                                     <svg
                                         className="pwb-nav-icon"
                                         viewBox="0 0 24 24"
@@ -659,12 +730,25 @@ export function DatePicker({
                                         strokeWidth="2.5"
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
+                                        aria-hidden="true"
                                     >
                                         <polyline points="15 18 9 12 15 6"></polyline>
                                     </svg>
                                 </button>
                                 <span className="pwb-calendar-title">
-                                    <span className="pwb-title-click" onClick={() => setActiveView("month")}>
+                                    <span
+                                        className="pwb-title-click"
+                                        onClick={() => setActiveView("month")}
+                                        role="button"
+                                        aria-label="Click to open month selection grid"
+                                        tabIndex={0}
+                                        onKeyDown={e => {
+                                            if (e.key === "Enter" || e.key === " ") {
+                                                e.preventDefault();
+                                                setActiveView("month");
+                                            }
+                                        }}
+                                    >
                                         {months[viewMonth].split(" / ")[isBuddhistEra ? 0 : 1]}
                                     </span>{" "}
                                     <span
@@ -673,11 +757,26 @@ export function DatePicker({
                                             setYearPageStart(viewYear - 6);
                                             setActiveView("year");
                                         }}
+                                        role="button"
+                                        aria-label="Click to open year selection grid"
+                                        tabIndex={0}
+                                        onKeyDown={e => {
+                                            if (e.key === "Enter" || e.key === " ") {
+                                                e.preventDefault();
+                                                setYearPageStart(viewYear - 6);
+                                                setActiveView("year");
+                                            }
+                                        }}
                                     >
                                         {viewYear + yearOffset}
                                     </span>
                                 </span>
-                                <button type="button" className="pwb-nav-btn" onClick={handleNextMonth}>
+                                <button
+                                    type="button"
+                                    className="pwb-nav-btn"
+                                    onClick={handleNextMonth}
+                                    aria-label="Next Month"
+                                >
                                     <svg
                                         className="pwb-nav-icon"
                                         viewBox="0 0 24 24"
@@ -686,6 +785,7 @@ export function DatePicker({
                                         strokeWidth="2.5"
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
+                                        aria-hidden="true"
                                     >
                                         <polyline points="9 18 15 12 9 6"></polyline>
                                     </svg>
@@ -704,6 +804,7 @@ export function DatePicker({
                                     className="pwb-nav-btn pwb-close-view-btn"
                                     onClick={() => setActiveView("calendar")}
                                     title="Back to calendar"
+                                    aria-label="Back to calendar view"
                                 >
                                     &times;
                                 </button>
@@ -716,6 +817,7 @@ export function DatePicker({
                                     type="button"
                                     className="pwb-nav-btn"
                                     onClick={() => setYearPageStart(prev => prev - 12)}
+                                    aria-label="Previous 12 Years"
                                 >
                                     <svg
                                         className="pwb-nav-icon"
@@ -725,6 +827,7 @@ export function DatePicker({
                                         strokeWidth="2.5"
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
+                                        aria-hidden="true"
                                     >
                                         <polyline points="15 18 9 12 15 6"></polyline>
                                     </svg>
@@ -733,6 +836,15 @@ export function DatePicker({
                                     className="pwb-calendar-title pwb-title-click"
                                     onClick={() => setActiveView("calendar")}
                                     title="Back to calendar"
+                                    role="button"
+                                    aria-label="Back to calendar view"
+                                    tabIndex={0}
+                                    onKeyDown={e => {
+                                        if (e.key === "Enter" || e.key === " ") {
+                                            e.preventDefault();
+                                            setActiveView("calendar");
+                                        }
+                                    }}
                                 >
                                     {yearPageStart + yearOffset} - {yearPageStart + 11 + yearOffset}
                                 </span>
@@ -740,6 +852,7 @@ export function DatePicker({
                                     type="button"
                                     className="pwb-nav-btn"
                                     onClick={() => setYearPageStart(prev => prev + 12)}
+                                    aria-label="Next 12 Years"
                                 >
                                     <svg
                                         className="pwb-nav-icon"
@@ -749,6 +862,7 @@ export function DatePicker({
                                         strokeWidth="2.5"
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
+                                        aria-hidden="true"
                                     >
                                         <polyline points="9 18 15 12 9 6"></polyline>
                                     </svg>
@@ -767,6 +881,8 @@ export function DatePicker({
                                         type="button"
                                         className={`pwb-era-btn ${isBuddhistEra ? "" : "pwb-era-btn-active"}`}
                                         onClick={() => setIsBuddhistEra(false)}
+                                        aria-label="Switch calendar to Christian Era"
+                                        aria-pressed={!isBuddhistEra}
                                     >
                                         ค.ศ. (A.D.)
                                     </button>
@@ -774,24 +890,44 @@ export function DatePicker({
                                         type="button"
                                         className={`pwb-era-btn ${isBuddhistEra ? "pwb-era-btn-active" : ""}`}
                                         onClick={() => setIsBuddhistEra(true)}
+                                        aria-label="Switch calendar to Thai Buddhist Era"
+                                        aria-pressed={isBuddhistEra}
                                     >
                                         พ.ศ. (B.E.)
                                     </button>
                                 </div>
                             )}
 
-                            <div className="pwb-calendar-weekdays">
-                                {weekDays.map((day, idx) => (
-                                    <div key={idx} className="pwb-weekday-col">
-                                        {day}
-                                    </div>
-                                ))}
+                            <div className="pwb-calendar-weekdays" role="row">
+                                {weekDays.map((day, idx) => {
+                                    const fullWeekDays = [
+                                        "วันอาทิตย์ / Sunday",
+                                        "วันจันทร์ / Monday",
+                                        "วันอังคาร / Tuesday",
+                                        "วันพุธ / Wednesday",
+                                        "วันพฤหัสบดี / Thursday",
+                                        "วันศุกร์ / Friday",
+                                        "วันเสาร์ / Saturday"
+                                    ];
+                                    return (
+                                        <div
+                                            key={idx}
+                                            className="pwb-weekday-col"
+                                            role="columnheader"
+                                            aria-label={fullWeekDays[idx]}
+                                        >
+                                            {day}
+                                        </div>
+                                    );
+                                })}
                             </div>
 
                             <div
                                 key={`${viewYear}-${viewMonth}`}
                                 className={`pwb-calendar-days-grid pwb-calendar-slide-${transitionDirection}`}
                                 onMouseLeave={() => setHoveredDate(null)}
+                                role="grid"
+                                aria-label="Calendar days grid"
                             >
                                 {renderCalendarDays()}
                             </div>
@@ -799,9 +935,10 @@ export function DatePicker({
                     )}
 
                     {activeView === "month" && (
-                        <div className="pwb-months-grid animate-fade-in">
+                        <div className="pwb-months-grid animate-fade-in" role="grid" aria-label="Month selection grid">
                             {months.map((m, idx) => {
                                 const isCurrent = viewMonth === idx;
+                                const monthLabel = m.split(" / ")[isBuddhistEra ? 0 : 1];
                                 return (
                                     <button
                                         key={idx}
@@ -811,8 +948,11 @@ export function DatePicker({
                                             setViewDate(new Date(viewYear, idx, 1));
                                             setActiveView("calendar");
                                         }}
+                                        aria-label={`Select month ${monthLabel}`}
+                                        aria-pressed={isCurrent}
+                                        role="gridcell"
                                     >
-                                        {m.split(" / ")[isBuddhistEra ? 0 : 1]}
+                                        {monthLabel}
                                     </button>
                                 );
                             })}
@@ -820,7 +960,7 @@ export function DatePicker({
                     )}
 
                     {activeView === "year" && (
-                        <div className="pwb-years-grid animate-fade-in">
+                        <div className="pwb-years-grid animate-fade-in" role="grid" aria-label="Year selection grid">
                             {Array.from({ length: 12 }, (_, i) => {
                                 const yr = yearPageStart + i;
                                 const isCurrent = viewYear === yr;
@@ -833,6 +973,9 @@ export function DatePicker({
                                             setViewDate(new Date(yr, viewMonth, 1));
                                             setActiveView("calendar");
                                         }}
+                                        aria-label={`Select year ${yr + yearOffset}`}
+                                        aria-pressed={isCurrent}
+                                        role="gridcell"
                                     >
                                         {yr + yearOffset}
                                     </button>

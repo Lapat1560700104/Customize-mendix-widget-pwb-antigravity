@@ -1,6 +1,360 @@
-/*
-Place your custom CSS here
-*/
-.widget-hello-world {
+/* Premium ComboBox Styling and Design Tokens */
+.pwb-combobox-wrapper {
+    position: relative;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    width: 100%;
+    box-sizing: border-box;
+    display: inline-block;
+    --accent-color: #3b82f6; /* Will be overridden dynamically by widget prop */
+    --accent-light: rgba(59, 130, 246, 0.08);
+    --accent-glow: rgba(59, 130, 246, 0.15);
+    --border-radius: 16px;
+    --bg-blur: 16px;
+    --popover-bg: rgba(255, 255, 255, 0.85);
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+}
 
+.pwb-combobox-wrapper * {
+    box-sizing: border-box;
+}
+
+/* Beautiful Interactive Input Field */
+.pwb-combobox-input-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    width: 100%;
+    min-height: 42px;
+    padding: 6px 14px;
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: calc(var(--border-radius) * 0.625);
+    cursor: text;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.pwb-combobox-input-container:hover {
+    border-color: var(--accent-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.pwb-combobox-input-container.pwb-input-active {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px var(--accent-glow), 0 4px 12px rgba(0, 0, 0, 0.03);
+    outline: none;
+}
+
+.pwb-combobox-input-container.pwb-input-error {
+    border-color: #ef4444;
+}
+
+.pwb-combobox-input-container.pwb-input-error:focus-within {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+/* Text Input Field */
+.pwb-combobox-search-input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 14px;
+    color: var(--slate-800);
+    padding: 2px 0;
+    flex-grow: 1;
+    min-width: 60px;
+    font-family: inherit;
+}
+
+.pwb-combobox-search-input::placeholder {
+    color: var(--slate-400);
+}
+
+/* Multi-Select Selected Tags */
+.pwb-combobox-tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.pwb-combobox-tag-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    background: var(--slate-100);
+    border: 1px solid var(--slate-200);
+    border-radius: calc(var(--border-radius) * 0.4);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--slate-700);
+    transition: all 0.2s;
+    user-select: none;
+    max-width: 150px;
+}
+
+.pwb-combobox-tag-pill span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pwb-combobox-tag-pill:hover {
+    background: var(--slate-200);
+    color: var(--slate-800);
+}
+
+.pwb-combobox-tag-remove-btn {
+    border: none;
+    background: none;
+    padding: 0 2px;
+    font-size: 14px;
+    color: var(--slate-400);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s;
+}
+
+.pwb-combobox-tag-remove-btn:hover {
+    color: #ef4444;
+}
+
+/* Dropdown Action Controls (Chevron & Clear) */
+.pwb-combobox-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    align-self: center;
+}
+
+.pwb-combobox-clear-btn {
+    border: none;
+    background: none;
+    color: var(--slate-400);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    transition: color 0.2s, transform 0.2s;
+}
+
+.pwb-combobox-clear-btn:hover {
+    color: #ef4444;
+    transform: scale(1.15);
+}
+
+.pwb-combobox-chevron-btn {
+    border: none;
+    background: none;
+    color: var(--slate-400);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: transform 0.2s, color 0.2s;
+}
+
+.pwb-combobox-input-container:hover .pwb-combobox-chevron-btn,
+.pwb-input-active .pwb-combobox-chevron-btn {
+    color: var(--accent-color);
+}
+
+.pwb-combobox-chevron-icon {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pwb-combobox-input-container.pwb-input-active .pwb-combobox-chevron-icon {
+    transform: rotate(180deg);
+}
+
+/* Glassmorphic Dropdown Popover */
+.pwb-combobox-popover {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 1000;
+    width: 100%;
+    background: var(--popover-bg);
+    backdrop-filter: blur(var(--bg-blur)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--bg-blur)) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-premium), 0 20px 40px -15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transform-origin: top;
+}
+
+/* Animations */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.99);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.animate-slide-up {
+    animation: slideUp 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Dropdown Options List */
+.pwb-combobox-options-list {
+    list-style: none;
+    margin: 0;
+    padding: 6px;
+    overflow-y: auto;
+    font-size: 14px;
+}
+
+/* Beautiful Custom Scrollbars */
+.pwb-combobox-options-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.pwb-combobox-options-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.pwb-combobox-options-list::-webkit-scrollbar-thumb {
+    background: var(--slate-200);
+    border-radius: 3px;
+}
+
+.pwb-combobox-options-list::-webkit-scrollbar-thumb:hover {
+    background: var(--slate-300);
+}
+
+/* Individual Dropdown Item */
+.pwb-combobox-option-item {
+    padding: 8px 12px;
+    border-radius: calc(var(--border-radius) * 0.4);
+    color: var(--slate-700);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 500;
+}
+
+.pwb-combobox-option-item:hover,
+.pwb-combobox-option-item.pwb-option-focused {
+    background: var(--slate-100);
+    color: var(--slate-800);
+}
+
+.pwb-combobox-option-item.pwb-option-selected {
+    background: var(--accent-light);
+    color: var(--accent-color);
+}
+
+.pwb-combobox-option-item.pwb-option-selected.pwb-option-focused {
+    background: rgba(59, 130, 246, 0.12);
+}
+
+/* Search Term Highlight */
+.pwb-search-highlight {
+    color: var(--accent-color);
+    font-weight: 700;
+    background: rgba(59, 130, 246, 0.05);
+    padding: 0 1px;
+    border-radius: 2px;
+}
+
+/* Loading & Empty States */
+.pwb-combobox-status-message {
+    padding: 18px;
+    text-align: center;
+    color: var(--slate-400);
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Spinner */
+.pwb-combobox-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--slate-200);
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: pwb-spin 0.65s linear infinite;
+}
+
+@keyframes pwb-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Validation Alert Message */
+.pwb-validation-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ef4444;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 6px;
+    padding: 4px 6px;
+}
+
+.pwb-warning-icon {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    flex-shrink: 0;
+}
+
+/* ==========================================
+   🌐 RIGHT-TO-LEFT (RTL) STYLING SUPPORT
+   ========================================== */
+.pwb-combobox-wrapper[dir="rtl"] {
+    text-align: right;
+}
+
+.pwb-combobox-wrapper[dir="rtl"] .pwb-combobox-input-container {
+    flex-direction: row-reverse;
+}
+
+.pwb-combobox-wrapper[dir="rtl"] .pwb-combobox-search-input {
+    text-align: right;
+}
+
+.pwb-combobox-wrapper[dir="rtl"] .pwb-combobox-actions {
+    margin-left: 0;
+    margin-right: auto;
+    flex-direction: row-reverse;
+}
+
+.pwb-combobox-wrapper[dir="rtl"] .pwb-combobox-popover {
+    left: auto;
+    right: 0;
+}
+
+.pwb-combobox-wrapper[dir="rtl"] .pwb-combobox-option-item {
+    flex-direction: row-reverse;
 }

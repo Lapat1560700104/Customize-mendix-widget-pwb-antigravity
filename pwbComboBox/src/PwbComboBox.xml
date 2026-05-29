@@ -4,13 +4,111 @@
         xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
     <name>Pwb Combo Box</name>
-    <description>Premium highly customizable ComboBox with search autocomplete.</description>
+    <description>Premium highly customizable ComboBox with search autocomplete, multi-select tag support, and WCAG compliance.</description>
     <icon/>
     <properties>
-        <propertyGroup caption="General">
-            <property key="sampleText" type="string" required="false">
-                <caption>Default value</caption>
-                <description>Sample text input</description>
+        <propertyGroup caption="Data Source">
+            <property key="optionsSource" type="datasource" isList="true" required="true">
+                <caption>Options Source</caption>
+                <description>Dynamic list of options to display in the dropdown</description>
+            </property>
+            <property key="optionLabel" type="expression" dataSource="optionsSource" required="true">
+                <caption>Option Label</caption>
+                <description>Expression to display text for each option item (e.g. $currentObject/AttributeName)</description>
+                <returnType type="String"/>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Selection">
+            <property key="selectionMode" type="enumeration" defaultValue="single">
+                <caption>Selection Mode</caption>
+                <description>Choose single selection or multi-select tag mode</description>
+                <enumerationValues>
+                    <enumerationValue key="single">Single Select</enumerationValue>
+                    <enumerationValue key="multi">Multi Select</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="selectedAttribute" type="attribute" required="false">
+                <caption>Selected Attribute (Single/Multi-Delimited)</caption>
+                <description>Attribute to store selected value (String/Integer for Single Mode, or Delimited String for Multi Mode)</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                    <attributeType name="Integer"/>
+                </attributeTypes>
+            </property>
+            <property key="delimiter" type="string" required="false" defaultValue=",">
+                <caption>Delimiter (Multi Mode String Only)</caption>
+                <description>Delimiter character used to separate values in Multi Mode String attribute (e.g. , or ; or |)</description>
+            </property>
+            <property key="selectedAssociation" type="association" required="false">
+                <caption>Selected Association (Object Reference)</caption>
+                <description>Reference (for Single Mode) or ReferenceSet (for Multi Mode) association to store selected object(s)</description>
+                <associationTypes>
+                    <associationType name="Reference"/>
+                    <associationType name="ReferenceSet"/>
+                </associationTypes>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Aesthetics">
+            <property key="placeholder" type="string" required="false" defaultValue="Search and select...">
+                <caption>Placeholder Text</caption>
+                <description>Input box placeholder text</description>
+            </property>
+            <property key="accentColor" type="string" required="false" defaultValue="#3b82f6">
+                <caption>Accent Color (Hex)</caption>
+                <description>Accent theme color (e.g. Hex code: #3b82f6)</description>
+            </property>
+            <property key="borderRadius" type="string" required="false" defaultValue="16px">
+                <caption>Border Radius</caption>
+                <description>Corner roundness of input and popover (e.g., 16px, 8px, 0px)</description>
+            </property>
+            <property key="bgBlur" type="string" required="false" defaultValue="16px">
+                <caption>Background Blur</caption>
+                <description>Glassmorphism backdrop-filter blur power (e.g., 16px, 8px, 0px)</description>
+            </property>
+            <property key="popoverBg" type="string" required="false" defaultValue="rgba(255, 255, 255, 0.85)">
+                <caption>Dropdown Background Color</caption>
+                <description>Background fill color of the popover dropdown (e.g., rgba(255,255,255,0.85), #ffffff)</description>
+            </property>
+            <property key="maxDropdownHeight" type="string" required="false" defaultValue="250px">
+                <caption>Max Dropdown Height</caption>
+                <description>Maximum height of the dropdown panel (e.g., 250px, 300px)</description>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Translations">
+            <property key="noOptionsMessage" type="string" required="false" defaultValue="ไม่พบตัวเลือก / No options found">
+                <caption>No Options Alert</caption>
+                <description>Text displayed when search results are empty</description>
+            </property>
+            <property key="loadingMessage" type="string" required="false" defaultValue="กำลังโหลด... / Loading...">
+                <caption>Loading Text</caption>
+                <description>Message displayed while Mendix is fetching options</description>
+            </property>
+            <property key="clearButtonTitle" type="string" required="false" defaultValue="ล้างค่า / Clear">
+                <caption>Clear Button Accessibility Title</caption>
+                <description>Help text announced when clearing selections</description>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Validation">
+            <property key="required" type="boolean" defaultValue="false">
+                <caption>Is Required</caption>
+                <description>Enforce required-field checking inside the widget</description>
+            </property>
+            <property key="requiredMessage" type="string" required="false" defaultValue="This field is required.">
+                <caption>Validation Error Message</caption>
+                <description>Custom alert text shown when required condition is violated</description>
+            </property>
+            <property key="validationExpression" type="expression" required="false">
+                <caption>Custom Validation Rule</caption>
+                <description>Mendix expression that must return True for the selection to be valid</description>
+                <returnType type="Boolean"/>
+            </property>
+            <property key="customValidationMessage" type="string" required="false" defaultValue="Selection violates custom validation rule.">
+                <caption>Custom Validation Message</caption>
+                <description>Alert text displayed when Custom Validation Rule evaluates to False</description>
             </property>
         </propertyGroup>
     </properties>

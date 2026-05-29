@@ -100,32 +100,45 @@ export type PreviewProps =
     | DatasourceProps;
 
 export function getProperties(
-    _values: PwbComboBoxPreviewProps,
+    values: PwbComboBoxPreviewProps,
     defaultProperties: Properties /* , target: Platform*/
 ): Properties {
-    // Do the values manipulation here to control the visibility of properties in Studio and Studio Pro conditionally.
-    /* Example
-    if (values.myProperty === "custom") {
-        delete defaultProperties.properties.myOtherProperty;
+    // Hide delimiter when in single-select mode
+    if (values.selectionMode === "single") {
+        defaultProperties.forEach(group => {
+            if (group.properties) {
+                group.properties = group.properties.filter(prop => prop.key !== "delimiter");
+            }
+        });
     }
-    */
     return defaultProperties;
 }
 
-// export function check(_values: PwbComboBoxPreviewProps): Problem[] {
-//     const errors: Problem[] = [];
-//     // Add errors to the above array to throw errors in Studio and Studio Pro.
-//     /* Example
-//     if (values.myProperty !== "custom") {
-//         errors.push({
-//             property: `myProperty`,
-//             message: `The value of 'myProperty' is different of 'custom'.`,
-//             url: "https://github.com/myrepo/mywidget"
-//         });
-//     }
-//     */
-//     return errors;
-// }
+export function check(values: PwbComboBoxPreviewProps): Problem[] {
+    const errors: Problem[] = [];
+
+    if (values.selectionMode === "single") {
+        if (!values.selectedAttribute && !values.selectedAssociation) {
+            errors.push({
+                property: "selectedAttribute",
+                severity: "warning",
+                message:
+                    "Please bind either 'Selected Attribute' or 'Selected Association' to save the selected option."
+            });
+        }
+    } else if (values.selectionMode === "multi") {
+        if (!values.selectedAttribute && !values.selectedAssociation) {
+            errors.push({
+                property: "selectedAssociation",
+                severity: "warning",
+                message:
+                    "Please bind either 'Selected Association' (ReferenceSet) or 'Selected Attribute' (Delimited String) to save the multiple selections."
+            });
+        }
+    }
+
+    return errors;
+}
 
 // export function getPreview(values: PwbComboBoxPreviewProps, isDarkMode: boolean, version: number[]): PreviewProps {
 //     // Customize your pluggable widget appearance for Studio Pro.

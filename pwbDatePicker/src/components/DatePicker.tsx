@@ -1,4 +1,12 @@
-import { ReactElement, useState, useEffect, useRef, MouseEvent as ReactMouseEvent, CSSProperties } from "react";
+import {
+    ReactElement,
+    useState,
+    useEffect,
+    useRef,
+    MouseEvent as ReactMouseEvent,
+    KeyboardEvent as ReactKeyboardEvent,
+    CSSProperties
+} from "react";
 
 export interface DatePickerProps {
     selectionMode: "single" | "range";
@@ -63,9 +71,17 @@ export function DatePicker({
     const [isOpen, setIsOpen] = useState(false);
     const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
 
+    // Navigation and Grid Views
+    const [activeView, setActiveView] = useState<"calendar" | "month" | "year">("calendar");
+    const [yearPageStart, setYearPageStart] = useState(() => (value || startValue || new Date()).getFullYear() - 6);
+    const [transitionDirection, setTransitionDirection] = useState<"left" | "right" | "">("");
+
     // Selected time state (if showTime is enabled)
     const [hour, setHour] = useState(() => (value || startValue || new Date()).getHours());
     const [minute, setMinute] = useState(() => (value || startValue || new Date()).getMinutes());
+
+    // Keyboard navigation focused date state
+    const [focusedDate, setFocusedDate] = useState<Date>(() => value || startValue || new Date());
 
     const popoverRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLDivElement>(null);
@@ -90,6 +106,14 @@ export function DatePicker({
             setMinute(startValue.getMinutes());
         }
     }, [value, startValue, selectionMode]);
+
+    // Update keyboard navigation cursor when popover opens
+    useEffect(() => {
+        if (isOpen) {
+            setFocusedDate(value || startValue || new Date());
+            setActiveView("calendar");
+        }
+    }, [isOpen, value, startValue]);
 
     // Close calendar when clicking outside
     useEffect(() => {
@@ -148,10 +172,12 @@ export function DatePicker({
     const getFirstDayOfMonth = (y: number, m: number): number => new Date(y, m, 1).getDay();
 
     const handlePrevMonth = (): void => {
+        setTransitionDirection("left");
         setViewDate(new Date(viewYear, viewMonth - 1, 1));
     };
 
     const handleNextMonth = (): void => {
+        setTransitionDirection("right");
         setViewDate(new Date(viewYear, viewMonth + 1, 1));
     };
 
@@ -182,20 +208,23 @@ export function DatePicker({
         return false;
     };
 
-    const handleDateSelect = (dayNum: number, isPrevMonth = false, isNextMonth = false): void => {
+    const handleDateSelect = (dayNum: number, isPrevMonth = false, isNextMonth = false, customDate?: Date): void => {
         if (readOnly) {
             return;
         }
 
-        const targetYear = viewYear;
-        let targetMonth = viewMonth;
-        if (isPrevMonth) {
-            targetMonth -= 1;
-        } else if (isNextMonth) {
-            targetMonth += 1;
+        let selected = customDate;
+        if (!selected) {
+            const targetYear = viewYear;
+            let targetMonth = viewMonth;
+            if (isPrevMonth) {
+                targetMonth -= 1;
+            } else if (isNextMonth) {
+                targetMonth += 1;
+            }
+            selected = new Date(targetYear, targetMonth, dayNum, hour, minute);
         }
 
-        const selected = new Date(targetYear, targetMonth, dayNum, hour, minute);
         if (isDateDisabled(selected)) {
             return;
         }
@@ -277,6 +306,59 @@ export function DatePicker({
         }
     };
 
+    // Keyboard controls handler
+    const handleKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>): void => {
+        if (readOnly || activeView !== "calendar") {
+            return;
+        }
+
+        let moveDays = 0;
+        switch (e.key) {
+            case "ArrowLeft":
+                moveDays = -1;
+                break;
+            case "ArrowRight":
+                moveDays = 1;
+                break;
+            case "ArrowUp":
+                moveDays = -7;
+                break;
+            case "ArrowDown":
+                moveDays = 7;
+                break;
+            case "Escape":
+                e.preventDefault();
+                setIsOpen(false);
+                return;
+            case "Enter":
+            case " ":
+                e.preventDefault();
+                if (focusedDate) {
+                    handleDateSelect(0, false, false, focusedDate);
+                }
+                return;
+            default:
+                return;
+        }
+
+        if (moveDays !== 0) {
+            e.preventDefault();
+            const currentFocused = new Date(focusedDate);
+            currentFocused.setDate(currentFocused.getDate() + moveDays);
+
+            // Bounds check
+            if (minDate && currentFocused < minDate) {
+                return;
+            }
+            if (maxDate && currentFocused > maxDate) {
+                return;
+            }
+
+            setFocusedDate(currentFocused);
+            setViewDate(currentFocused); // Shift view month automatically if focus leaves month
+        }
+    };
+
     // Time slider handlers
     const handleHourChange = (newHour: number): void => {
         setHour(newHour);
@@ -294,7 +376,6 @@ export function DatePicker({
                 );
                 onRangeChange(updated, undefined);
             } else if (startValue && endValue) {
-                // Update time of both or just start? Typically update start, or whichever was clicked last.
                 const updatedStart = new Date(
                     startValue.getFullYear(),
                     startValue.getMonth(),
@@ -353,6 +434,47 @@ export function DatePicker({
 
     const weekDays = isBuddhistEra ? ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"] : ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
+    // Helper to compute specific ranges and highlights (Airbnb style)
+    const getDayClasses = (thisDate: Date, selected: boolean, inRange: boolean, disabled: boolean): string => {
+        const classes = ["pwb-calendar-day"];
+        if (selected) {
+            classes.push("pwb-day-selected");
+        }
+        if (inRange) {
+            classes.push("pwb-day-in-range");
+        }
+        if (disabled) {
+            classes.push("pwb-day-disabled");
+        }
+
+        const isSameDay = (d1: Date, d2: Date): boolean =>
+            d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear();
+
+        if (selectionMode === "range" && startValue) {
+            const isStart = isSameDay(thisDate, startValue);
+            const isEnd = endValue
+                ? isSameDay(thisDate, endValue)
+                : hoveredDate
+                ? isSameDay(thisDate, hoveredDate)
+                : false;
+
+            if (isStart && isEnd) {
+                classes.push("pwb-day-range-single");
+            } else if (isStart) {
+                classes.push("pwb-day-range-start");
+            } else if (isEnd && (endValue || (hoveredDate && hoveredDate > startValue))) {
+                classes.push("pwb-day-range-end");
+            }
+        }
+
+        // Keyboard focused class
+        if (focusedDate && isSameDay(thisDate, focusedDate)) {
+            classes.push("pwb-day-focused");
+        }
+
+        return classes.join(" ");
+    };
+
     // Render days grid
     const renderCalendarDays = (): ReactElement[] => {
         const days: ReactElement[] = [];
@@ -374,9 +496,7 @@ export function DatePicker({
             days.push(
                 <div
                     key={`prev-${dayNum}`}
-                    className={`pwb-calendar-day pwb-day-other ${selected ? "pwb-day-selected" : ""} ${
-                        inRange ? "pwb-day-in-range" : ""
-                    } ${disabled ? "pwb-day-disabled" : ""}`}
+                    className={`pwb-day-other ${getDayClasses(thisDate, selected, inRange, disabled)}`}
                     onClick={() => !disabled && handleDateSelect(dayNum, true, false)}
                     onMouseEnter={() => !disabled && setHoveredDate(thisDate)}
                 >
@@ -395,9 +515,7 @@ export function DatePicker({
             days.push(
                 <div
                     key={`curr-${i}`}
-                    className={`pwb-calendar-day ${selected ? "pwb-day-selected" : ""} ${
-                        inRange ? "pwb-day-in-range" : ""
-                    } ${disabled ? "pwb-day-disabled" : ""}`}
+                    className={getDayClasses(thisDate, selected, inRange, disabled)}
                     onClick={() => !disabled && handleDateSelect(i)}
                     onMouseEnter={() => !disabled && setHoveredDate(thisDate)}
                 >
@@ -420,9 +538,7 @@ export function DatePicker({
             days.push(
                 <div
                     key={`next-${i}`}
-                    className={`pwb-calendar-day pwb-day-other ${selected ? "pwb-day-selected" : ""} ${
-                        inRange ? "pwb-day-in-range" : ""
-                    } ${disabled ? "pwb-day-disabled" : ""}`}
+                    className={`pwb-day-other ${getDayClasses(thisDate, selected, inRange, disabled)}`}
                     onClick={() => !disabled && handleDateSelect(i, false, true)}
                     onMouseEnter={() => !disabled && setHoveredDate(thisDate)}
                 >
@@ -502,53 +618,208 @@ export function DatePicker({
 
             {/* Dropdown Calendar Popover */}
             {isOpen && (
-                <div ref={popoverRef} className="pwb-datepicker-popover animate-slide-up">
+                <div
+                    ref={popoverRef}
+                    className="pwb-datepicker-popover animate-slide-up"
+                    tabIndex={0}
+                    onKeyDown={handleKeyDown}
+                    style={{ outline: "none" }}
+                >
+                    {/* Calendar Header with Switchable Navigation Modes */}
                     <div className="pwb-calendar-header">
-                        <button type="button" className="pwb-nav-btn" onClick={handlePrevMonth}>
-                            &lt;
-                        </button>
-                        <span className="pwb-calendar-title">
-                            {months[viewMonth]} {viewYear + yearOffset}
-                        </span>
-                        <button type="button" className="pwb-nav-btn" onClick={handleNextMonth}>
-                            &gt;
-                        </button>
+                        {activeView === "calendar" && (
+                            <>
+                                <button type="button" className="pwb-nav-btn" onClick={handlePrevMonth}>
+                                    <svg
+                                        className="pwb-nav-icon"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <polyline points="15 18 9 12 15 6"></polyline>
+                                    </svg>
+                                </button>
+                                <span className="pwb-calendar-title">
+                                    <span className="pwb-title-click" onClick={() => setActiveView("month")}>
+                                        {months[viewMonth].split(" / ")[isBuddhistEra ? 0 : 1]}
+                                    </span>{" "}
+                                    <span
+                                        className="pwb-title-click"
+                                        onClick={() => {
+                                            setYearPageStart(viewYear - 6);
+                                            setActiveView("year");
+                                        }}
+                                    >
+                                        {viewYear + yearOffset}
+                                    </span>
+                                </span>
+                                <button type="button" className="pwb-nav-btn" onClick={handleNextMonth}>
+                                    <svg
+                                        className="pwb-nav-icon"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                    </svg>
+                                </button>
+                            </>
+                        )}
+
+                        {activeView === "month" && (
+                            <>
+                                <button type="button" className="pwb-nav-btn" style={{ visibility: "hidden" }}></button>
+                                <span className="pwb-calendar-title">เลือกเดือน / Select Month</span>
+                                <button
+                                    type="button"
+                                    className="pwb-nav-btn pwb-close-view-btn"
+                                    onClick={() => setActiveView("calendar")}
+                                    title="Back to calendar"
+                                >
+                                    &times;
+                                </button>
+                            </>
+                        )}
+
+                        {activeView === "year" && (
+                            <>
+                                <button
+                                    type="button"
+                                    className="pwb-nav-btn"
+                                    onClick={() => setYearPageStart(prev => prev - 12)}
+                                >
+                                    <svg
+                                        className="pwb-nav-icon"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <polyline points="15 18 9 12 15 6"></polyline>
+                                    </svg>
+                                </button>
+                                <span
+                                    className="pwb-calendar-title pwb-title-click"
+                                    onClick={() => setActiveView("calendar")}
+                                    title="Back to calendar"
+                                >
+                                    {yearPageStart + yearOffset} - {yearPageStart + 11 + yearOffset}
+                                </span>
+                                <button
+                                    type="button"
+                                    className="pwb-nav-btn"
+                                    onClick={() => setYearPageStart(prev => prev + 12)}
+                                >
+                                    <svg
+                                        className="pwb-nav-icon"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                    </svg>
+                                </button>
+                            </>
+                        )}
                     </div>
 
-                    {/* Live Era Toggle Switch */}
-                    {showEraToggle && (
-                        <div className="pwb-era-toggle-container">
-                            <button
-                                type="button"
-                                className={`pwb-era-btn ${isBuddhistEra ? "" : "pwb-era-btn-active"}`}
-                                onClick={() => setIsBuddhistEra(false)}
+                    {/* View Switchers */}
+                    {activeView === "calendar" && (
+                        <>
+                            {/* Live Era Toggle Switch */}
+                            {showEraToggle && (
+                                <div className="pwb-era-toggle-container">
+                                    <button
+                                        type="button"
+                                        className={`pwb-era-btn ${isBuddhistEra ? "" : "pwb-era-btn-active"}`}
+                                        onClick={() => setIsBuddhistEra(false)}
+                                    >
+                                        ค.ศ. (A.D.)
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`pwb-era-btn ${isBuddhistEra ? "pwb-era-btn-active" : ""}`}
+                                        onClick={() => setIsBuddhistEra(true)}
+                                    >
+                                        พ.ศ. (B.E.)
+                                    </button>
+                                </div>
+                            )}
+
+                            <div className="pwb-calendar-weekdays">
+                                {weekDays.map((day, idx) => (
+                                    <div key={idx} className="pwb-weekday-col">
+                                        {day}
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div
+                                key={`${viewYear}-${viewMonth}`}
+                                className={`pwb-calendar-days-grid pwb-calendar-slide-${transitionDirection}`}
+                                onMouseLeave={() => setHoveredDate(null)}
                             >
-                                ค.ศ. (A.D.)
-                            </button>
-                            <button
-                                type="button"
-                                className={`pwb-era-btn ${isBuddhistEra ? "pwb-era-btn-active" : ""}`}
-                                onClick={() => setIsBuddhistEra(true)}
-                            >
-                                พ.ศ. (B.E.)
-                            </button>
+                                {renderCalendarDays()}
+                            </div>
+                        </>
+                    )}
+
+                    {activeView === "month" && (
+                        <div className="pwb-months-grid animate-fade-in">
+                            {months.map((m, idx) => {
+                                const isCurrent = viewMonth === idx;
+                                return (
+                                    <button
+                                        key={idx}
+                                        type="button"
+                                        className={`pwb-month-jump-btn ${isCurrent ? "pwb-month-jump-btn-active" : ""}`}
+                                        onClick={() => {
+                                            setViewDate(new Date(viewYear, idx, 1));
+                                            setActiveView("calendar");
+                                        }}
+                                    >
+                                        {m.split(" / ")[isBuddhistEra ? 0 : 1]}
+                                    </button>
+                                );
+                            })}
                         </div>
                     )}
 
-                    <div className="pwb-calendar-weekdays">
-                        {weekDays.map((day, idx) => (
-                            <div key={idx} className="pwb-weekday-col">
-                                {day}
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="pwb-calendar-days-grid" onMouseLeave={() => setHoveredDate(null)}>
-                        {renderCalendarDays()}
-                    </div>
+                    {activeView === "year" && (
+                        <div className="pwb-years-grid animate-fade-in">
+                            {Array.from({ length: 12 }, (_, i) => {
+                                const yr = yearPageStart + i;
+                                const isCurrent = viewYear === yr;
+                                return (
+                                    <button
+                                        key={yr}
+                                        type="button"
+                                        className={`pwb-year-jump-btn ${isCurrent ? "pwb-year-jump-btn-active" : ""}`}
+                                        onClick={() => {
+                                            setViewDate(new Date(yr, viewMonth, 1));
+                                            setActiveView("calendar");
+                                        }}
+                                    >
+                                        {yr + yearOffset}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
 
                     {/* Numerical Time Picker inputs */}
-                    {showTime && (
+                    {showTime && activeView === "calendar" && (
                         <div className="pwb-time-picker-panel">
                             <span className="pwb-time-label">เวลา / Time (HH:MM):</span>
                             <div className="pwb-time-inputs-container">
@@ -594,7 +865,7 @@ export function DatePicker({
                     )}
 
                     {/* Quick Select Presets Panel */}
-                    {showPresets && (
+                    {showPresets && activeView === "calendar" && (
                         <div className="pwb-presets-panel">
                             {selectionMode === "single" ? (
                                 <>

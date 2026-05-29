@@ -166,11 +166,48 @@
     transform: scale(1.05);
 }
 
+.pwb-nav-icon {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: block;
+}
+
+.pwb-nav-btn:hover .pwb-nav-icon {
+    transform: scale(1.15);
+}
+
 .pwb-calendar-title {
     font-size: 14px;
     font-weight: 600;
     color: var(--slate-800);
     letter-spacing: -0.01em;
+    user-select: none;
+}
+
+.pwb-title-click {
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 8px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-block;
+}
+
+.pwb-title-click:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--accent-color);
+}
+
+.pwb-close-view-btn {
+    font-size: 20px !important;
+    font-weight: normal !important;
+    color: var(--slate-400) !important;
+}
+
+.pwb-close-view-btn:hover {
+    color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.05) !important;
 }
 
 /* Calendar Weekdays */
@@ -226,22 +263,62 @@
     color: var(--slate-600);
 }
 
-/* Range Selected Day Connected State */
+/* Range Selected Day Connected State (Airbnb-Style) */
 .pwb-day-in-range {
-    background: rgba(59, 130, 246, 0.08); /* Fallback */
-    background: var(--accent-light);
-    color: var(--accent-color);
-    border-radius: 0;
+    background: var(--accent-light) !important;
+    color: var(--accent-color) !important;
+    border-radius: 0 !important;
 }
 
-/* Rounding edges for connected range elements */
+/* Rounding edges for connected range elements when wrapping row lines */
 .pwb-calendar-days-grid .pwb-day-in-range:nth-child(7n+1) {
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
+    border-top-left-radius: 8px !important;
+    border-bottom-left-radius: 8px !important;
 }
 .pwb-calendar-days-grid .pwb-day-in-range:nth-child(7n) {
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
+    border-top-right-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+}
+
+/* Visual continuous pill ends */
+.pwb-day-range-start {
+    border-top-left-radius: calc(var(--border-radius) * 0.5) !important;
+    border-bottom-left-radius: calc(var(--border-radius) * 0.5) !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+.pwb-day-range-start::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 50%;
+    background: var(--accent-light);
+    z-index: -1;
+}
+
+.pwb-day-range-end {
+    border-top-right-radius: calc(var(--border-radius) * 0.5) !important;
+    border-bottom-right-radius: calc(var(--border-radius) * 0.5) !important;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+
+.pwb-day-range-end::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 50%;
+    background: var(--accent-light);
+    z-index: -1;
+}
+
+.pwb-day-range-single {
+    border-radius: calc(var(--border-radius) * 0.5) !important;
 }
 
 /* Selection Highlight */
@@ -250,7 +327,33 @@
     color: #ffffff !important;
     font-weight: 600;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1), 0 2px 4px var(--accent-glow);
-    border-radius: calc(var(--border-radius) * 0.5) !important;
+    z-index: 2;
+}
+
+/* Keyboard focused state */
+.pwb-day-focused {
+    position: relative;
+    outline: none;
+}
+
+.pwb-day-focused::after {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: 2px solid var(--accent-color);
+    border-radius: calc(var(--border-radius) * 0.5 + 2px);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+    pointer-events: none;
+    z-index: 10;
+    animation: pulse-focus 2s infinite;
+}
+
+@keyframes pulse-focus {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.97); }
 }
 
 /* Disabled State */
@@ -483,4 +586,84 @@
     animation: slideDown 0.18s ease-out forwards;
 }
 
+/* Month/Year Selection Grids styling */
+.pwb-months-grid, .pwb-years-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 10px 0 5px 0;
+}
 
+.pwb-month-jump-btn, .pwb-year-jump-btn {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid var(--slate-100);
+    border-radius: 12px;
+    padding: 10px 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate-700);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    text-align: center;
+}
+
+.pwb-month-jump-btn:hover, .pwb-year-jump-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    background: var(--accent-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.02);
+}
+
+.pwb-month-jump-btn:active, .pwb-year-jump-btn:active {
+    transform: translateY(0);
+}
+
+.pwb-month-jump-btn-active, .pwb-year-jump-btn-active {
+    background: var(--accent-color) !important;
+    color: #ffffff !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 4px 10px var(--accent-glow) !important;
+}
+
+/* Fluid Month Slide Animations */
+@keyframes slideLeftIn {
+    from {
+        opacity: 0;
+        transform: translateX(-16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideRightIn {
+    from {
+        opacity: 0;
+        transform: translateX(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.pwb-calendar-slide-left {
+    animation: slideLeftIn 0.24s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.pwb-calendar-slide-right {
+    animation: slideRightIn 0.24s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Fade-in for Month/Year select modes */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}

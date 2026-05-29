@@ -34,6 +34,13 @@ export interface PwbDatePickerContainerProps {
     requiredMessage: string;
     validationExpression?: DynamicValue<boolean>;
     customValidationMessage: string;
+    timeLabel: string;
+    todayPresetLabel: string;
+    clearPresetLabel: string;
+    selectMonthLabel: string;
+    last7DaysPresetLabel: string;
+    last30DaysPresetLabel: string;
+    thisMonthPresetLabel: string;
 }
 
 export interface PwbDatePickerPreviewProps {
@@ -68,4 +75,11 @@ export interface PwbDatePickerPreviewProps {
     requiredMessage: string;
     validationExpression: string;
     customValidationMessage: string;
+    timeLabel: string;
+    todayPresetLabel: string;
+    clearPresetLabel: string;
+    selectMonthLabel: string;
+    last7DaysPresetLabel: string;
+    last30DaysPresetLabel: string;
+    thisMonthPresetLabel: string;
 }

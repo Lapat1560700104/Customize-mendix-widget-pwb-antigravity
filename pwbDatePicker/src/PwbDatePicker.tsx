@@ -26,7 +26,14 @@ export function PwbDatePicker({
     required,
     requiredMessage,
     validationExpression,
-    customValidationMessage
+    customValidationMessage,
+    timeLabel,
+    todayPresetLabel,
+    clearPresetLabel,
+    selectMonthLabel,
+    last7DaysPresetLabel,
+    last30DaysPresetLabel,
+    thisMonthPresetLabel
 }: PwbDatePickerContainerProps): ReactElement {
     // Check if the inputs are read-only
     const readOnly =
@@ -93,6 +100,13 @@ export function PwbDatePicker({
             required={required}
             requiredMessage={requiredMessage}
             mendixValidationError={activeValidationError}
+            timeLabel={timeLabel}
+            todayPresetLabel={todayPresetLabel}
+            clearPresetLabel={clearPresetLabel}
+            selectMonthLabel={selectMonthLabel}
+            last7DaysPresetLabel={last7DaysPresetLabel}
+            last30DaysPresetLabel={last30DaysPresetLabel}
+            thisMonthPresetLabel={thisMonthPresetLabel}
         />
     );
 }

@@ -34,6 +34,13 @@ export interface DatePickerProps {
     required: boolean;
     requiredMessage: string;
     mendixValidationError?: string;
+    timeLabel?: string;
+    todayPresetLabel?: string;
+    clearPresetLabel?: string;
+    selectMonthLabel?: string;
+    last7DaysPresetLabel?: string;
+    last30DaysPresetLabel?: string;
+    thisMonthPresetLabel?: string;
 }
 
 export function DatePicker({
@@ -61,7 +68,14 @@ export function DatePicker({
     popoverBg,
     required,
     requiredMessage,
-    mendixValidationError
+    mendixValidationError,
+    timeLabel,
+    todayPresetLabel,
+    clearPresetLabel,
+    selectMonthLabel,
+    last7DaysPresetLabel,
+    last30DaysPresetLabel,
+    thisMonthPresetLabel
 }: DatePickerProps): ReactElement {
     const [isBuddhistEra, setIsBuddhistEra] = useState(buddhistEra);
     const [localError, setLocalError] = useState<string | null>(null);
@@ -675,7 +689,9 @@ export function DatePicker({
                         {activeView === "month" && (
                             <>
                                 <button type="button" className="pwb-nav-btn" style={{ visibility: "hidden" }}></button>
-                                <span className="pwb-calendar-title">เลือกเดือน / Select Month</span>
+                                <span className="pwb-calendar-title">
+                                    {selectMonthLabel || "เลือกเดือน / Select Month"}
+                                </span>
                                 <button
                                     type="button"
                                     className="pwb-nav-btn pwb-close-view-btn"
@@ -821,7 +837,7 @@ export function DatePicker({
                     {/* Numerical Time Picker inputs */}
                     {showTime && activeView === "calendar" && (
                         <div className="pwb-time-picker-panel">
-                            <span className="pwb-time-label">เวลา / Time (HH:MM):</span>
+                            <span className="pwb-time-label">{timeLabel || "เวลา / Time (HH:MM):"}</span>
                             <div className="pwb-time-inputs-container">
                                 <input
                                     type="number"
@@ -884,14 +900,14 @@ export function DatePicker({
                                             setIsOpen(false);
                                         }}
                                     >
-                                        วันนี้ (Today)
+                                        {todayPresetLabel || "วันนี้ (Today)"}
                                     </button>
                                     <button
                                         type="button"
                                         className="pwb-preset-btn pwb-preset-clear"
                                         onClick={handleClear}
                                     >
-                                        ล้างค่า (Clear)
+                                        {clearPresetLabel || "ล้างค่า (Clear)"}
                                     </button>
                                 </>
                             ) : (
@@ -919,7 +935,7 @@ export function DatePicker({
                                             setIsOpen(false);
                                         }}
                                     >
-                                        วันนี้
+                                        {todayPresetLabel || "วันนี้"}
                                     </button>
                                     <button
                                         type="button"
@@ -944,7 +960,7 @@ export function DatePicker({
                                             setIsOpen(false);
                                         }}
                                     >
-                                        7 วันล่าสุด
+                                        {last7DaysPresetLabel || "7 วันล่าสุด"}
                                     </button>
                                     <button
                                         type="button"
@@ -969,7 +985,7 @@ export function DatePicker({
                                             setIsOpen(false);
                                         }}
                                     >
-                                        30 วันล่าสุด
+                                        {last30DaysPresetLabel || "30 วันล่าสุด"}
                                     </button>
                                     <button
                                         type="button"
@@ -988,7 +1004,7 @@ export function DatePicker({
                                             setIsOpen(false);
                                         }}
                                     >
-                                        เดือนนี้
+                                        {thisMonthPresetLabel || "เดือนนี้"}
                                     </button>
                                 </>
                             )}

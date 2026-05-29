@@ -117,5 +117,35 @@
                 <description>Alert text displayed when Custom Validation Rule evaluates to False</description>
             </property>
         </propertyGroup>
+        <propertyGroup caption="Translations">
+            <property key="timeLabel" type="string" required="false" defaultValue="เวลา / Time (HH:MM):">
+                <caption>Time Picker Label</caption>
+                <description>Title label displayed in the custom time picker section</description>
+            </property>
+            <property key="todayPresetLabel" type="string" required="false" defaultValue="วันนี้ (Today)">
+                <caption>Today Preset Button Label</caption>
+                <description>Label for the Quick Select Today button</description>
+            </property>
+            <property key="clearPresetLabel" type="string" required="false" defaultValue="ล้างค่า (Clear)">
+                <caption>Clear Preset Button Label</caption>
+                <description>Label for the Clear/Reset button</description>
+            </property>
+            <property key="selectMonthLabel" type="string" required="false" defaultValue="เลือกเดือน / Select Month">
+                <caption>Select Month View Title</caption>
+                <description>Header title displayed when month grid selection is active</description>
+            </property>
+            <property key="last7DaysPresetLabel" type="string" required="false" defaultValue="7 วันล่าสุด">
+                <caption>Last 7 Days Preset Label</caption>
+                <description>Label for the 7 Days range preset button</description>
+            </property>
+            <property key="last30DaysPresetLabel" type="string" required="false" defaultValue="30 วันล่าสุด">
+                <caption>Last 30 Days Preset Label</caption>
+                <description>Label for the 30 Days range preset button</description>
+            </property>
+            <property key="thisMonthPresetLabel" type="string" required="false" defaultValue="เดือนนี้">
+                <caption>This Month Preset Label</caption>
+                <description>Label for the This Month range preset button</description>
+            </property>
+        </propertyGroup>
     </properties>
 </widget>

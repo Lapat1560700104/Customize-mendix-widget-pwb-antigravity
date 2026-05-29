@@ -2,6 +2,7 @@ import { ReactElement } from "react";
 import { DatePicker } from "./components/DatePicker";
 import { PwbDatePickerContainerProps } from "../typings/PwbDatePickerProps";
 import { Icon } from "mendix/components/Icon";
+import { parseDateStr, formatDateStr } from "./utils/dateUtils";
 import "./ui/PwbDatePicker.css";
 
 export function PwbDatePicker({
@@ -80,20 +81,59 @@ export function PwbDatePicker({
     // Combine all Mendix and custom expression errors together
     const activeValidationError = mendixValidationError || expressionValidationError;
 
+    const yearOffset = buddhistEra ? 543 : 0;
+
+    // Parse incoming values if bound to String attributes
+    const parsedValue =
+        typeof dateAttribute?.value === "string"
+            ? parseDateStr(dateAttribute.value, dateFormat, yearOffset)
+            : dateAttribute?.value;
+
+    const parsedStartValue =
+        typeof startDateAttribute?.value === "string"
+            ? parseDateStr(startDateAttribute.value, dateFormat, yearOffset)
+            : startDateAttribute?.value;
+
+    const parsedEndValue =
+        typeof endDateAttribute?.value === "string"
+            ? parseDateStr(endDateAttribute.value, dateFormat, yearOffset)
+            : endDateAttribute?.value;
+
     // Handle single date changes
     const handleSingleChange = (newDate: Date | undefined): void => {
         if (dateAttribute) {
-            dateAttribute.setValue(newDate);
+            if (newDate === undefined) {
+                dateAttribute.setValue(undefined);
+            } else if (dateAttribute.formatter === undefined) {
+                const formatted = formatDateStr(newDate, dateFormat, yearOffset, showTime);
+                dateAttribute.setValue(formatted);
+            } else {
+                dateAttribute.setValue(newDate);
+            }
         }
     };
 
     // Handle range date changes
     const handleRangeChange = (start: Date | undefined, end: Date | undefined): void => {
         if (startDateAttribute) {
-            startDateAttribute.setValue(start);
+            if (start === undefined) {
+                startDateAttribute.setValue(undefined);
+            } else if (startDateAttribute.formatter === undefined) {
+                const formatted = formatDateStr(start, dateFormat, yearOffset, showTime);
+                startDateAttribute.setValue(formatted);
+            } else {
+                startDateAttribute.setValue(start);
+            }
         }
         if (endDateAttribute) {
-            endDateAttribute.setValue(end);
+            if (end === undefined) {
+                endDateAttribute.setValue(undefined);
+            } else if (endDateAttribute.formatter === undefined) {
+                const formatted = formatDateStr(end, dateFormat, yearOffset, showTime);
+                endDateAttribute.setValue(formatted);
+            } else {
+                endDateAttribute.setValue(end);
+            }
         }
     };
 
@@ -102,9 +142,9 @@ export function PwbDatePicker({
     return (
         <DatePicker
             selectionMode={selectionMode}
-            value={dateAttribute?.value}
-            startValue={startDateAttribute?.value}
-            endValue={endDateAttribute?.value}
+            value={parsedValue}
+            startValue={parsedStartValue}
+            endValue={parsedEndValue}
             onChange={handleSingleChange}
             onRangeChange={handleRangeChange}
             showTime={showTime}

@@ -14,9 +14,9 @@ export interface PwbDatePickerContainerProps {
     style?: CSSProperties;
     tabIndex?: number;
     selectionMode: SelectionModeEnum;
-    dateAttribute?: EditableValue<Date>;
-    startDateAttribute?: EditableValue<Date>;
-    endDateAttribute?: EditableValue<Date>;
+    dateAttribute?: EditableValue<Date | string>;
+    startDateAttribute?: EditableValue<Date | string>;
+    endDateAttribute?: EditableValue<Date | string>;
     showTime: boolean;
     buddhistEra: boolean;
     showPresets: boolean;

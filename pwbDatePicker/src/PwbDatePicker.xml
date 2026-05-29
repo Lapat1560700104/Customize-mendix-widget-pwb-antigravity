@@ -18,23 +18,26 @@
             </property>
             <property key="dateAttribute" type="attribute" required="false">
                 <caption>Date Attribute</caption>
-                <description>DateTime attribute for Single selection mode</description>
+                <description>DateTime or String attribute for Single selection mode</description>
                 <attributeTypes>
                     <attributeType name="DateTime"/>
+                    <attributeType name="String"/>
                 </attributeTypes>
             </property>
             <property key="startDateAttribute" type="attribute" required="false">
                 <caption>Start Date Attribute</caption>
-                <description>DateTime attribute for Range start date</description>
+                <description>DateTime or String attribute for Range start date</description>
                 <attributeTypes>
                     <attributeType name="DateTime"/>
+                    <attributeType name="String"/>
                 </attributeTypes>
             </property>
             <property key="endDateAttribute" type="attribute" required="false">
                 <caption>End Date Attribute</caption>
-                <description>DateTime attribute for Range end date</description>
+                <description>DateTime or String attribute for Range end date</description>
                 <attributeTypes>
                     <attributeType name="DateTime"/>
+                    <attributeType name="String"/>
                 </attributeTypes>
             </property>
         </propertyGroup>

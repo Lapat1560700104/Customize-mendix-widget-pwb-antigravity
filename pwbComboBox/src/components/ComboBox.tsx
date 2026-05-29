@@ -1,4 +1,4 @@
-import { ReactElement, useState, useEffect, useRef, KeyboardEvent as ReactKeyboardEvent, UIEvent } from "react";
+import { ReactElement, useState, useEffect, useRef, useId, KeyboardEvent as ReactKeyboardEvent, UIEvent } from "react";
 
 export interface ComboBoxOption {
     id: string;
@@ -25,6 +25,7 @@ export interface ComboBoxProps {
     bgBlur: string;
     popoverBg: string;
     maxDropdownHeight: string;
+    searchDebounce?: number;
     noOptionsMessage: string;
     loadingMessage: string;
     clearButtonTitle: string;
@@ -49,6 +50,7 @@ export function ComboBox({
     bgBlur,
     popoverBg,
     maxDropdownHeight,
+    searchDebounce = 300,
     noOptionsMessage,
     loadingMessage,
     clearButtonTitle,
@@ -57,8 +59,13 @@ export function ComboBox({
     hasError,
     errorText
 }: ComboBoxProps): ReactElement {
+    const uid = useId();
+    const listboxId = `pwb-listbox-${uid}`;
+    const getOptionId = (optId: string): string => `pwb-opt-${uid}-${optId}`;
+
     const [isOpen, setIsOpen] = useState(false);
     const [searchText, setSearchText] = useState("");
+    const [debouncedSearchText, setDebouncedSearchText] = useState("");
     const [focusedIndex, setFocusedIndex] = useState(-1);
     const [visibleCount, setVisibleCount] = useState(50);
     const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
@@ -81,10 +88,21 @@ export function ComboBox({
         }
     }, [isOpen, selectedIds, selectionMode, options]);
 
-    // Reset visible count when search text changes
+    // Handle search text debouncing
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearchText(searchText);
+        }, searchDebounce);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [searchText, searchDebounce]);
+
+    // Reset visible count when debounced search text changes
     useEffect(() => {
         setVisibleCount(50);
-    }, [searchText]);
+    }, [debouncedSearchText]);
 
     // Automatically expand visible count when keyboard focuses near the end of visible list
     useEffect(() => {
@@ -111,7 +129,7 @@ export function ComboBox({
 
     // Filter options in real-time (matching primary label or secondary subtitle)
     const getFilteredOptions = (): ComboBoxOption[] => {
-        const query = searchText.toLowerCase().trim();
+        const query = debouncedSearchText.toLowerCase().trim();
         const matches = (opt: ComboBoxOption): boolean => {
             return (
                 opt.label.toLowerCase().includes(query) ||
@@ -237,6 +255,79 @@ export function ComboBox({
     // Keyboard handlers
     const handleKeyDown = (e: ReactKeyboardEvent<HTMLInputElement>): void => {
         if (readOnly) {
+            return;
+        }
+
+        if (e.ctrlKey && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+            e.preventDefault();
+            if (!isOpen) {
+                setIsOpen(true);
+                return;
+            }
+            if (visibleFilteredOptions.length === 0) {
+                return;
+            }
+
+            const currentOpt =
+                focusedIndex >= 0 && focusedIndex < visibleFilteredOptions.length
+                    ? visibleFilteredOptions[focusedIndex]
+                    : null;
+
+            if (!currentOpt) {
+                setFocusedIndex(0);
+                return;
+            }
+
+            const currentGroup = currentOpt.groupName || "";
+            const currentGroupIdx = sortedGroupNames.indexOf(currentGroup);
+
+            if (e.key === "ArrowDown") {
+                let nextGroupIdx = currentGroupIdx + 1;
+                let foundNext = false;
+                while (nextGroupIdx < sortedGroupNames.length) {
+                    const nextGroup = sortedGroupNames[nextGroupIdx];
+                    const targetIdx = visibleFilteredOptions.findIndex(o => (o.groupName || "") === nextGroup);
+                    if (targetIdx !== -1) {
+                        setFocusedIndex(targetIdx);
+                        foundNext = true;
+                        break;
+                    }
+                    nextGroupIdx++;
+                }
+                if (!foundNext) {
+                    const targetIdx = visibleFilteredOptions.findIndex(
+                        o => (o.groupName || "") === sortedGroupNames[0]
+                    );
+                    if (targetIdx !== -1) {
+                        setFocusedIndex(targetIdx);
+                    }
+                }
+            } else {
+                let prevGroupIdx = currentGroupIdx - 1;
+                let foundPrev = false;
+                while (prevGroupIdx >= 0) {
+                    const prevGroup = sortedGroupNames[prevGroupIdx];
+                    const targetIdx = visibleFilteredOptions.findIndex(o => (o.groupName || "") === prevGroup);
+                    if (targetIdx !== -1) {
+                        setFocusedIndex(targetIdx);
+                        foundPrev = true;
+                        break;
+                    }
+                    prevGroupIdx--;
+                }
+                if (!foundPrev) {
+                    let loopIdx = sortedGroupNames.length - 1;
+                    while (loopIdx >= 0) {
+                        const nextGroup = sortedGroupNames[loopIdx];
+                        const targetIdx = visibleFilteredOptions.findIndex(o => (o.groupName || "") === nextGroup);
+                        if (targetIdx !== -1) {
+                            setFocusedIndex(targetIdx);
+                            break;
+                        }
+                        loopIdx--;
+                    }
+                }
+            }
             return;
         }
 
@@ -418,7 +509,12 @@ export function ComboBox({
                     aria-disabled={readOnly}
                     aria-required={required}
                     aria-invalid={hasError}
-                    aria-controls={isOpen ? `pwb-listbox-${borderRadius}` : undefined}
+                    aria-controls={isOpen ? listboxId : undefined}
+                    aria-activedescendant={
+                        isOpen && focusedIndex >= 0 && focusedIndex < visibleFilteredOptions.length
+                            ? getOptionId(visibleFilteredOptions[focusedIndex].id)
+                            : undefined
+                    }
                 />
 
                 {/* Right Action Icons (Clear and Dropdown Arrow) */}
@@ -470,12 +566,7 @@ export function ComboBox({
 
             {/* Dropdown list popover panel */}
             {isOpen && (
-                <div
-                    ref={popoverRef}
-                    id={`pwb-listbox-${borderRadius}`}
-                    className="pwb-combobox-popover animate-slide-up"
-                    role="listbox"
-                >
+                <div ref={popoverRef} id={listboxId} className="pwb-combobox-popover animate-slide-up" role="listbox">
                     {isLoading ? (
                         <div className="pwb-combobox-status-message">
                             <div className="pwb-combobox-spinner" />
@@ -506,7 +597,7 @@ export function ComboBox({
                                                 }}
                                             >
                                                 <div className="pwb-combobox-group-header-content">
-                                                    <span>{renderOptionLabel(groupName, searchText)}</span>
+                                                    <span>{renderOptionLabel(groupName, debouncedSearchText)}</span>
                                                     <span className="pwb-combobox-group-count">{item.count}</span>
                                                 </div>
                                                 <svg
@@ -534,6 +625,7 @@ export function ComboBox({
                                     return (
                                         <li
                                             key={opt.id}
+                                            id={getOptionId(opt.id)}
                                             className={`pwb-combobox-option-item ${
                                                 isSelected ? "pwb-option-selected" : ""
                                             } ${isFocused ? "pwb-option-focused" : ""} ${
@@ -584,11 +676,11 @@ export function ComboBox({
                                                 }}
                                             >
                                                 <div className="pwb-combobox-option-label">
-                                                    {renderOptionLabel(opt.label, searchText)}
+                                                    {renderOptionLabel(opt.label, debouncedSearchText)}
                                                 </div>
                                                 {opt.subtitle && (
                                                     <div className="pwb-combobox-option-subtitle">
-                                                        {renderOptionLabel(opt.subtitle, searchText)}
+                                                        {renderOptionLabel(opt.subtitle, debouncedSearchText)}
                                                     </div>
                                                 )}
                                             </div>

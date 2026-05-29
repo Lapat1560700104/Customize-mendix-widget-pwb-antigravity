@@ -103,6 +103,10 @@
                 <caption>Max Dropdown Height</caption>
                 <description>Maximum height of the dropdown panel (e.g., 250px, 300px)</description>
             </property>
+            <property key="searchDebounce" type="integer" required="false" defaultValue="300">
+                <caption>Search Input Debounce (ms)</caption>
+                <description>Time to wait in milliseconds after the user stops typing before filtering lists (helps optimize database queries)</description>
+            </property>
         </propertyGroup>
 
         <propertyGroup caption="Translations">

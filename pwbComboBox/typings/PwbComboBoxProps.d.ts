@@ -33,6 +33,7 @@ export interface PwbComboBoxContainerProps {
     bgBlur: string;
     popoverBg: string;
     maxDropdownHeight: string;
+    searchDebounce?: number;
     noOptionsMessage: string;
     loadingMessage: string;
     clearButtonTitle: string;
@@ -70,6 +71,7 @@ export interface PwbComboBoxPreviewProps {
     bgBlur: string;
     popoverBg: string;
     maxDropdownHeight: string;
+    searchDebounce: number | null;
     noOptionsMessage: string;
     loadingMessage: string;
     clearButtonTitle: string;

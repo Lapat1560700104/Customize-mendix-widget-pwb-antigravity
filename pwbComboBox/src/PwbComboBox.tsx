@@ -23,6 +23,7 @@ export function PwbComboBox({
     bgBlur,
     popoverBg,
     maxDropdownHeight,
+    searchDebounce,
     noOptionsMessage,
     loadingMessage,
     clearButtonTitle,
@@ -232,6 +233,7 @@ export function PwbComboBox({
                 bgBlur={safeBgBlur}
                 popoverBg={safePopoverBg}
                 maxDropdownHeight={maxDropdownHeight}
+                searchDebounce={searchDebounce}
                 noOptionsMessage={noOptionsMessage}
                 loadingMessage={loadingMessage}
                 clearButtonTitle={clearButtonTitle}

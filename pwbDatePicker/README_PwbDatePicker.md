@@ -6,12 +6,12 @@
 
 ## 🌟 Key Features
 
-*   **Dual Selection Modes**: Supports both `Single Date` selection and `Date Range` (Start/End) selection in a single, fluid component.
-*   **Thai Buddhist Era (พ.ศ.)**: Supports displaying years in the Thai Buddhist Era offset (+543 years) with a live switch button on the calendar popover.
-*   **Direct Numerical Time Input (HH:MM)**: Elegant numerical inputs with boundary limitations ($0 \le \text{Hour} \le 23$, $0 \le \text{Minute} \le 59$) replacing inaccurate range sliders.
-*   **Dynamic Date Formatting**: Custom token parsing (`DD`, `MM`, `YYYY`, `YY`, `hh`, `mm`) to match localized formatting standards.
-*   **Zero-Code Aesthetic Parameters**: Corner roundness (`Border Radius`), glassmorphism backdrop-blur (`Background Blur`), and color configurations (`Popover Background`) customizable straight from Mendix.
-*   **Comprehensive Validations**: Seamless support for Mendix native microflow validations, required-field checks, and custom Boolean validation rules.
+* **Dual Selection Modes**: Supports both `Single Date` selection and `Date Range` (Start/End) selection in a single, fluid component.
+* **Thai Buddhist Era (พ.ศ.)**: Supports displaying years in the Thai Buddhist Era offset (+543 years) with a live switch button on the calendar popover.
+* **Direct Numerical Time Input (HH:MM)**: Elegant numerical inputs with boundary limitations ($0 \le \text{Hour} \le 23$, $0 \le \text{Minute} \le 59$) replacing inaccurate range sliders.
+* **Dynamic Date Formatting**: Custom token parsing (`DD`, `MM`, `YYYY`, `YY`, `hh`, `mm`) to match localized formatting standards.
+* **Zero-Code Aesthetic Parameters**: Corner roundness (`Border Radius`), glassmorphism backdrop-blur (`Background Blur`), and color configurations (`Popover Background`) customizable straight from Mendix.
+* **Comprehensive Validations**: Seamless support for Mendix native microflow validations, required-field checks, and custom Boolean validation rules.
 
 ---
 
@@ -70,6 +70,7 @@
 The widget exposes a highly organized layout structured with local CSS Custom Properties (Variables) inside `PwbDatePicker.css`.
 
 ### Layout CSS Variables
+
 ```css
 .pwb-datepicker-wrapper {
     --accent-color: #3b82f6;       /* Accent color set from Mendix */
@@ -81,13 +82,14 @@ The widget exposes a highly organized layout structured with local CSS Custom Pr
 ```
 
 ### Core HTML Layout Class Targets
-*   `.pwb-datepicker-wrapper`: Root container. Can be targeted with custom classes.
-*   `.pwb-datepicker-input`: Input box container.
-*   `.pwb-datepicker-input.pwb-input-error`: Input box when active validation fails (adds glowing red border).
-*   `.pwb-datepicker-popover`: Floating dropdown calendar calendar card.
-*   `.pwb-calendar-day`: Individual date slot.
-*   `.pwb-day-selected`: Selected active day slot.
-*   `.pwb-day-in-range`: Days contained within start/end range bounds.
-*   `.pwb-time-input-field`: Direct numerical HH/MM text entry fields.
-*   `.pwb-era-btn-active`: Live Era Toggle active switch states.
-*   `.pwb-validation-message`: Slide-down red validation warning alerts.
+
+* `.pwb-datepicker-wrapper`: Root container. Can be targeted with custom classes.
+* `.pwb-datepicker-input`: Input box container.
+* `.pwb-datepicker-input.pwb-input-error`: Input box when active validation fails (adds glowing red border).
+* `.pwb-datepicker-popover`: Floating dropdown calendar calendar card.
+* `.pwb-calendar-day`: Individual date slot.
+* `.pwb-day-selected`: Selected active day slot.
+* `.pwb-day-in-range`: Days contained within start/end range bounds.
+* `.pwb-time-input-field`: Direct numerical HH/MM text entry fields.
+* `.pwb-era-btn-active`: Live Era Toggle active switch states.
+* `.pwb-validation-message`: Slide-down red validation warning alerts.

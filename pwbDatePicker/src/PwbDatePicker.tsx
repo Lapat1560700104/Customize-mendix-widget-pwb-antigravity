@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import { DatePicker } from "./components/DatePicker";
 import { PwbDatePickerContainerProps } from "../typings/PwbDatePickerProps";
-import { Icon } from "mendix/components/Icon";
+import { WebIcon } from "mendix";
 import { parseDateStr, formatDateStr } from "./utils/dateUtils";
 import "./ui/PwbDatePicker.css";
 
@@ -137,7 +137,7 @@ export function PwbDatePicker({
         }
     };
 
-    const customIconNode = calendarIcon && calendarIcon.value ? <Icon icon={calendarIcon.value} /> : undefined;
+    const customIconNode = calendarIcon && calendarIcon.value ? <MendixIcon icon={calendarIcon.value} /> : undefined;
 
     return (
         <DatePicker
@@ -176,4 +176,29 @@ export function PwbDatePicker({
             customIcon={customIconNode}
         />
     );
+}
+
+interface MendixIconProps {
+    icon: WebIcon;
+    className?: string;
+}
+
+export function MendixIcon({ icon, className }: MendixIconProps): ReactElement | null {
+    if (!icon) {
+        return null;
+    }
+    if (icon.type === "glyph" || icon.type === "icon") {
+        return <span className={`${icon.iconClass || ""} ${className || ""}`} aria-hidden="true" />;
+    }
+    if (icon.type === "image") {
+        return (
+            <img
+                src={icon.iconUrl}
+                className={className}
+                alt="icon"
+                style={{ width: "1em", height: "1em", objectFit: "contain" }}
+            />
+        );
+    }
+    return null;
 }

@@ -3,6 +3,78 @@ import { ComboBox, ComboBoxOption } from "./components/ComboBox";
 import { PwbComboBoxContainerProps } from "../typings/PwbComboBoxProps";
 import "./ui/PwbComboBox.css";
 
+function getSmartEnumColor(key: string): string {
+    const lowerKey = key.toLowerCase();
+
+    // 1. Success / Approved / Active / Enabled / Done keys -> Green
+    if (
+        lowerKey.includes("approve") ||
+        lowerKey.includes("active") ||
+        lowerKey.includes("success") ||
+        lowerKey.includes("true") ||
+        lowerKey.includes("complete") ||
+        lowerKey.includes("enable") ||
+        lowerKey.includes("yes") ||
+        lowerKey.includes("done") ||
+        lowerKey.includes("finish") ||
+        lowerKey.includes("pass") ||
+        lowerKey.includes("ok")
+    ) {
+        return "#10b981";
+    }
+
+    // 2. Reject / Danger / Error / False / Disable / Cancel / Fail / Inactive keys -> Red
+    if (
+        lowerKey.includes("reject") ||
+        lowerKey.includes("danger") ||
+        lowerKey.includes("error") ||
+        lowerKey.includes("false") ||
+        lowerKey.includes("disable") ||
+        lowerKey.includes("no") ||
+        lowerKey.includes("cancel") ||
+        lowerKey.includes("fail") ||
+        lowerKey.includes("inactive") ||
+        lowerKey.includes("stop") ||
+        lowerKey.includes("block") ||
+        lowerKey.includes("deny")
+    ) {
+        return "#ef4444";
+    }
+
+    // 3. Pending / Process / Warning / Wait / Review keys -> Amber
+    if (
+        lowerKey.includes("pending") ||
+        lowerKey.includes("process") ||
+        lowerKey.includes("warning") ||
+        lowerKey.includes("wait") ||
+        lowerKey.includes("review") ||
+        lowerKey.includes("hold") ||
+        lowerKey.includes("progress") ||
+        lowerKey.includes("queue")
+    ) {
+        return "#f59e0b";
+    }
+
+    // 4. Draft / New / Prepare / Initial keys -> Blue
+    if (
+        lowerKey.includes("draft") ||
+        lowerKey.includes("new") ||
+        lowerKey.includes("prepare") ||
+        lowerKey.includes("init") ||
+        lowerKey.includes("plan")
+    ) {
+        return "#3b82f6";
+    }
+
+    // 5. Stable color hashing for other statuses (beautiful HSL pastel colors)
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+        hash = (hash * 31 + key.charCodeAt(i)) % 1000000;
+    }
+    const hue = hash % 360;
+    return `hsl(${hue}, 65%, 50%)`;
+}
+
 export function PwbComboBox({
     class: className,
     style,
@@ -93,14 +165,15 @@ export function PwbComboBox({
                 options.push({
                     id: stringVal,
                     label,
+                    colorCode: getSmartEnumColor(stringVal),
                     rawObject: value
                 });
             });
         }
     } else if (sourceMode === "boolean" && selectedAttribute) {
         options.push(
-            { id: "true", label: booleanTrueLabel || "Yes", rawObject: true },
-            { id: "false", label: booleanFalseLabel || "No", rawObject: false }
+            { id: "true", label: booleanTrueLabel || "Yes", colorCode: "#10b981", rawObject: true },
+            { id: "false", label: booleanFalseLabel || "No", colorCode: "#ef4444", rawObject: false }
         );
     }
 

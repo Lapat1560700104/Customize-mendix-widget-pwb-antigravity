@@ -8,6 +8,15 @@
     <icon/>
     <properties>
         <propertyGroup caption="Data Source">
+            <property key="sourceMode" type="enumeration" defaultValue="association">
+                <caption>Data Source Mode</caption>
+                <description>Choose whether options come from an Association/Datasource, or directly from an Enumeration/Boolean Attribute.</description>
+                <enumerationValues>
+                    <enumerationValue key="association">Association (Entity Datasource)</enumerationValue>
+                    <enumerationValue key="enumeration">Enumeration Attribute</enumerationValue>
+                    <enumerationValue key="boolean">Boolean Attribute</enumerationValue>
+                </enumerationValues>
+            </property>
             <property key="optionsSource" type="datasource" isList="true" required="true">
                 <caption>Options Source</caption>
                 <description>Dynamic list of options to display in the dropdown</description>
@@ -97,11 +106,13 @@
                 <returnType type="String"/>
             </property>
             <property key="selectedAttribute" type="attribute" required="false">
-                <caption>Selected Attribute (Single/Multi-Delimited)</caption>
-                <description>Attribute to store selected value (String/Integer for Single Mode, or Delimited String for Multi Mode)</description>
+                <caption>Selected Attribute</caption>
+                <description>Attribute to store or read the selected value (supports String, Integer, Enum, or Boolean depending on Mode)</description>
                 <attributeTypes>
                     <attributeType name="String"/>
                     <attributeType name="Integer"/>
+                    <attributeType name="Enum"/>
+                    <attributeType name="Boolean"/>
                 </attributeTypes>
             </property>
             <property key="delimiter" type="string" required="false" defaultValue=",">

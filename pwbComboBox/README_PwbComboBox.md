@@ -125,3 +125,44 @@
 * ไอคอนปุ่ม chevron ลอยตัว และปุ่มกากบาทล้างค่า ย้ายมาอยู่ฝั่งซ้ายมือ
 * ลำดับการเรียงตัวของแผ่นป้ายแท็ก badge ไหลตัวจากขวาไปซ้ายอย่างสวยงาม
 * อวาตาร์รูปโปรไฟล์และรูปภาพสินค้าจัดตำแหน่งเยื้องขวามือด้านหน้าตัวอักษรอย่างสมดุล!
+
+---
+
+## 📊 โครงสร้างข้อมูลแหล่งเชื่อมโยง (Section Data Source: Source Type Attributes)
+
+เพื่อให้เข้าใจโครงสร้างการเชื่อมต่อข้อมูลของวิดเจ็ตใน Mendix Studio Pro และ Mendix Client API ด้านล่างนี้คือข้อมูลสถาปัตยกรรมเชิงลึกของแหล่งข้อมูล (DataSource) ที่ใช้งานในวิดเจ็ต `pwbComboBox` นี้:
+
+### 1. โครงสร้างประเภทแหล่งข้อมูล (Source Type Attributes ใน XML)
+ในไฟล์โครงสร้างคุณสมบัติ (`PwbComboBox.xml`) แหล่งข้อมูลหลักจะถูกประกาศเป็นประเภท `datasource` โดยรับค่าเป็นรายการวัตถุ (`isList="true"`) ซึ่งระบุคุณสมบัติดังนี้:
+
+```xml
+<property key="optionsSource" type="datasource" isList="true" required="true">
+    <caption>Options Source</caption>
+    <description>Dynamic list of options to display in the dropdown</description>
+</property>
+```
+
+### 2. โครงสร้างข้อมูลในโค้ด React / TypeScript (ListValue API)
+เมื่อ Mendix Compiler ทำการแปลงข้อมูลจากโมเดลมาเป็น Props ในฝั่ง React ตัวแปร `optionsSource` จะมีรูปแบบโครงสร้างข้อมูลเป็นอินเตอร์เฟซ **`ListValue`** ซึ่งประกอบด้วยรายละเอียดสมาชิกหลักดังนี้:
+
+#### A. ข้อมูลและสถานะ (Data & States)
+* **`status`** (`"loading"` | `"available"` | `"unavailable"`):
+  * **`loading`**: ระบบหลังบ้านกำลังดึงข้อมูล (Async Fetching) วิดเจ็ตจะแสดงสถานะโหลดข้อความหรือ Loading Message
+  * **`available`**: ข้อมูลถูกโหลดเสร็จสมบูรณ์ วิดเจ็ตจะนำรายการไปเรนเดอร์ใน Dropdown List
+  * **`unavailable`**: เกิดข้อผิดพลาดในการโหลด หรือไม่มีสิทธิ์เข้าถึงอ็อบเจกต์ วิดเจ็ตจะเข้าสู่สถานะว่างเปล่าหรือมีข้อความ No Options Found
+* **`items`** (`ObjectItem[]` | `undefined`):
+  * อาร์เรย์ของอ็อบเจกต์จริง ซึ่งแต่ละตัวเรียกว่า **`ObjectItem`** 
+  * แต่ละ `ObjectItem` จะมีคุณสมบัติสำคัญที่เป็น **GUID** (เช่น `item.id`) ซึ่งเป็น String ประจำตัววัตถุที่ไม่ซ้ำกันในฐานข้อมูลของ Mendix โดยวิดเจ็ตใช้เป็นคีย์เชื่อมโยงและนำไปจัดเก็บบันทึกรหัสลงใน `selectedAttribute` หรือผูกความสัมพันธ์กับ `selectedAssociation`
+
+#### B. ข้อมูลปริมาณและการแบ่งหน้า (Paging & Totals)
+* **`totalCount`** (`number` | `undefined`): จำนวนวัตถุทั้งหมดในฐานข้อมูล
+* **`hasMoreItems`** (`boolean`): มีวัตถุในหน้าถัดไปอีกหรือไม่ (ใช้ตรวจสอบเพื่อดึงข้อมูลเพิ่มเมื่อ Scroll ลงล่าง)
+* **`offset`** (`number`): ลำดับแถวเริ่มต้นในการดึงข้อมูลปัจจุบัน
+* **`limit`** (`number`): จำนวนแถวข้อมูลสูงสุดที่ดึงมาแสดงผลต่อหนึ่งครั้ง
+
+#### C. ฟังก์ชันโต้ตอบเชิงคำสั่ง (Interactive operations)
+วิดเจ็ตสามารถจัดการคัดกรอง หรือปรับขนาดข้อมูลจากฝั่งบราวเซอร์กลับไปยังฐานข้อมูล Mendix ได้โดยตรงผ่านฟังก์ชันเหล่านี้:
+* **`setPageSize(size: number)`**: กำหนดจำนวนแถวข้อมูลสูงสุดที่ต้องการโหลด
+* **`setOffset(offset: number)`**: สั่งเปลี่ยนจุดเริ่มต้นข้อมูลเพื่อทำระบบแบ่งหน้า (Paging)
+* **`setSortOrder(SortInstruction[] | undefined)`**: สั่งเรียงลำดับข้อมูลระดับ Server (Server-side Sorting)
+* **`setFilter(FilterCondition | undefined)`**: ส่งตัวกรองไปประมวลผลค้นหาข้อมูลที่ Database โดยตรง (Server-side Filtering) ซึ่งทำงานสอดรับกับค่าหน่วงเวลา `searchDebounce`

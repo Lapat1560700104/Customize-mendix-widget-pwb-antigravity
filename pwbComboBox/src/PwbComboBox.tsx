@@ -6,6 +6,7 @@ import "./ui/PwbComboBox.css";
 export function PwbComboBox({
     class: className,
     style,
+    sourceMode,
     optionsSource,
     optionLabel,
     optionDetail,
@@ -60,21 +61,44 @@ export function PwbComboBox({
             : assoc?.readOnly === true || selectedAttribute?.readOnly === true;
 
     // 2. Fetch loading state
-    const isLoading = optionsSource.status === "loading";
+    const isLoading = sourceMode === "association" ? optionsSource && optionsSource.status === "loading" : false;
 
-    // 3. Map Mendix ObjectItems to clean ComboBoxOption interface
-    const options: ComboBoxOption[] = optionsSource.items
-        ? optionsSource.items.map(item => ({
-              id: item.id,
-              label: optionLabel.get(item).value || "",
-              subtitle: optionDetail ? optionDetail.get(item).value || "" : undefined,
-              groupName: optionGroup ? optionGroup.get(item).value : undefined,
-              colorCode: tagColorExpression ? tagColorExpression.get(item).value : undefined,
-              imageUrl: optionImage ? optionImage.get(item).value : undefined,
-              selectedLabel: selectedOptionLabel ? selectedOptionLabel.get(item).value || "" : undefined,
-              rawObject: item
-          }))
-        : [];
+    // 3. Map options according to sourceMode
+    const options: ComboBoxOption[] = [];
+
+    if (sourceMode === "association") {
+        if (optionsSource && optionsSource.items) {
+            optionsSource.items.forEach(item => {
+                options.push({
+                    id: item.id,
+                    label: optionLabel.get(item).value || "",
+                    subtitle: optionDetail ? optionDetail.get(item).value || "" : undefined,
+                    groupName: optionGroup ? optionGroup.get(item).value : undefined,
+                    colorCode: tagColorExpression ? tagColorExpression.get(item).value : undefined,
+                    imageUrl: optionImage ? optionImage.get(item).value : undefined,
+                    selectedLabel: selectedOptionLabel ? selectedOptionLabel.get(item).value || "" : undefined,
+                    rawObject: item
+                });
+            });
+        }
+    } else if (sourceMode === "enumeration" && selectedAttribute) {
+        if (selectedAttribute.universe) {
+            selectedAttribute.universe.forEach(value => {
+                const stringVal = String(value);
+                const label = selectedAttribute.formatter ? selectedAttribute.formatter.format(value) : stringVal;
+                options.push({
+                    id: stringVal,
+                    label,
+                    rawObject: value
+                });
+            });
+        }
+    } else if (sourceMode === "boolean" && selectedAttribute) {
+        options.push(
+            { id: "true", label: "Yes / True", rawObject: true },
+            { id: "false", label: "No / False", rawObject: false }
+        );
+    }
 
     // Apply sorting if configured
     if (sortOrder && sortOrder !== "none") {
@@ -102,27 +126,34 @@ export function PwbComboBox({
     // 4. Retrieve currently selected IDs
     let selectedIds: string[] = [];
     if (selectionMode === "single") {
-        if (assoc && assoc.value) {
+        if (sourceMode === "association" && assoc && assoc.value) {
             // Find option matching Mendix object GUID
             const matched = options.find(o => o.id === assoc.value.id);
             if (matched) {
                 selectedIds = [matched.id];
             }
-        } else if (selectedAttribute && selectedAttribute.value !== undefined) {
-            const attrVal = String(selectedAttribute.value);
-            // Match either option ID or option label value
-            const matched = options.find(o => o.id === attrVal || o.label === attrVal || o.selectedLabel === attrVal);
-            if (matched) {
-                selectedIds = [matched.id];
+        } else if (selectedAttribute && selectedAttribute.value !== undefined && selectedAttribute.value !== null) {
+            if (sourceMode === "boolean") {
+                const boolVal = selectedAttribute.value === true || String(selectedAttribute.value) === "true";
+                selectedIds = [boolVal ? "true" : "false"];
+            } else {
+                const attrVal = String(selectedAttribute.value);
+                // Match either option ID or option label value
+                const matched = options.find(
+                    o => o.id === attrVal || o.label === attrVal || o.selectedLabel === attrVal
+                );
+                if (matched) {
+                    selectedIds = [matched.id];
+                }
             }
         }
     } else {
         // Multi-select mode (ReferenceSet association or Delimited String Attribute)
-        if (assoc && assoc.value) {
+        if (sourceMode === "association" && assoc && assoc.value) {
             const selectedObjects = assoc.value;
             const selectedArray = Array.isArray(selectedObjects) ? selectedObjects : [selectedObjects];
             selectedIds = selectedArray.map((item: any) => item.id);
-        } else if (selectedAttribute && selectedAttribute.value !== undefined) {
+        } else if (selectedAttribute && selectedAttribute.value !== undefined && selectedAttribute.value !== null) {
             const attrVal = String(selectedAttribute.value);
             if (attrVal.trim() !== "") {
                 const delim = delimiter || ",";
@@ -147,15 +178,21 @@ export function PwbComboBox({
         const displayLabel = option.selectedLabel || option.label;
 
         if (selectionMode === "single") {
-            if (assoc) {
+            if (sourceMode === "association" && assoc) {
                 assoc.setValue(option.rawObject);
             }
             if (selectedAttribute) {
-                selectedAttribute.setValue(displayLabel);
+                if (sourceMode === "boolean") {
+                    selectedAttribute.setValue(id === "true");
+                } else if (sourceMode === "enumeration") {
+                    selectedAttribute.setValue(option.rawObject as any);
+                } else {
+                    selectedAttribute.setValue(displayLabel);
+                }
             }
         } else {
             // Multi-select mode
-            if (assoc) {
+            if (sourceMode === "association" && assoc) {
                 const currentSelected = (assoc.value as any[]) || [];
                 if (!currentSelected.some(item => item.id === id)) {
                     assoc.setValue([...currentSelected, option.rawObject]);
@@ -180,14 +217,14 @@ export function PwbComboBox({
 
     const handleRemove = (id: string): void => {
         if (selectionMode === "single") {
-            if (assoc) {
+            if (sourceMode === "association" && assoc) {
                 assoc.setValue(undefined);
             }
             if (selectedAttribute) {
                 selectedAttribute.setValue(undefined);
             }
         } else {
-            if (assoc) {
+            if (sourceMode === "association" && assoc) {
                 const currentSelected = (assoc.value as any[]) || [];
                 assoc.setValue(currentSelected.filter(item => item.id !== id));
             }
@@ -211,14 +248,14 @@ export function PwbComboBox({
 
     const handleClear = (): void => {
         if (selectionMode === "single") {
-            if (assoc) {
+            if (sourceMode === "association" && assoc) {
                 assoc.setValue(undefined);
             }
             if (selectedAttribute) {
                 selectedAttribute.setValue(undefined);
             }
         } else {
-            if (assoc) {
+            if (sourceMode === "association" && assoc) {
                 assoc.setValue([]);
             }
             if (selectedAttribute) {

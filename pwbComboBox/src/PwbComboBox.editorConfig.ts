@@ -105,11 +105,36 @@ export function getProperties(
 ): Properties {
     defaultProperties.forEach(group => {
         if (group.properties) {
-            // Hide delimiter when in single-select mode
-            if (values.selectionMode === "single") {
-                group.properties = group.properties.filter(prop => prop.key !== "delimiter");
+            // ── 1. Dynamic Visibility based on Data Source Mode ──
+            if (values.sourceMode === "enumeration" || values.sourceMode === "boolean") {
+                const propsToHide = [
+                    "optionsSource",
+                    "optionLabel",
+                    "optionDetail",
+                    "optionGroup",
+                    "optionImage",
+                    "sortOrder",
+                    "sortField",
+                    "selectedOptionLabel",
+                    "enableGrouping",
+                    "selectedAssociation",
+                    "showSelectAll",
+                    "selectAllText",
+                    "deselectAllText",
+                    "customItemContent",
+                    "showOptionAvatar",
+                    "showOptionCheckbox",
+                    "highlightColorMode"
+                ];
+                group.properties = group.properties.filter(prop => !propsToHide.includes(prop.key));
             }
-            // Hide singleSelectStyle when in multi-select mode
+
+            // ── 2. Dynamic Visibility based on Selection Mode ──
+            if (values.selectionMode === "single") {
+                group.properties = group.properties.filter(
+                    prop => prop.key !== "delimiter" && prop.key !== "maxVisibleTags"
+                );
+            }
             if (values.selectionMode === "multi") {
                 group.properties = group.properties.filter(prop => prop.key !== "singleSelectStyle");
             }
@@ -121,23 +146,33 @@ export function getProperties(
 export function check(values: PwbComboBoxPreviewProps): Problem[] {
     const errors: Problem[] = [];
 
-    if (values.selectionMode === "single") {
-        if (!values.selectedAttribute && !values.selectedAssociation) {
+    if (values.sourceMode === "enumeration" || values.sourceMode === "boolean") {
+        if (!values.selectedAttribute) {
             errors.push({
                 property: "selectedAttribute",
-                severity: "warning",
-                message:
-                    "Please bind either 'Selected Attribute' or 'Selected Association' to save the selected option."
+                severity: "error",
+                message: "Please bind 'Selected Attribute' to store your selection."
             });
         }
-    } else if (values.selectionMode === "multi") {
-        if (!values.selectedAttribute && !values.selectedAssociation) {
-            errors.push({
-                property: "selectedAssociation",
-                severity: "warning",
-                message:
-                    "Please bind either 'Selected Association' (ReferenceSet) or 'Selected Attribute' (Delimited String) to save the multiple selections."
-            });
+    } else {
+        if (values.selectionMode === "single") {
+            if (!values.selectedAttribute && !values.selectedAssociation) {
+                errors.push({
+                    property: "selectedAttribute",
+                    severity: "warning",
+                    message:
+                        "Please bind either 'Selected Attribute' or 'Selected Association' to save the selected option."
+                });
+            }
+        } else if (values.selectionMode === "multi") {
+            if (!values.selectedAttribute && !values.selectedAssociation) {
+                errors.push({
+                    property: "selectedAssociation",
+                    severity: "warning",
+                    message:
+                        "Please bind either 'Selected Association' (ReferenceSet) or 'Selected Attribute' (Delimited String) to save the multiple selections."
+                });
+            }
         }
     }
 

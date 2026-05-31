@@ -7,6 +7,8 @@ import { ComponentType, CSSProperties, ReactNode } from "react";
 import { ActionValue, DynamicValue, EditableValue, ListValue, ListExpressionValue, ListWidgetValue, ReferenceValue, ReferenceSetValue } from "mendix";
 import { Big } from "big.js";
 
+export type SourceModeEnum = "association" | "enumeration" | "boolean";
+
 export type SortOrderEnum = "none" | "asc" | "desc";
 
 export type SortFieldEnum = "label" | "detail" | "group";
@@ -28,6 +30,7 @@ export interface PwbComboBoxContainerProps {
     class: string;
     style?: CSSProperties;
     tabIndex?: number;
+    sourceMode: SourceModeEnum;
     optionsSource: ListValue;
     optionLabel: ListExpressionValue<string>;
     optionDetail?: ListExpressionValue<string>;
@@ -42,7 +45,7 @@ export interface PwbComboBoxContainerProps {
     showSelectedAvatar: boolean;
     tagStyle: TagStyleEnum;
     tagColorExpression?: ListExpressionValue<string>;
-    selectedAttribute?: EditableValue<string | Big>;
+    selectedAttribute?: EditableValue<string | Big | boolean>;
     delimiter: string;
     maxVisibleTags: number;
     showSelectAll: boolean;
@@ -85,6 +88,7 @@ export interface PwbComboBoxPreviewProps {
     readOnly: boolean;
     renderMode: "design" | "xray" | "structure";
     translate: (text: string) => string;
+    sourceMode: SourceModeEnum;
     optionsSource: {} | { caption: string } | { type: string } | null;
     optionLabel: string;
     optionDetail: string;

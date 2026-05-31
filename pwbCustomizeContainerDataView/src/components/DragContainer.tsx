@@ -1,4 +1,4 @@
-import { ReactElement, useState, useEffect } from "react";
+import { ReactElement, useState, useEffect, DragEvent } from "react";
 
 export interface DragItem {
     id: string;
@@ -7,7 +7,7 @@ export interface DragItem {
 
 export interface DragContainerProps {
     items: DragItem[];
-    renderItem: (rawObject: any) => JSX.Element;
+    renderItem: (rawObject: any) => ReactElement;
     onOrderChange: (newOrderIds: string[]) => void;
     accentColor: string;
     borderRadius: string;
@@ -31,7 +31,7 @@ export function DragContainer({
         setOrderedItems(items);
     }, [items]);
 
-    const handleDragStart = (e: React.DragEvent, index: number): void => {
+    const handleDragStart = (e: DragEvent, index: number): void => {
         setDraggingIndex(index);
         e.dataTransfer.effectAllowed = "move";
         // Create an empty drag image for custom visual feel (optional, fallback is standard)
@@ -39,12 +39,12 @@ export function DragContainer({
             const img = new Image();
             img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
             e.dataTransfer.setDragImage(img, 0, 0);
-        } catch (err) {
+        } catch {
             // Ignore if browser restricts
         }
     };
 
-    const handleDragOver = (e: React.DragEvent, index: number): void => {
+    const handleDragOver = (e: DragEvent, index: number): void => {
         e.preventDefault();
         if (draggingIndex !== null && draggingIndex !== index) {
             setDragOverIndex(index);
@@ -61,7 +61,7 @@ export function DragContainer({
             const nextItems = [...orderedItems];
             const [movedItem] = nextItems.splice(draggingIndex, 1);
             nextItems.splice(index, 0, movedItem);
-            
+
             setOrderedItems(nextItems);
             // Callback to sync new order with parent
             onOrderChange(nextItems.map(item => item.id));
@@ -73,20 +73,22 @@ export function DragContainer({
     return (
         <div
             className={`pwb-drag-container pwb-direction-${layoutDirection}`}
-            style={{
-                "--accent-color": accentColor,
-                "--border-radius": borderRadius,
-                "--accent-glow": `color-mix(in srgb, ${accentColor} 15%, transparent)`
-            } as any}
+            style={
+                {
+                    "--accent-color": accentColor,
+                    "--border-radius": borderRadius,
+                    "--accent-glow": `color-mix(in srgb, ${accentColor} 15%, transparent)`
+                } as any
+            }
         >
             {orderedItems.map((item, idx) => {
                 const isDragging = idx === draggingIndex;
                 const isDragOver = idx === dragOverIndex;
-                
+
                 return (
                     <div
                         key={item.id}
-                        draggable={true}
+                        draggable
                         onDragStart={e => handleDragStart(e, idx)}
                         onDragOver={e => handleDragOver(e, idx)}
                         onDragEnd={handleDragEnd}
@@ -100,7 +102,15 @@ export function DragContainer({
                     >
                         {/* Drag Handle Icon on the left */}
                         <div className="pwb-drag-handle" title="Drag to reorder">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                            <svg
+                                viewBox="0 0 24 24"
+                                width="16"
+                                height="16"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                            >
                                 <circle cx="9" cy="5" r="1.2" fill="currentColor" />
                                 <circle cx="9" cy="12" r="1.2" fill="currentColor" />
                                 <circle cx="9" cy="19" r="1.2" fill="currentColor" />
@@ -111,9 +121,7 @@ export function DragContainer({
                         </div>
 
                         {/* Nested custom widgets container */}
-                        <div className="pwb-draggable-item-content">
-                            {renderItem(item.rawObject)}
-                        </div>
+                        <div className="pwb-draggable-item-content">{renderItem(item.rawObject)}</div>
                     </div>
                 );
             })}

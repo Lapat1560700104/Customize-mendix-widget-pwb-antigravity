@@ -48,7 +48,7 @@ export function PwbCustomizeContainerDataView({
                 .split(",")
                 .map(id => id.trim())
                 .filter(id => id !== "");
-            
+
             if (sortedIds.length > 0) {
                 const sortedMap = new Map<string, number>();
                 sortedIds.forEach((id, idx) => sortedMap.set(id, idx));
@@ -62,7 +62,7 @@ export function PwbCustomizeContainerDataView({
         }
 
         return rawList;
-    }, [itemsSource.items, sortedAttribute?.value]);
+    }, [itemsSource.items, sortedAttribute]);
 
     // 4. Update order callback
     const handleOrderChange = (newOrderIds: string[]): void => {
@@ -86,7 +86,15 @@ export function PwbCustomizeContainerDataView({
                 </div>
             ) : !hasItems ? (
                 <div className="pwb-empty-state" style={{ borderRadius: safeBorderRadius }}>
-                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="1.5" className="pwb-empty-icon">
+                    <svg
+                        viewBox="0 0 24 24"
+                        width="48"
+                        height="48"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        className="pwb-empty-icon"
+                    >
                         <rect x="3" y="3" width="18" height="18" rx="2" strokeDasharray="4 4" />
                         <path d="M8 12h8M12 8v8" strokeLinecap="round" />
                     </svg>
@@ -96,7 +104,7 @@ export function PwbCustomizeContainerDataView({
             ) : (
                 <DragContainer
                     items={dragItems}
-                    renderItem={rawObject => customItemContent.get(rawObject) as JSX.Element}
+                    renderItem={rawObject => customItemContent.get(rawObject) as ReactElement}
                     onOrderChange={handleOrderChange}
                     accentColor={safeAccentColor}
                     borderRadius={safeBorderRadius}

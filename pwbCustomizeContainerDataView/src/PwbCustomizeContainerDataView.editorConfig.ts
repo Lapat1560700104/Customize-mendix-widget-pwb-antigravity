@@ -145,6 +145,7 @@ export function check(values: PwbCustomizeContainerDataViewPreviewProps): Proble
  */
 export function getPreview(
     values: PwbCustomizeContainerDataViewPreviewProps,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _isDarkMode: boolean
 ): PreviewProps {
     const accentColor = values.accentColor || "#3b82f6";
@@ -237,6 +238,7 @@ export function getPreview(
 
 export function getCustomCaption(
     values: PwbCustomizeContainerDataViewPreviewProps,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _platform: Platform
 ): string {
     const dir = values.layoutDirection === "horizontal" ? "↔ Horizontal" : "↕ Vertical";

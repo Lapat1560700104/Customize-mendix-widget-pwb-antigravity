@@ -1,4 +1,13 @@
-import { ReactElement, useState, useEffect, useRef, useId, KeyboardEvent as ReactKeyboardEvent, UIEvent } from "react";
+import {
+    ReactElement,
+    ReactNode,
+    useState,
+    useEffect,
+    useRef,
+    useId,
+    KeyboardEvent as ReactKeyboardEvent,
+    UIEvent
+} from "react";
 
 export interface ComboBoxOption {
     id: string;
@@ -48,6 +57,9 @@ export interface ComboBoxProps {
     required: boolean;
     hasError?: boolean;
     errorText?: string;
+    showOptionAvatar?: boolean;
+    enableGrouping?: boolean;
+    renderCustomItem?: (item: any) => ReactNode;
 }
 
 const normalizeText = (str: string): string => {
@@ -141,7 +153,10 @@ export function ComboBox({
     readOnly,
     required,
     hasError,
-    errorText
+    errorText,
+    showOptionAvatar = true,
+    enableGrouping = true,
+    renderCustomItem
 }: ComboBoxProps): ReactElement {
     const uid = useId();
     const listboxId = `pwb-listbox-${uid}`;
@@ -294,16 +309,18 @@ export function ComboBox({
 
     // Grouping calculations:
     // Extract unique group names and sort them alphabetically, keeping empty group at the end
-    const groupNames = Array.from(new Set(filteredOptions.map(o => o.groupName || "")));
-    const sortedGroupNames = groupNames.sort((a, b) => {
-        if (a === "") {
-            return 1;
-        }
-        if (b === "") {
-            return -1;
-        }
-        return a.localeCompare(b);
-    });
+    const groupNames = enableGrouping ? Array.from(new Set(filteredOptions.map(o => o.groupName || ""))) : [""];
+    const sortedGroupNames = enableGrouping
+        ? groupNames.sort((a, b) => {
+              if (a === "") {
+                  return 1;
+              }
+              if (b === "") {
+                  return -1;
+              }
+              return a.localeCompare(b);
+          })
+        : [""];
 
     // Compute visible options (excluding collapsed groups) for keyboard navigation
     const visibleFilteredOptions: ComboBoxOption[] = [];
@@ -377,7 +394,7 @@ export function ComboBox({
         }));
     };
 
-    const shouldShowOptionAvatars = options.some(o => !!o.imageUrl) || tagStyle === "avatar";
+    const shouldShowOptionAvatars = showOptionAvatar && (options.some(o => !!o.imageUrl) || tagStyle === "avatar");
 
     // Handle lazy scroll loading
     const handleDropdownScroll = (e: UIEvent<HTMLDivElement>): void => {
@@ -1090,55 +1107,68 @@ export function ComboBox({
                                                         </div>
                                                     </div>
                                                 )}
-
-                                                {shouldShowOptionAvatars && (
+                                                {renderCustomItem ? (
                                                     <div
-                                                        className="pwb-combobox-option-avatar-container"
-                                                        style={
-                                                            opt.colorCode
-                                                                ? {
-                                                                      backgroundColor: `color-mix(in srgb, ${opt.colorCode} 12%, transparent)`,
-                                                                      color: opt.colorCode,
-                                                                      borderColor: `color-mix(in srgb, ${opt.colorCode} 30%, transparent)`
-                                                                  }
-                                                                : {
-                                                                      backgroundColor: `color-mix(in srgb, ${accentColor} 12%, transparent)`,
-                                                                      color: accentColor,
-                                                                      borderColor: `color-mix(in srgb, ${accentColor} 30%, transparent)`
-                                                                  }
-                                                        }
+                                                        className="pwb-custom-widget-content-wrapper"
+                                                        style={{ flex: 1, minWidth: 0 }}
                                                     >
-                                                        {opt.imageUrl && !brokenImages[opt.id] ? (
-                                                            <img
-                                                                src={opt.imageUrl}
-                                                                className="pwb-combobox-option-avatar-img"
-                                                                onError={() => handleImageError(opt.id)}
-                                                                alt={opt.label}
-                                                            />
-                                                        ) : (
-                                                            <span className="pwb-combobox-option-avatar-initials">
-                                                                {getInitials(opt.label)}
-                                                            </span>
+                                                        {renderCustomItem(opt.rawObject)}
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        {shouldShowOptionAvatars && (
+                                                            <div
+                                                                className="pwb-combobox-option-avatar-container"
+                                                                style={
+                                                                    opt.colorCode
+                                                                        ? {
+                                                                              backgroundColor: `color-mix(in srgb, ${opt.colorCode} 12%, transparent)`,
+                                                                              color: opt.colorCode,
+                                                                              borderColor: `color-mix(in srgb, ${opt.colorCode} 30%, transparent)`
+                                                                          }
+                                                                        : {
+                                                                              backgroundColor: `color-mix(in srgb, ${accentColor} 12%, transparent)`,
+                                                                              color: accentColor,
+                                                                              borderColor: `color-mix(in srgb, ${accentColor} 30%, transparent)`
+                                                                          }
+                                                                }
+                                                            >
+                                                                {opt.imageUrl && !brokenImages[opt.id] ? (
+                                                                    <img
+                                                                        src={opt.imageUrl}
+                                                                        className="pwb-combobox-option-avatar-img"
+                                                                        onError={() => handleImageError(opt.id)}
+                                                                        alt={opt.label}
+                                                                    />
+                                                                ) : (
+                                                                    <span className="pwb-combobox-option-avatar-initials">
+                                                                        {getInitials(opt.label)}
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                         )}
-                                                    </div>
-                                                )}
-                                                <div
-                                                    style={{
-                                                        flex: 1,
-                                                        display: "flex",
-                                                        flexDirection: "column",
-                                                        minWidth: 0
-                                                    }}
-                                                >
-                                                    <div className="pwb-combobox-option-label">
-                                                        {renderOptionLabel(opt.label, debouncedSearchText)}
-                                                    </div>
-                                                    {opt.subtitle && (
-                                                        <div className="pwb-combobox-option-subtitle">
-                                                            {renderOptionLabel(opt.subtitle, debouncedSearchText)}
+                                                        <div
+                                                            style={{
+                                                                flex: 1,
+                                                                display: "flex",
+                                                                flexDirection: "column",
+                                                                minWidth: 0
+                                                            }}
+                                                        >
+                                                            <div className="pwb-combobox-option-label">
+                                                                {renderOptionLabel(opt.label, debouncedSearchText)}
+                                                            </div>
+                                                            {opt.subtitle && (
+                                                                <div className="pwb-combobox-option-subtitle">
+                                                                    {renderOptionLabel(
+                                                                        opt.subtitle,
+                                                                        debouncedSearchText
+                                                                    )}
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    )}
-                                                </div>
+                                                    </>
+                                                )}
                                                 {isSelected && !showOptionCheckbox && (
                                                     <svg
                                                         width="16"

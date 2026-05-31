@@ -3,8 +3,8 @@
  * WARNING: All changes made to this file will be overwritten
  * @author Mendix Widgets Framework Team
  */
-import { CSSProperties } from "react";
-import { ActionValue, DynamicValue, EditableValue, ListValue, ListExpressionValue, ReferenceValue, ReferenceSetValue } from "mendix";
+import { ComponentType, CSSProperties, ReactNode } from "react";
+import { ActionValue, DynamicValue, EditableValue, ListValue, ListExpressionValue, ListWidgetValue, ReferenceValue, ReferenceSetValue } from "mendix";
 import { Big } from "big.js";
 
 export type SortOrderEnum = "none" | "asc" | "desc";
@@ -36,6 +36,7 @@ export interface PwbComboBoxContainerProps {
     sortOrder: SortOrderEnum;
     sortField: SortFieldEnum;
     selectedOptionLabel?: ListExpressionValue<string>;
+    enableGrouping: boolean;
     selectionMode: SelectionModeEnum;
     singleSelectStyle: SingleSelectStyleEnum;
     showSelectedAvatar: boolean;
@@ -57,6 +58,8 @@ export interface PwbComboBoxContainerProps {
     maxDropdownHeight: string;
     dropdownLayout: DropdownLayoutEnum;
     optionAvatarShape: OptionAvatarShapeEnum;
+    showOptionAvatar: boolean;
+    customItemContent?: ListWidgetValue;
     showOptionCheckbox: boolean;
     highlightColorMode: HighlightColorModeEnum;
     searchDebounce?: number;
@@ -90,6 +93,7 @@ export interface PwbComboBoxPreviewProps {
     sortOrder: SortOrderEnum;
     sortField: SortFieldEnum;
     selectedOptionLabel: string;
+    enableGrouping: boolean;
     selectionMode: SelectionModeEnum;
     singleSelectStyle: SingleSelectStyleEnum;
     showSelectedAvatar: boolean;
@@ -111,6 +115,8 @@ export interface PwbComboBoxPreviewProps {
     maxDropdownHeight: string;
     dropdownLayout: DropdownLayoutEnum;
     optionAvatarShape: OptionAvatarShapeEnum;
+    showOptionAvatar: boolean;
+    customItemContent: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     showOptionCheckbox: boolean;
     highlightColorMode: HighlightColorModeEnum;
     searchDebounce: number | null;

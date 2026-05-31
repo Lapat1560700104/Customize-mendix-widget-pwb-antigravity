@@ -1033,4 +1033,19 @@
     margin-right: 8px;
 }
 
+/* ==========================================
+   🚀 UPGRADES (v3.6.0): CUSTOM CONTENT ROW WRAPPER
+   ========================================== */
+
+.pwb-custom-widget-content-wrapper {
+    flex: 1;
+    min-width: 0;
+    display: block;
+    box-sizing: border-box;
+}
+
+.pwb-custom-widget-content-wrapper > * {
+    max-width: 100%;
+}
+
 

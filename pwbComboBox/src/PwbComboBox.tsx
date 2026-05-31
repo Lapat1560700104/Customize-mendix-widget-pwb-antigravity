@@ -46,7 +46,10 @@ export function PwbComboBox({
     required,
     requiredMessage,
     validationExpression,
-    customValidationMessage
+    customValidationMessage,
+    enableGrouping,
+    showOptionAvatar,
+    customItemContent
 }: PwbComboBoxContainerProps): ReactElement {
     const assoc = selectedAssociation as any;
 
@@ -303,6 +306,9 @@ export function PwbComboBox({
                 highlightColorMode={highlightColorMode}
                 searchDebounce={searchDebounce}
                 maxVisibleTags={maxVisibleTags}
+                showOptionAvatar={showOptionAvatar}
+                enableGrouping={enableGrouping}
+                renderCustomItem={customItemContent ? item => customItemContent.get(item) : undefined}
                 showSelectAll={showSelectAll}
                 selectAllText={selectAllText}
                 deselectAllText={deselectAllText}

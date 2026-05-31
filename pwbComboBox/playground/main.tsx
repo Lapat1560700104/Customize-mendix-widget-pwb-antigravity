@@ -282,6 +282,15 @@ function App() {
     const [showAvatars, setShowAvatars] = useState(true);
     const [showColors, setShowColors] = useState(true);
 
+    // New v3.2.0 simulation states
+    const [sortOrder, setSortOrder] = useState<"none" | "asc" | "desc">("none");
+    const [singleSelectStyle, setSingleSelectStyle] = useState<"text" | "pill" | "rich">("text");
+    const [showSelectedAvatar, setShowSelectedAvatar] = useState(true);
+    const [dropdownLayout, setDropdownLayout] = useState<"list" | "grid">("list");
+    const [optionAvatarShape, setOptionAvatarShape] = useState<"circle" | "rounded" | "square">("circle");
+    const [showOptionCheckbox, setShowOptionCheckbox] = useState(false);
+    const [highlightColorMode, setHighlightColorMode] = useState<"accent" | "optionColor">("accent");
+
     // Delimited String simulator states
     const [delimiter, setDelimiter] = useState(",");
     const [simulatedStringVal, setSimulatedStringVal] = useState("");
@@ -314,7 +323,7 @@ function App() {
     const [openTab, setOpenTab] = useState<string>("general");
 
     // Get Active Options list based on simulation controls
-    const activeOptions = isEmpty
+    let activeOptions = isEmpty
         ? []
         : DATASETS[datasetKey].map(opt => ({
               ...opt,
@@ -324,6 +333,13 @@ function App() {
               imageUrl: showAvatars ? (opt as any).imageUrl : undefined,
               colorCode: showColors ? (opt as any).colorCode : undefined
           }));
+
+    // Apply sorting in playground if simulated
+    if (sortOrder === "asc") {
+        activeOptions = [...activeOptions].sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: "base", numeric: true }));
+    } else if (sortOrder === "desc") {
+        activeOptions = [...activeOptions].sort((a, b) => b.label.localeCompare(a.label, undefined, { sensitivity: "base", numeric: true }));
+    }
 
     // Reset selected IDs when changing selection modes to prevent overflow
     useEffect(() => {
@@ -508,6 +524,88 @@ function App() {
                                         <option value="multi">Multi (เลือกได้หลายแท็ก badge)</option>
                                     </select>
                                 </label>
+
+                                {selectionMode === "single" && (
+                                    <label
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "6px",
+                                            fontSize: "12px",
+                                            color: "#94a3b8"
+                                        }}
+                                    >
+                                        <span>Single Select Style (สไตล์แสดงรายการเดี่ยว)</span>
+                                        <select
+                                            value={singleSelectStyle}
+                                            onChange={e => setSingleSelectStyle(e.target.value as "text" | "pill" | "rich")}
+                                            style={{
+                                                background: "#1e293b",
+                                                color: "#f8fafc",
+                                                border: "1px solid rgba(255,255,255,0.06)",
+                                                borderRadius: "8px",
+                                                padding: "8px",
+                                                outline: "none"
+                                            }}
+                                        >
+                                            <option value="text">Standard Text Field (ช่องรับส่งข้อความ)</option>
+                                            <option value="pill">Removable Pill (ป้ายแกะลบได้)</option>
+                                            <option value="rich">Premium Rich Card (การ์ดรูปภาพเด่นเต็มแถว)</option>
+                                        </select>
+                                    </label>
+                                )}
+
+                                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                    <input
+                                        id="showSelectedAvatarCheck"
+                                        type="checkbox"
+                                        checked={showSelectedAvatar}
+                                        onChange={e => setShowSelectedAvatar(e.target.checked)}
+                                        style={{ cursor: "pointer" }}
+                                    />
+                                    <label
+                                        htmlFor="showSelectedAvatarCheck"
+                                        style={{
+                                            fontSize: "12px",
+                                            color: "#cbd5e1",
+                                            cursor: "pointer"
+                                        }}
+                                    >
+                                        Show Selected Avatar (แสดงอวตารป้ายเลือก)
+                                    </label>
+                                </div>
+
+                                <label
+                                    style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "6px",
+                                        fontSize: "12px",
+                                        color: "#94a3b8",
+                                        borderTop: "1px solid rgba(255,255,255,0.05)",
+                                        paddingTop: "10px",
+                                        marginTop: "4px"
+                                    }}
+                                >
+                                    <span>Sort Options Order (จัดเรียงลำดับตัวเลือก)</span>
+                                    <select
+                                        value={sortOrder}
+                                        onChange={e => setSortOrder(e.target.value as "none" | "asc" | "desc")}
+                                        style={{
+                                            background: "#1e293b",
+                                            color: "#f8fafc",
+                                            border: "1px solid rgba(255,255,255,0.06)",
+                                            borderRadius: "8px",
+                                            padding: "8px",
+                                            outline: "none"
+                                        }}
+                                    >
+                                        <option value="none">None (เรียงตาม Datasource)</option>
+                                        <option value="asc">Ascending Alphabetical (A-Z / ก-ฮ)</option>
+                                        <option value="desc">Descending Alphabetical (Z-A / ฮ-ก)</option>
+                                    </select>
+                                </label>
+
 
                                 {selectionMode === "multi" && (
                                     <label
@@ -738,6 +836,120 @@ function App() {
                                     />
                                     <span>Dynamic Tag Colors (ระบายสีตามประเภท)</span>
                                 </label>
+
+                                <div
+                                    style={{
+                                        borderTop: "1px solid rgba(255,255,255,0.05)",
+                                        paddingTop: "10px",
+                                        marginTop: "4px",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "10px"
+                                    }}
+                                >
+                                    <label
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "4px",
+                                            fontSize: "12px",
+                                            color: "#94a3b8"
+                                        }}
+                                    >
+                                        <span>Dropdown List Layout (เลย์เอาต์ลิสต์ตัวเลือก)</span>
+                                        <select
+                                            value={dropdownLayout}
+                                            onChange={e => setDropdownLayout(e.target.value as "list" | "grid")}
+                                            style={{
+                                                background: "#1e293b",
+                                                color: "#f8fafc",
+                                                border: "1px solid rgba(255,255,255,0.06)",
+                                                borderRadius: "8px",
+                                                padding: "8px",
+                                                outline: "none"
+                                            }}
+                                        >
+                                            <option value="list">Standard Row List (แถวเดี่ยวตามตั้ง)</option>
+                                            <option value="grid">Compact 2-Column Grid Cards (การ์ดตารางสองแถว)</option>
+                                        </select>
+                                    </label>
+
+                                    <label
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "4px",
+                                            fontSize: "12px",
+                                            color: "#94a3b8"
+                                        }}
+                                    >
+                                        <span>Option Avatar Shape (รูปทรงอวตาร/รูปสินค้า)</span>
+                                        <select
+                                            value={optionAvatarShape}
+                                            onChange={e => setOptionAvatarShape(e.target.value as "circle" | "rounded" | "square")}
+                                            style={{
+                                                background: "#1e293b",
+                                                color: "#f8fafc",
+                                                border: "1px solid rgba(255,255,255,0.06)",
+                                                borderRadius: "8px",
+                                                padding: "8px",
+                                                outline: "none"
+                                            }}
+                                        >
+                                            <option value="circle">Circular (วงกลมคลาสสิก)</option>
+                                            <option value="rounded">Rounded Square (สี่เหลี่ยมเปียกมุม Squircle)</option>
+                                            <option value="square">Sharp Square (สี่เหลี่ยมขอบคมตัด)</option>
+                                        </select>
+                                    </label>
+
+                                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                        <input
+                                            id="showOptionCheckboxCheck"
+                                            type="checkbox"
+                                            checked={showOptionCheckbox}
+                                            onChange={e => setShowOptionCheckbox(e.target.checked)}
+                                            style={{ cursor: "pointer" }}
+                                        />
+                                        <label
+                                            htmlFor="showOptionCheckboxCheck"
+                                            style={{
+                                                fontSize: "12px",
+                                                color: "#cbd5e1",
+                                                cursor: "pointer"
+                                            }}
+                                        >
+                                            Show Left Option Checkbox/Radio
+                                        </label>
+                                    </div>
+
+                                    <label
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "4px",
+                                            fontSize: "12px",
+                                            color: "#94a3b8"
+                                        }}
+                                    >
+                                        <span>Hover Highlight Color Mode</span>
+                                        <select
+                                            value={highlightColorMode}
+                                            onChange={e => setHighlightColorMode(e.target.value as "accent" | "optionColor")}
+                                            style={{
+                                                background: "#1e293b",
+                                                color: "#f8fafc",
+                                                border: "1px solid rgba(255,255,255,0.06)",
+                                                borderRadius: "8px",
+                                                padding: "8px",
+                                                outline: "none"
+                                            }}
+                                        >
+                                            <option value="accent">Universal Accent Color (สีแบรนด์เด่นหลัก)</option>
+                                            <option value="optionColor">Dynamic Option Color (ใช้รหัสสีกำกับตัวเลือก)</option>
+                                        </select>
+                                    </label>
+                                </div>
+
 
                                 <span
                                     style={{
@@ -1384,6 +1596,8 @@ function App() {
                             options={activeOptions}
                             selectedIds={selectedIds}
                             selectionMode={selectionMode}
+                            singleSelectStyle={singleSelectStyle}
+                            showSelectedAvatar={showSelectedAvatar}
                             tagStyle={tagStyle}
                             onSelect={handleSelect}
                             onRemove={handleRemove}
@@ -1395,6 +1609,10 @@ function App() {
                             bgBlur={bgBlur}
                             popoverBg={popoverBg}
                             maxDropdownHeight={maxDropdownHeight}
+                            dropdownLayout={dropdownLayout}
+                            optionAvatarShape={optionAvatarShape}
+                            showOptionCheckbox={showOptionCheckbox}
+                            highlightColorMode={highlightColorMode}
                             noOptionsMessage={noOptionsMessage}
                             loadingMessage={loadingMessage}
                             clearButtonTitle={clearButtonTitle}

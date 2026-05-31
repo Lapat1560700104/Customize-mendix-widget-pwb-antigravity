@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode, useState, useEffect } from "react";
+import { ReactElement, useState, useEffect } from "react";
 
 export interface DragItem {
     id: string;
@@ -7,7 +7,7 @@ export interface DragItem {
 
 export interface DragContainerProps {
     items: DragItem[];
-    renderItem: (rawObject: any) => ReactNode;
+    renderItem: (rawObject: any) => JSX.Element;
     onOrderChange: (newOrderIds: string[]) => void;
     accentColor: string;
     borderRadius: string;

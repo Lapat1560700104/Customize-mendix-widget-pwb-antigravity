@@ -96,7 +96,7 @@ export function PwbCustomizeContainerDataView({
             ) : (
                 <DragContainer
                     items={dragItems}
-                    renderItem={rawObject => customItemContent.get(rawObject)}
+                    renderItem={rawObject => customItemContent.get(rawObject) as JSX.Element}
                     onOrderChange={handleOrderChange}
                     accentColor={safeAccentColor}
                     borderRadius={safeBorderRadius}

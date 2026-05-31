@@ -117,7 +117,12 @@ export function check(values: PwbCustomizeContainerDataViewPreviewProps): Proble
         });
     }
 
-    if (values.accentColor && !/^(#([0-9a-fA-F]{3}){1,2}|rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*(?:,\s*[0-9.]+\s*)?\)|[a-zA-Z]+)$/.test(values.accentColor.trim())) {
+    if (
+        values.accentColor &&
+        !/^(#([0-9a-fA-F]{3}){1,2}|rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*(?:,\s*[0-9.]+\s*)?\)|[a-zA-Z]+)$/.test(
+            values.accentColor.trim()
+        )
+    ) {
         errors.push({
             property: "accentColor",
             severity: "warning",
@@ -126,4 +131,115 @@ export function check(values: PwbCustomizeContainerDataViewPreviewProps): Proble
     }
 
     return errors;
+}
+
+/**
+ * getPreview — renders the real-time Mendix Studio Pro structural preview.
+ *
+ * Strategy:
+ * - Wrap everything in a Container that mimics the drag list appearance.
+ * - Use a Datasource node to show the itemsSource binding header.
+ * - Inside it, use a DropZone linked to `customItemContent` so Studio Pro
+ *   renders the ACTUAL widgets dropped by the developer — not a placeholder.
+ * - Show drag handle decoration on the left of each row via RowLayout.
+ */
+export function getPreview(
+    values: PwbCustomizeContainerDataViewPreviewProps,
+    _isDarkMode: boolean
+): PreviewProps {
+    const accentColor = values.accentColor || "#3b82f6";
+    const isHorizontal = values.layoutDirection === "horizontal";
+
+    // ── Drag Handle ── visual grip dots column
+    const dragHandleSvg =
+        `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#94a3b8" stroke-width="2.5">` +
+        `<circle cx="9" cy="5" r="1.2" fill="#94a3b8"/>` +
+        `<circle cx="9" cy="12" r="1.2" fill="#94a3b8"/>` +
+        `<circle cx="9" cy="19" r="1.2" fill="#94a3b8"/>` +
+        `<circle cx="15" cy="5" r="1.2" fill="#94a3b8"/>` +
+        `<circle cx="15" cy="12" r="1.2" fill="#94a3b8"/>` +
+        `<circle cx="15" cy="19" r="1.2" fill="#94a3b8"/>` +
+        `</svg>`;
+
+    // ── Single item row: [Handle] [DropZone with real widgets] ──
+    const itemRow: RowLayoutProps = {
+        type: "RowLayout",
+        columnSize: "grow",
+        borders: true,
+        borderRadius: 8,
+        borderWidth: 1,
+        padding: 8,
+        backgroundColor: "#ffffff",
+        children: [
+            // Left: drag handle decoration
+            {
+                type: "Container",
+                grow: 0,
+                children: [
+                    {
+                        type: "Image",
+                        document: dragHandleSvg,
+                        width: 14,
+                        height: 14
+                    }
+                ],
+                padding: 4
+            },
+            // Right: the LIVE DropZone — shows actual widgets placed by developer
+            {
+                type: "DropZone",
+                property: values.customItemContent as object,
+                placeholder: "⬇ Drop your content widgets here — each item row will display these widgets",
+                showDataSourceHeader: false,
+                grow: 1
+            }
+        ]
+    };
+
+    // ── Direction label in header ──
+    const directionLabel = isHorizontal ? "Horizontal Grid →" : "Vertical List ↓";
+
+    // ── Header bar: widget identity + current config summary ──
+    const headerBar: RowLayoutProps = {
+        type: "RowLayout",
+        columnSize: "grow",
+        backgroundColor: accentColor,
+        borderRadius: 6,
+        padding: 6,
+        children: [
+            {
+                type: "Text",
+                content: `⠿ PWB Container DataView  ·  ${directionLabel}`,
+                fontSize: 10,
+                fontColor: "#ffffff",
+                bold: true
+            }
+        ]
+    };
+
+    // ── Datasource wrapper: shows bound datasource name + one item row ──
+    const datasourceWrapper: DatasourceProps = {
+        type: "Datasource",
+        property: values.itemsSource as object | null,
+        child: itemRow
+    };
+
+    // ── Outer container: header + datasource row ──
+    return {
+        type: "Container",
+        borders: true,
+        borderRadius: 10,
+        borderWidth: 1,
+        padding: 8,
+        children: [headerBar, datasourceWrapper]
+    };
+}
+
+export function getCustomCaption(
+    values: PwbCustomizeContainerDataViewPreviewProps,
+    _platform: Platform
+): string {
+    const dir = values.layoutDirection === "horizontal" ? "↔ Horizontal" : "↕ Vertical";
+    const src = values.itemsSource ? "bound" : "no datasource";
+    return `PWB Container [${dir}] (${src})`;
 }

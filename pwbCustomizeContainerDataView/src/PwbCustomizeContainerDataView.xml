@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget id="pwb.pwbcustomizecontainerdataview.PwbCustomizeContainerDataView" pluginWidget="true" needsEntityContext="true" offlineCapable="true"
+        supportedPlatform="Web"
+        xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
+    <name>Pwb Customize Container Data View</name>
+    <description>Premium DataView Container widget supporting nested custom Mendix widgets and fluent Drag and Drop sorting.</description>
+    <icon/>
+    <properties>
+        <propertyGroup caption="Data Source">
+            <property key="itemsSource" type="datasource" isList="true" required="true">
+                <caption>Items Source</caption>
+                <description>Dynamic list of child items to display and sort inside the container</description>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Custom Content">
+            <property key="customItemContent" type="widgets" required="true" dataSource="itemsSource">
+                <caption>Custom Option Content</caption>
+                <description>Render custom Mendix widgets for each list item</description>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Sorting Persistence">
+            <property key="sortedAttribute" type="attribute" required="true">
+                <caption>Sorted IDs Attribute</caption>
+                <description>Attribute on the parent context entity (e.g. String type) to store the comma-separated sorted IDs of the items.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="onSortAction" type="action" required="false">
+                <caption>On Sort Complete Action</caption>
+                <description>Microflow or nanoflow triggered immediately when drag-and-drop sorting completes</description>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Aesthetics">
+            <property key="layoutDirection" type="enumeration" defaultValue="vertical">
+                <caption>Layout Direction</caption>
+                <description>Select list orientation layout format</description>
+                <enumerationValues>
+                    <enumerationValue key="vertical">Vertical List Column</enumerationValue>
+                    <enumerationValue key="horizontal">Horizontal Grid Row</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="accentColor" type="string" required="false" defaultValue="#3b82f6">
+                <caption>Accent Color (Hex)</caption>
+                <description>Theme color for active drag outlines, markers, and glows (e.g., #3b82f6)</description>
+            </property>
+            <property key="borderRadius" type="string" required="false" defaultValue="16px">
+                <caption>Border Radius</caption>
+                <description>Corner roundness of item rows and drop overlays (e.g., 16px, 8px, 0px)</description>
+            </property>
+        </propertyGroup>
+    </properties>
+</widget>

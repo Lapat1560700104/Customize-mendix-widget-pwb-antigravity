@@ -1,0 +1,196 @@
+/* Premium Drag & Drop sorting container styling */
+
+.pwb-customize-container-dataview-wrapper {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.pwb-drag-container {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --accent-color: #3b82f6;
+    --border-radius: 16px;
+    --accent-glow: rgba(59, 130, 246, 0.15);
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+    padding: 6px;
+}
+
+.pwb-drag-container * {
+    box-sizing: border-box;
+}
+
+/* Layout Orientations */
+.pwb-drag-container.pwb-direction-vertical {
+    flex-direction: column;
+}
+
+.pwb-drag-container.pwb-direction-horizontal {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+/* Draggable item card */
+.pwb-draggable-row-item {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    padding: 12px 16px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.015);
+    position: relative;
+    user-select: none;
+}
+
+.pwb-draggable-row-item:hover {
+    border-color: var(--slate-300);
+    box-shadow: var(--shadow-premium);
+}
+
+/* Active dragging state physics (Lower opacity + lift shadow) */
+.pwb-draggable-row-item.pwb-dragging {
+    opacity: 0.45;
+    border: 1px dashed var(--accent-color);
+    background: var(--slate-50);
+    transform: scale(0.97);
+    box-shadow: none;
+    z-index: 100;
+}
+
+/* Insertion indicator glow when dragging item over others */
+.pwb-drag-container.pwb-direction-vertical .pwb-draggable-row-item.pwb-drag-over {
+    border-top: 3.5px solid var(--accent-color);
+    box-shadow: 0 0 15px var(--accent-glow);
+    padding-top: 9.5px; /* Adjust padding to avoid height jumping */
+    background: var(--slate-50);
+}
+
+.pwb-drag-container.pwb-direction-horizontal .pwb-draggable-row-item.pwb-drag-over {
+    border-left: 3.5px solid var(--accent-color);
+    box-shadow: 0 0 15px var(--accent-glow);
+    padding-left: 12.5px;
+    background: var(--slate-50);
+}
+
+/* Drag handle on the left */
+.pwb-drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--slate-400);
+    cursor: grab;
+    margin-right: 14px;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.pwb-draggable-row-item:hover .pwb-drag-handle {
+    color: var(--slate-700);
+}
+
+.pwb-drag-handle:hover {
+    background: var(--slate-100);
+}
+
+.pwb-drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Draggable item custom Mendix widgets wrapper */
+.pwb-draggable-item-content {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+/* Premium Loading State */
+.pwb-loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 40px;
+    color: #64748b;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.pwb-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e2e8f0;
+    border-top-color: var(--accent-color, #3b82f6);
+    border-radius: 50%;
+    animation: pwb-spin 0.8s linear infinite;
+}
+
+@keyframes pwb-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Premium Illustrated Empty State */
+.pwb-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #475569;
+}
+
+.pwb-empty-icon {
+    color: #94a3b8;
+    margin-bottom: 16px;
+    animation: pwb-pulse 2s infinite ease-in-out;
+}
+
+@keyframes pwb-pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+}
+
+.pwb-empty-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.pwb-empty-subtitle {
+    font-size: 13px;
+    color: #64748b;
+    max-width: 320px;
+    line-height: 1.5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .pwb-drag-container.pwb-direction-horizontal {
+        flex-direction: column;
+    }
+}

@@ -858,4 +858,98 @@
     z-index: 10;
 }
 
+/* ==========================================
+   🚀 UPGRADES (v3.4.0): SELECT ALL ACTION BAR
+   ========================================== */
+
+.pwb-combobox-select-all-bar {
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--slate-100);
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+}
+
+.pwb-combobox-select-all-btn {
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 4px 6px;
+    border-radius: calc(var(--border-radius) * 0.3);
+    color: var(--slate-600);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+}
+
+.pwb-combobox-select-all-btn:hover,
+.pwb-combobox-select-all-btn:focus {
+    background: var(--slate-100);
+    color: var(--slate-800);
+}
+
+.pwb-combobox-select-all-checkbox {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--slate-300);
+    border-radius: 4px;
+    background: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    margin-right: 8px;
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+}
+
+.pwb-combobox-select-all-checkbox.pwb-checked {
+    border-color: var(--accent-color);
+    background-color: var(--accent-color);
+}
+
+.pwb-combobox-select-all-text {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pwb-combobox-select-all-count {
+    font-size: 11px;
+    color: var(--slate-400);
+    margin-left: 8px;
+    font-weight: 500;
+}
+
+.pwb-combobox-select-all-btn:hover .pwb-combobox-select-all-count {
+    color: var(--slate-500);
+}
+
+/* RTL support for Select All Bar */
+.pwb-combobox-wrapper[dir="rtl"] .pwb-combobox-select-all-bar {
+    border-bottom: 1px solid var(--slate-100);
+}
+
+.pwb-combobox-wrapper[dir="rtl"] .pwb-combobox-select-all-btn {
+    text-align: right;
+    flex-direction: row-reverse;
+}
+
+.pwb-combobox-wrapper[dir="rtl"] .pwb-combobox-select-all-checkbox {
+    margin-right: 0;
+    margin-left: 8px;
+}
+
+.pwb-combobox-wrapper[dir="rtl"] .pwb-combobox-select-all-count {
+    margin-left: 0;
+    margin-right: 8px;
+}
+
 

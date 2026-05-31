@@ -23,6 +23,9 @@ export function PwbComboBox({
     delimiter,
     maxVisibleTags,
     selectedAssociation,
+    showSelectAll,
+    selectAllText,
+    deselectAllText,
     placeholder,
     accentColor,
     searchHighlightColor,
@@ -300,6 +303,9 @@ export function PwbComboBox({
                 highlightColorMode={highlightColorMode}
                 searchDebounce={searchDebounce}
                 maxVisibleTags={maxVisibleTags}
+                showSelectAll={showSelectAll}
+                selectAllText={selectAllText}
+                deselectAllText={deselectAllText}
                 onCreateOption={handleCreateOption}
                 hasCreateAction={!!onCreateAction}
                 onCreateText={onCreateText}

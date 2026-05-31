@@ -35,6 +35,9 @@ export interface ComboBoxProps {
     highlightColorMode?: "accent" | "optionColor";
     searchDebounce?: number;
     maxVisibleTags?: number;
+    showSelectAll?: boolean;
+    selectAllText?: string;
+    deselectAllText?: string;
     onCreateOption?: (text: string) => void;
     hasCreateAction?: boolean;
     onCreateText?: string;
@@ -71,6 +74,9 @@ export function ComboBox({
     highlightColorMode = "accent",
     searchDebounce = 300,
     maxVisibleTags = 0,
+    showSelectAll = false,
+    selectAllText,
+    deselectAllText,
     onCreateOption,
     hasCreateAction = false,
     onCreateText,
@@ -177,6 +183,17 @@ export function ComboBox({
             (opt.selectedLabel && opt.selectedLabel.toLowerCase() === typedText.toLowerCase())
     );
     const showQuickCreator = hasCreateAction && typedText !== "" && !exactMatchExists;
+
+    // Select All / Deselect All computations (v3.4.0)
+    const searchQuery = debouncedSearchText.toLowerCase().trim();
+    const queryMatchedOptions = options.filter(
+        opt =>
+            opt.label.toLowerCase().includes(searchQuery) ||
+            (!!opt.subtitle && opt.subtitle.toLowerCase().includes(searchQuery))
+    );
+    const querySelectedOptions = queryMatchedOptions.filter(opt => selectedIds.includes(opt.id));
+    const isAllQuerySelected =
+        queryMatchedOptions.length > 0 && querySelectedOptions.length === queryMatchedOptions.length;
 
     // Grouping calculations:
     // Extract unique group names and sort them alphabetically, keeping empty group at the end
@@ -760,171 +777,218 @@ export function ComboBox({
                             </div>
                         )
                     ) : (
-                        <div
-                            className={`pwb-combobox-options-list ${
-                                dropdownLayout === "grid" ? "pwb-layout-grid" : ""
-                            }`}
-                            style={{ maxHeight: maxDropdownHeight }}
-                            onScroll={handleDropdownScroll}
-                        >
-                            <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
-                                {renderableItems.map(item => {
-                                    if (item.type === "header") {
-                                        const groupName = item.groupName || "";
-                                        const isCollapsed = !!item.isCollapsed;
-                                        return (
-                                            <li
-                                                key={`header-${groupName}`}
-                                                className="pwb-combobox-group-header"
-                                                onClick={e => {
-                                                    e.stopPropagation();
-                                                    toggleGroup(groupName);
-                                                }}
-                                            >
-                                                <div className="pwb-combobox-group-header-content">
-                                                    <span>{renderOptionLabel(groupName, debouncedSearchText)}</span>
-                                                    <span className="pwb-combobox-group-count">{item.count}</span>
-                                                </div>
-                                                <svg
-                                                    className={`pwb-combobox-group-chevron ${
-                                                        isCollapsed ? "pwb-collapsed" : ""
-                                                    }`}
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="2.5"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                >
-                                                    <polyline points="6 9 12 15 18 9"></polyline>
-                                                </svg>
-                                            </li>
-                                        );
-                                    }
-
-                                    const opt = item.option!;
-                                    const idx = item.index!;
-                                    const isSelected = !!item.isSelected;
-                                    const isFocused = !!item.isFocused;
-
-                                    const isDynamicHighlight = highlightColorMode === "optionColor" && !!opt.colorCode;
-                                    const optionStyle = isDynamicHighlight
-                                        ? ({
-                                              "--item-color-code": opt.colorCode,
-                                              "--item-glow-bg": `color-mix(in srgb, ${opt.colorCode} 8%, transparent)`,
-                                              "--item-glow-bg-strong": `color-mix(in srgb, ${opt.colorCode} 15%, transparent)`
-                                          } as any)
-                                        : {};
-
-                                    return (
-                                        <li
-                                            key={opt.id}
-                                            id={getOptionId(opt.id)}
-                                            className={`pwb-combobox-option-item ${
-                                                isSelected ? "pwb-option-selected" : ""
-                                            } ${isFocused ? "pwb-option-focused" : ""} ${
-                                                opt.subtitle ? "pwb-option-two-line" : ""
-                                            } ${isDynamicHighlight ? "pwb-highlight-dynamic" : ""}`}
-                                            style={optionStyle}
-                                            onClick={() => handleSelectOption(opt.id)}
-                                            onMouseEnter={() => setFocusedIndex(idx)}
-                                            role="option"
-                                            aria-selected={isSelected}
-                                        >
-                                            {/* Checkbox or Radio button on the left */}
-                                            {showOptionCheckbox && (
-                                                <div className="pwb-combobox-option-checkbox-wrapper">
-                                                    <div
-                                                        className={`pwb-combobox-option-checkbox ${
-                                                            selectionMode === "multi"
-                                                                ? "pwb-checkbox-multi"
-                                                                : "pwb-checkbox-single"
-                                                        }`}
-                                                    >
-                                                        {selectionMode === "multi"
-                                                            ? isSelected && (
-                                                                  <svg
-                                                                      className="pwb-combobox-option-checkbox-tick"
-                                                                      viewBox="0 0 24 24"
-                                                                  >
-                                                                      <polyline points="20 6 9 17 4 12"></polyline>
-                                                                  </svg>
-                                                              )
-                                                            : isSelected && (
-                                                                  <div className="pwb-combobox-option-checkbox-dot" />
-                                                              )}
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {shouldShowOptionAvatars && (
-                                                <div
-                                                    className="pwb-combobox-option-avatar-container"
-                                                    style={
-                                                        opt.colorCode
-                                                            ? {
-                                                                  backgroundColor: `color-mix(in srgb, ${opt.colorCode} 12%, transparent)`,
-                                                                  color: opt.colorCode,
-                                                                  borderColor: `color-mix(in srgb, ${opt.colorCode} 30%, transparent)`
-                                                              }
-                                                            : {
-                                                                  backgroundColor: `color-mix(in srgb, ${accentColor} 12%, transparent)`,
-                                                                  color: accentColor,
-                                                                  borderColor: `color-mix(in srgb, ${accentColor} 30%, transparent)`
-                                                              }
+                        <>
+                            {selectionMode === "multi" && showSelectAll && queryMatchedOptions.length > 0 && (
+                                <div className="pwb-combobox-select-all-bar">
+                                    <button
+                                        type="button"
+                                        className="pwb-combobox-select-all-btn"
+                                        onClick={e => {
+                                            e.stopPropagation();
+                                            if (isAllQuerySelected) {
+                                                querySelectedOptions.forEach(opt => onRemove(opt.id));
+                                            } else {
+                                                queryMatchedOptions.forEach(opt => {
+                                                    if (!selectedIds.includes(opt.id)) {
+                                                        onSelect(opt.id);
                                                     }
-                                                >
-                                                    {opt.imageUrl && !brokenImages[opt.id] ? (
-                                                        <img
-                                                            src={opt.imageUrl}
-                                                            className="pwb-combobox-option-avatar-img"
-                                                            onError={() => handleImageError(opt.id)}
-                                                            alt={opt.label}
-                                                        />
-                                                    ) : (
-                                                        <span className="pwb-combobox-option-avatar-initials">
-                                                            {getInitials(opt.label)}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            )}
-                                            <div
-                                                style={{
-                                                    flex: 1,
-                                                    display: "flex",
-                                                    flexDirection: "column",
-                                                    minWidth: 0
-                                                }}
-                                            >
-                                                <div className="pwb-combobox-option-label">
-                                                    {renderOptionLabel(opt.label, debouncedSearchText)}
-                                                </div>
-                                                {opt.subtitle && (
-                                                    <div className="pwb-combobox-option-subtitle">
-                                                        {renderOptionLabel(opt.subtitle, debouncedSearchText)}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            {isSelected && !showOptionCheckbox && (
-                                                <svg
-                                                    width="16"
-                                                    height="16"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="3"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    style={{ flexShrink: 0, marginLeft: "8px" }}
-                                                >
+                                                });
+                                            }
+                                        }}
+                                    >
+                                        <span
+                                            className={`pwb-combobox-select-all-checkbox ${
+                                                isAllQuerySelected ? "pwb-checked" : ""
+                                            }`}
+                                        >
+                                            {isAllQuerySelected && (
+                                                <svg className="pwb-combobox-option-checkbox-tick" viewBox="0 0 24 24">
                                                     <polyline points="20 6 9 17 4 12"></polyline>
                                                 </svg>
                                             )}
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                        </div>
+                                        </span>
+                                        <span className="pwb-combobox-select-all-text">
+                                            {isAllQuerySelected
+                                                ? deselectAllText || "ล้างทั้งหมด / Deselect All"
+                                                : selectAllText || "เลือกทั้งหมด / Select All"}
+                                        </span>
+                                        <span className="pwb-combobox-select-all-count">
+                                            (
+                                            {isAllQuerySelected
+                                                ? querySelectedOptions.length
+                                                : queryMatchedOptions.length - querySelectedOptions.length}
+                                            )
+                                        </span>
+                                    </button>
+                                </div>
+                            )}
+                            <div
+                                className={`pwb-combobox-options-list ${
+                                    dropdownLayout === "grid" ? "pwb-layout-grid" : ""
+                                }`}
+                                style={{ maxHeight: maxDropdownHeight }}
+                                onScroll={handleDropdownScroll}
+                            >
+                                <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+                                    {renderableItems.map(item => {
+                                        if (item.type === "header") {
+                                            const groupName = item.groupName || "";
+                                            const isCollapsed = !!item.isCollapsed;
+                                            return (
+                                                <li
+                                                    key={`header-${groupName}`}
+                                                    className="pwb-combobox-group-header"
+                                                    onClick={e => {
+                                                        e.stopPropagation();
+                                                        toggleGroup(groupName);
+                                                    }}
+                                                >
+                                                    <div className="pwb-combobox-group-header-content">
+                                                        <span>{renderOptionLabel(groupName, debouncedSearchText)}</span>
+                                                        <span className="pwb-combobox-group-count">{item.count}</span>
+                                                    </div>
+                                                    <svg
+                                                        className={`pwb-combobox-group-chevron ${
+                                                            isCollapsed ? "pwb-collapsed" : ""
+                                                        }`}
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="2.5"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                    >
+                                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                                    </svg>
+                                                </li>
+                                            );
+                                        }
+
+                                        const opt = item.option!;
+                                        const idx = item.index!;
+                                        const isSelected = !!item.isSelected;
+                                        const isFocused = !!item.isFocused;
+
+                                        const isDynamicHighlight =
+                                            highlightColorMode === "optionColor" && !!opt.colorCode;
+                                        const optionStyle = isDynamicHighlight
+                                            ? ({
+                                                  "--item-color-code": opt.colorCode,
+                                                  "--item-glow-bg": `color-mix(in srgb, ${opt.colorCode} 8%, transparent)`,
+                                                  "--item-glow-bg-strong": `color-mix(in srgb, ${opt.colorCode} 15%, transparent)`
+                                              } as any)
+                                            : {};
+
+                                        return (
+                                            <li
+                                                key={opt.id}
+                                                id={getOptionId(opt.id)}
+                                                className={`pwb-combobox-option-item ${
+                                                    isSelected ? "pwb-option-selected" : ""
+                                                } ${isFocused ? "pwb-option-focused" : ""} ${
+                                                    opt.subtitle ? "pwb-option-two-line" : ""
+                                                } ${isDynamicHighlight ? "pwb-highlight-dynamic" : ""}`}
+                                                style={optionStyle}
+                                                onClick={() => handleSelectOption(opt.id)}
+                                                onMouseEnter={() => setFocusedIndex(idx)}
+                                                role="option"
+                                                aria-selected={isSelected}
+                                            >
+                                                {/* Checkbox or Radio button on the left */}
+                                                {showOptionCheckbox && (
+                                                    <div className="pwb-combobox-option-checkbox-wrapper">
+                                                        <div
+                                                            className={`pwb-combobox-option-checkbox ${
+                                                                selectionMode === "multi"
+                                                                    ? "pwb-checkbox-multi"
+                                                                    : "pwb-checkbox-single"
+                                                            }`}
+                                                        >
+                                                            {selectionMode === "multi"
+                                                                ? isSelected && (
+                                                                      <svg
+                                                                          className="pwb-combobox-option-checkbox-tick"
+                                                                          viewBox="0 0 24 24"
+                                                                      >
+                                                                          <polyline points="20 6 9 17 4 12"></polyline>
+                                                                      </svg>
+                                                                  )
+                                                                : isSelected && (
+                                                                      <div className="pwb-combobox-option-checkbox-dot" />
+                                                                  )}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {shouldShowOptionAvatars && (
+                                                    <div
+                                                        className="pwb-combobox-option-avatar-container"
+                                                        style={
+                                                            opt.colorCode
+                                                                ? {
+                                                                      backgroundColor: `color-mix(in srgb, ${opt.colorCode} 12%, transparent)`,
+                                                                      color: opt.colorCode,
+                                                                      borderColor: `color-mix(in srgb, ${opt.colorCode} 30%, transparent)`
+                                                                  }
+                                                                : {
+                                                                      backgroundColor: `color-mix(in srgb, ${accentColor} 12%, transparent)`,
+                                                                      color: accentColor,
+                                                                      borderColor: `color-mix(in srgb, ${accentColor} 30%, transparent)`
+                                                                  }
+                                                        }
+                                                    >
+                                                        {opt.imageUrl && !brokenImages[opt.id] ? (
+                                                            <img
+                                                                src={opt.imageUrl}
+                                                                className="pwb-combobox-option-avatar-img"
+                                                                onError={() => handleImageError(opt.id)}
+                                                                alt={opt.label}
+                                                            />
+                                                        ) : (
+                                                            <span className="pwb-combobox-option-avatar-initials">
+                                                                {getInitials(opt.label)}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
+                                                <div
+                                                    style={{
+                                                        flex: 1,
+                                                        display: "flex",
+                                                        flexDirection: "column",
+                                                        minWidth: 0
+                                                    }}
+                                                >
+                                                    <div className="pwb-combobox-option-label">
+                                                        {renderOptionLabel(opt.label, debouncedSearchText)}
+                                                    </div>
+                                                    {opt.subtitle && (
+                                                        <div className="pwb-combobox-option-subtitle">
+                                                            {renderOptionLabel(opt.subtitle, debouncedSearchText)}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {isSelected && !showOptionCheckbox && (
+                                                    <svg
+                                                        width="16"
+                                                        height="16"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="3"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        style={{ flexShrink: 0, marginLeft: "8px" }}
+                                                    >
+                                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                                    </svg>
+                                                )}
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </div>
+                        </>
                     )}
                     {showQuickCreator && filteredOptions.length > 0 && (
                         <div className="pwb-combobox-popover-footer">

@@ -298,6 +298,11 @@ function App() {
     const [hasCreateAction, setHasCreateAction] = useState(true);
     const [onCreateText, setOnCreateText] = useState("+ Add '{value}' dynamically");
 
+    // New v3.4.0 Simulation States
+    const [showSelectAll, setShowSelectAll] = useState(true);
+    const [selectAllText, setSelectAllText] = useState("เลือกทั้งหมด / Select All");
+    const [deselectAllText, setDeselectAllText] = useState("ล้างทั้งหมด / Deselect All");
+
     // Delimited String simulator states
     const [delimiter, setDelimiter] = useState(",");
     const [simulatedStringVal, setSimulatedStringVal] = useState("");
@@ -688,32 +693,126 @@ function App() {
 
 
                                 {selectionMode === "multi" && (
-                                    <label
+                                    <div
                                         style={{
                                             display: "flex",
                                             flexDirection: "column",
-                                            gap: "6px",
-                                            fontSize: "12px",
-                                            color: "#94a3b8"
+                                            gap: "10px"
                                         }}
                                     >
-                                        <span>Tag Pill Style (สไตล์ของป้ายแท็ก)</span>
-                                        <select
-                                            value={tagStyle}
-                                            onChange={e => setTagStyle(e.target.value as "pill" | "avatar")}
+                                        <label
                                             style={{
-                                                background: "#1e293b",
-                                                color: "#f8fafc",
-                                                border: "1px solid rgba(255,255,255,0.06)",
-                                                borderRadius: "8px",
-                                                padding: "8px",
-                                                outline: "none"
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                gap: "6px",
+                                                fontSize: "12px",
+                                                color: "#94a3b8"
                                             }}
                                         >
-                                            <option value="pill">Standard Pill (ป้ายแท็กปกติ)</option>
-                                            <option value="avatar">Avatar Circle (มีวงกลมรูปอักษรย่อ)</option>
-                                        </select>
-                                    </label>
+                                            <span>Tag Pill Style (สไตล์ของป้ายแท็ก)</span>
+                                            <select
+                                                value={tagStyle}
+                                                onChange={e => setTagStyle(e.target.value as "pill" | "avatar")}
+                                                style={{
+                                                    background: "#1e293b",
+                                                    color: "#f8fafc",
+                                                    border: "1px solid rgba(255,255,255,0.06)",
+                                                    borderRadius: "8px",
+                                                    padding: "8px",
+                                                    outline: "none"
+                                                }}
+                                            >
+                                                <option value="pill">Standard Pill (ป้ายแท็กปกติ)</option>
+                                                <option value="avatar">Avatar Circle (มีวงกลมรูปอักษรย่อ)</option>
+                                            </select>
+                                        </label>
+
+                                        <div
+                                            style={{
+                                                borderTop: "1px solid rgba(255,255,255,0.05)",
+                                                paddingTop: "10px",
+                                                marginTop: "4px",
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                gap: "8px"
+                                            }}
+                                        >
+                                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                                <input
+                                                    id="showSelectAllCheck"
+                                                    type="checkbox"
+                                                    checked={showSelectAll}
+                                                    onChange={e => setShowSelectAll(e.target.checked)}
+                                                    style={{ cursor: "pointer" }}
+                                                />
+                                                <label
+                                                    htmlFor="showSelectAllCheck"
+                                                    style={{
+                                                        fontSize: "12px",
+                                                        color: "#cbd5e1",
+                                                        cursor: "pointer"
+                                                    }}
+                                                >
+                                                    Show Select All Bar (แสดงแถบเลือกทั้งหมด)
+                                                </label>
+                                            </div>
+
+                                            {showSelectAll && (
+                                                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                                                    <label
+                                                        style={{
+                                                            display: "flex",
+                                                            flexDirection: "column",
+                                                            gap: "4px",
+                                                            fontSize: "11px",
+                                                            color: "#94a3b8"
+                                                        }}
+                                                    >
+                                                        <span>Select All Label Text</span>
+                                                        <input
+                                                            type="text"
+                                                            value={selectAllText}
+                                                            onChange={e => setSelectAllText(e.target.value)}
+                                                            style={{
+                                                                background: "#1e293b",
+                                                                color: "#f8fafc",
+                                                                border: "1px solid rgba(255,255,255,0.06)",
+                                                                borderRadius: "8px",
+                                                                padding: "8px",
+                                                                outline: "none",
+                                                                fontSize: "12px"
+                                                            }}
+                                                        />
+                                                    </label>
+                                                    <label
+                                                        style={{
+                                                            display: "flex",
+                                                            flexDirection: "column",
+                                                            gap: "4px",
+                                                            fontSize: "11px",
+                                                            color: "#94a3b8"
+                                                        }}
+                                                    >
+                                                        <span>Deselect All Label Text</span>
+                                                        <input
+                                                            type="text"
+                                                            value={deselectAllText}
+                                                            onChange={e => setDeselectAllText(e.target.value)}
+                                                            style={{
+                                                                background: "#1e293b",
+                                                                color: "#f8fafc",
+                                                                border: "1px solid rgba(255,255,255,0.06)",
+                                                                borderRadius: "8px",
+                                                                padding: "8px",
+                                                                outline: "none",
+                                                                fontSize: "12px"
+                                                            }}
+                                                        />
+                                                    </label>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                 )}
 
                                 {selectionMode === "multi" && (
@@ -1830,6 +1929,9 @@ function App() {
                             showOptionCheckbox={showOptionCheckbox}
                             highlightColorMode={highlightColorMode}
                             maxVisibleTags={maxVisibleTags}
+                            showSelectAll={showSelectAll}
+                            selectAllText={selectAllText}
+                            deselectAllText={deselectAllText}
                             onCreateOption={handleCreateOption}
                             hasCreateAction={hasCreateAction}
                             onCreateText={onCreateText}

@@ -44,6 +44,9 @@ export interface PwbComboBoxContainerProps {
     selectedAttribute?: EditableValue<string | Big>;
     delimiter: string;
     maxVisibleTags?: number;
+    showSelectAll: boolean;
+    selectAllText: string;
+    deselectAllText: string;
     selectedAssociation?: ReferenceValue | ReferenceSetValue;
     placeholder: string;
     accentColor: string;
@@ -95,6 +98,9 @@ export interface PwbComboBoxPreviewProps {
     selectedAttribute: string;
     delimiter: string;
     maxVisibleTags: number | null;
+    showSelectAll: boolean;
+    selectAllText: string;
+    deselectAllText: string;
     selectedAssociation: string;
     placeholder: string;
     accentColor: string;

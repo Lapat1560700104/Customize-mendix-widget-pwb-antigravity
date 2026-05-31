@@ -8,66 +8,98 @@
     <icon/>
     <properties>
         <propertyGroup caption="Data Source">
-            <property key="sourceMode" type="enumeration" defaultValue="association">
-                <caption>Data Source Mode</caption>
-                <description>Choose whether options come from an Association/Datasource, or directly from an Enumeration/Boolean Attribute.</description>
-                <enumerationValues>
-                    <enumerationValue key="association">Association (Entity Datasource)</enumerationValue>
-                    <enumerationValue key="enumeration">Enumeration Attribute</enumerationValue>
-                    <enumerationValue key="boolean">Boolean Attribute</enumerationValue>
-                </enumerationValues>
-            </property>
-            <property key="optionsSource" type="datasource" isList="true" required="false">
-                <caption>Options Source</caption>
-                <description>Dynamic list of options to display in the dropdown</description>
-            </property>
-            <property key="optionLabel" type="expression" dataSource="optionsSource" required="false">
-                <caption>Option Label</caption>
-                <description>Expression to display text for each option item (e.g. $currentObject/AttributeName)</description>
-                <returnType type="String"/>
-            </property>
-            <property key="optionDetail" type="expression" dataSource="optionsSource" required="false">
-                <caption>Option Detail (Subtitle)</caption>
-                <description>Optional secondary text displayed below the option label (e.g. Email under Name)</description>
-                <returnType type="String"/>
-            </property>
-            <property key="optionGroup" type="expression" dataSource="optionsSource" required="false">
-                <caption>Option Group Category</caption>
-                <description>Optional expression to group option items by a category name (e.g. $currentObject/Category)</description>
-                <returnType type="String"/>
-            </property>
-            <property key="optionImage" type="expression" dataSource="optionsSource" required="false">
-                <caption>Option Image URL</caption>
-                <description>Optional expression to display a circular avatar image thumbnail (e.g. $currentObject/AvatarUrl)</description>
-                <returnType type="String"/>
-            </property>
-            <property key="sortOrder" type="enumeration" defaultValue="none">
-                <caption>Sort Dropdown Options</caption>
-                <description>Sort options alphabetically in ascending or descending order. None retains original data source sequence.</description>
-                <enumerationValues>
-                    <enumerationValue key="none">None (Datasource order)</enumerationValue>
-                    <enumerationValue key="asc">Ascending (A to Z)</enumerationValue>
-                    <enumerationValue key="desc">Descending (Z to A)</enumerationValue>
-                </enumerationValues>
-            </property>
-            <property key="sortField" type="enumeration" defaultValue="label">
-                <caption>Sort Field</caption>
-                <description>Specify the field of the option item to sort by.</description>
-                <enumerationValues>
-                    <enumerationValue key="label">Option Label</enumerationValue>
-                    <enumerationValue key="detail">Option Detail (Subtitle)</enumerationValue>
-                    <enumerationValue key="group">Option Group Category</enumerationValue>
-                </enumerationValues>
-            </property>
-            <property key="selectedOptionLabel" type="expression" dataSource="optionsSource" required="false">
-                <caption>Selected Option Label</caption>
-                <description>Optional expression to display a custom label format ONLY when the option is selected (e.g., a shorter tag name). If empty, Option Label is used.</description>
-                <returnType type="String"/>
-            </property>
-            <property key="enableGrouping" type="boolean" defaultValue="true">
-                <caption>Enable Grouping</caption>
-                <description>Enable or disable grouping of options by the Option Group Category expression</description>
-            </property>
+            <propertyGroup caption="1. Data Source Mode">
+                <property key="sourceMode" type="enumeration" defaultValue="association">
+                    <caption>Data Source Mode</caption>
+                    <description>Choose whether options come from an Association/Datasource, or directly from an Enumeration/Boolean Attribute.</description>
+                    <enumerationValues>
+                        <enumerationValue key="association">Association (Entity Datasource)</enumerationValue>
+                        <enumerationValue key="enumeration">Enumeration Attribute</enumerationValue>
+                        <enumerationValue key="boolean">Boolean Attribute</enumerationValue>
+                    </enumerationValues>
+                </property>
+            </propertyGroup>
+
+            <propertyGroup caption="2. Entity Datasource Config">
+                <property key="optionsSource" type="datasource" isList="true" required="false">
+                    <caption>Options Source</caption>
+                    <description>Dynamic list of options to display in the dropdown</description>
+                </property>
+                <property key="optionLabel" type="expression" dataSource="optionsSource" required="false">
+                    <caption>Option Label</caption>
+                    <description>Expression to display text for each option item (e.g. $currentObject/AttributeName)</description>
+                    <returnType type="String"/>
+                </property>
+                <property key="optionDetail" type="expression" dataSource="optionsSource" required="false">
+                    <caption>Option Detail (Subtitle)</caption>
+                    <description>Optional secondary text displayed below the option label (e.g. Email under Name)</description>
+                    <returnType type="String"/>
+                </property>
+                <property key="optionGroup" type="expression" dataSource="optionsSource" required="false">
+                    <caption>Option Group Category</caption>
+                    <description>Optional expression to group option items by a category name (e.g. $currentObject/Category)</description>
+                    <returnType type="String"/>
+                </property>
+                <property key="optionImage" type="expression" dataSource="optionsSource" required="false">
+                    <caption>Option Image URL</caption>
+                    <description>Optional expression to display a circular avatar image thumbnail (e.g. $currentObject/AvatarUrl)</description>
+                    <returnType type="String"/>
+                </property>
+                <property key="sortOrder" type="enumeration" defaultValue="none">
+                    <caption>Sort Dropdown Options</caption>
+                    <description>Sort options alphabetically in ascending or descending order. None retains original data source sequence.</description>
+                    <enumerationValues>
+                        <enumerationValue key="none">None (Datasource order)</enumerationValue>
+                        <enumerationValue key="asc">Ascending (A to Z)</enumerationValue>
+                        <enumerationValue key="desc">Descending (Z to A)</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="sortField" type="enumeration" defaultValue="label">
+                    <caption>Sort Field</caption>
+                    <description>Specify the field of the option item to sort by.</description>
+                    <enumerationValues>
+                        <enumerationValue key="label">Option Label</enumerationValue>
+                        <enumerationValue key="detail">Option Detail (Subtitle)</enumerationValue>
+                        <enumerationValue key="group">Option Group Category</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="selectedOptionLabel" type="expression" dataSource="optionsSource" required="false">
+                    <caption>Selected Option Label</caption>
+                    <description>Optional expression to display a custom label format ONLY when the option is selected (e.g., a shorter tag name). If empty, Option Label is used.</description>
+                    <returnType type="String"/>
+                </property>
+                <property key="enableGrouping" type="boolean" defaultValue="true">
+                    <caption>Enable Grouping</caption>
+                    <description>Enable or disable grouping of options by the Option Group Category expression</description>
+                </property>
+            </propertyGroup>
+
+            <propertyGroup caption="3. Boolean Mode Config">
+                <property key="booleanTrueLabel" type="string" required="false" defaultValue="Yes">
+                    <caption>Yes / True Display Label</caption>
+                    <description>Text to display for the 'True' option (e.g. Yes, Active, Enabled)</description>
+                </property>
+                <property key="booleanFalseLabel" type="string" required="false" defaultValue="No">
+                    <caption>No / False Display Label</caption>
+                    <description>Text to display for the 'False' option (e.g. No, Inactive, Disabled)</description>
+                </property>
+                <property key="booleanOutputFormat" type="enumeration" defaultValue="boolean">
+                    <caption>Output Value Format</caption>
+                    <description>Specify whether selected value is saved as a real Boolean (true/false) or custom String Key (e.g. 'active'/'inactive'). Ensure selectedAttribute type matches.</description>
+                    <enumerationValues>
+                        <enumerationValue key="boolean">Boolean Type (true / false)</enumerationValue>
+                        <enumerationValue key="string">String Key Type (Custom values)</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="booleanTrueValue" type="string" required="false" defaultValue="true">
+                    <caption>True String Value Key</caption>
+                    <description>The string key stored in database when selected 'True' (e.g. 'active', 'Y')</description>
+                </property>
+                <property key="booleanFalseValue" type="string" required="false" defaultValue="false">
+                    <caption>False String Value Key</caption>
+                    <description>The string key stored in database when selected 'False' (e.g. 'inactive', 'N')</description>
+                </property>
+            </propertyGroup>
         </propertyGroup>
 
         <propertyGroup caption="Selection">

@@ -13,6 +13,8 @@ export type SortOrderEnum = "none" | "asc" | "desc";
 
 export type SortFieldEnum = "label" | "detail" | "group";
 
+export type BooleanOutputFormatEnum = "boolean" | "string";
+
 export type SelectionModeEnum = "single" | "multi";
 
 export type SingleSelectStyleEnum = "text" | "pill" | "rich";
@@ -40,6 +42,11 @@ export interface PwbComboBoxContainerProps {
     sortField: SortFieldEnum;
     selectedOptionLabel?: ListExpressionValue<string>;
     enableGrouping: boolean;
+    booleanTrueLabel: string;
+    booleanFalseLabel: string;
+    booleanOutputFormat: BooleanOutputFormatEnum;
+    booleanTrueValue: string;
+    booleanFalseValue: string;
     selectionMode: SelectionModeEnum;
     singleSelectStyle: SingleSelectStyleEnum;
     showSelectedAvatar: boolean;
@@ -98,6 +105,11 @@ export interface PwbComboBoxPreviewProps {
     sortField: SortFieldEnum;
     selectedOptionLabel: string;
     enableGrouping: boolean;
+    booleanTrueLabel: string;
+    booleanFalseLabel: string;
+    booleanOutputFormat: BooleanOutputFormatEnum;
+    booleanTrueValue: string;
+    booleanFalseValue: string;
     selectionMode: SelectionModeEnum;
     singleSelectStyle: SingleSelectStyleEnum;
     showSelectedAvatar: boolean;

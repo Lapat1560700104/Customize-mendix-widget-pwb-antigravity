@@ -84,9 +84,11 @@ _This automatically builds the production JavaScript bundles, runs validations, 
 -   **selectionMode**: Choose between `Single Select` and `Multi Select` tags mode.
 -   **singleSelectStyle**: Choose selected presentation: traditional `text`, removable `pill` tag, or premium `rich` avatar card.
 -   **selectedAttribute**: Attribute to store single selected value (String/Integer) or multi delimited string.
--   **selectedAssociation**: Reference/ReferenceSet association to store selected object(s).
+-   **maxVisibleTags**: Maximum number of selected tags shown before collapsing in multi-select mode.
+-   **selectedAssociation**: Reference/ReferenceSet association to store selected object(s) (must link to optionsSource).
 -   **dropdownLayout**: Arrange dropdown list items vertically (`list`) or in a compact card grid (`grid`).
 -   **optionAvatarShape**: Style thumbnails as perfect circles (`circle`), squircle/rounded rectangles (`rounded`), or perfect squares (`square`).
 -   **showOptionCheckbox**: Display Left-aligned interactive checkboxes (multi) or radio buttons (single).
 -   **highlightColorMode**: Highlight hovered items with global `accent` color or dynamic unique `optionColor`.
+-   **searchDebounce**: Time in ms to wait after typing stops before filtering dropdown lists to optimize performance.
 -   **Aesthetic Parameters**: Corner roundness (`Border Radius`), backdrop-blur (`Background Blur`), and colors customizable straight from Mendix.

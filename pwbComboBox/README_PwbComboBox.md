@@ -50,7 +50,8 @@
 | `tagColorExpression` | Tag Color (Hex/CSS) | Expression (String) | No | - | Optional expression returning color code to style tag badges dynamically |
 | `selectedAttribute` | Selected Attribute | Attribute (String/Integer) | No | - | Stores selected key (Single Mode) or Delimited String (Multi Mode) |
 | `delimiter` | Delimiter | String | No | `,` | Separator character used to split/join multiple values in Multi Mode String attribute |
-| `selectedAssociation` | Selected Association | Association | No | - | Reference (Single) or ReferenceSet (Multi) association to store selected object |
+| `maxVisibleTags` | Max Visible Tags | Integer | Yes | `0` | Maximum number of selected tags shown before collapsing. Set to 0 to show all |
+| `selectedAssociation` | Selected Association | Association | No | - | Reference (Single) or ReferenceSet (Multi) association to store selected object. Must link to optionsSource |
 
 ### 3. Aesthetics
 
@@ -66,6 +67,7 @@
 | `optionAvatarShape` | Option Avatar Shape | Enumeration | Yes | `circle` | Shape for thumbnail pictures: `circle` (round), `rounded` (squircle), `square` (sharp block) |
 | `showOptionCheckbox` | Show Checkbox/Radio Option | Boolean | Yes | `false` | Display Left-aligned interactive checkboxes (multi) or radio buttons (single) |
 | `highlightColorMode` | Hover Highlight Color Mode | Enumeration | Yes | `accent` | Highlight color on hover: `accent` (theme main) or `optionColor` (item dynamic category color) |
+| `searchDebounce` | Search Input Debounce (ms) | Integer | Yes | `300` | Time in ms to wait after typing stops before filtering dropdown lists |
 
 ---
 

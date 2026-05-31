@@ -44,7 +44,7 @@ export interface PwbComboBoxContainerProps {
     tagColorExpression?: ListExpressionValue<string>;
     selectedAttribute?: EditableValue<string | Big>;
     delimiter: string;
-    maxVisibleTags?: number;
+    maxVisibleTags: number;
     showSelectAll: boolean;
     selectAllText: string;
     deselectAllText: string;
@@ -62,7 +62,7 @@ export interface PwbComboBoxContainerProps {
     customItemContent?: ListWidgetValue;
     showOptionCheckbox: boolean;
     highlightColorMode: HighlightColorModeEnum;
-    searchDebounce?: number;
+    searchDebounce: number;
     onCreateAction?: ActionValue;
     onCreateText: string;
     noOptionsMessage: string;

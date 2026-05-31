@@ -50,6 +50,61 @@ export interface ComboBoxProps {
     errorText?: string;
 }
 
+const normalizeText = (str: string): string => {
+    if (!str) {
+        return "";
+    }
+    return (
+        str
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            // Thai vowels above/below and tone marks:
+            // \u0e31 (Mai Han-Akat), \u0e34-\u0e3a (Sara I, Ii, Ue, Uee, U, Uu, Phinthu), \u0e47-\u0e4e (Mai Tai-Khu, tone marks, Karan)
+            .replace(/[\u0e31\u0e34-\u0e3a\u0e47-\u0e4e]/g, "")
+            .toLowerCase()
+    );
+};
+
+const EmptySearchIllustration = (): ReactElement => (
+    <svg className="pwb-combobox-empty-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Glow effect */}
+        <circle cx="60" cy="60" r="30" fill="var(--accent-glow)" opacity="0.5" />
+
+        {/* Sleek dashboard card grid */}
+        <rect x="35" y="35" width="50" height="6" rx="3" fill="var(--slate-200)" />
+        <rect x="35" y="47" width="35" height="6" rx="3" fill="var(--slate-200)" opacity="0.6" />
+        <rect x="35" y="59" width="42" height="6" rx="3" fill="var(--slate-200)" opacity="0.4" />
+
+        {/* Floating Glassmorphic Magnifier */}
+        <g className="pwb-floating-magnifier">
+            <circle
+                cx="70"
+                cy="70"
+                r="18"
+                stroke="var(--accent-color)"
+                strokeWidth="3"
+                strokeLinecap="round"
+                fill="rgba(255,255,255,0.75)"
+            />
+            <line
+                x1="83"
+                y1="83"
+                x2="98"
+                y2="98"
+                stroke="var(--accent-color)"
+                strokeWidth="3.5"
+                strokeLinecap="round"
+            />
+            <circle cx="66" cy="66" r="6" fill="#fff" opacity="0.5" />
+        </g>
+
+        {/* Tiny stars/particles */}
+        <circle cx="28" cy="28" r="2.5" fill="var(--accent-color)" opacity="0.6" className="pwb-particle-star-1" />
+        <circle cx="95" cy="40" r="1.5" fill="var(--accent-color)" opacity="0.4" className="pwb-particle-star-2" />
+        <circle cx="85" cy="20" r="2" fill="var(--accent-color)" opacity="0.7" className="pwb-particle-star-3" />
+    </svg>
+);
+
 export function ComboBox({
     options,
     selectedIds,
@@ -100,6 +155,7 @@ export function ComboBox({
     const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
     const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
     const [isTagsExpanded, setIsTagsExpanded] = useState(false);
+    const [popoverPlacement, setPopoverPlacement] = useState<"bottom" | "top">("bottom");
 
     const popoverRef = useRef<HTMLDivElement>(null);
     const inputContainerRef = useRef<HTMLDivElement>(null);
@@ -157,13 +213,54 @@ export function ComboBox({
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    // Handle collision detection and smart flipping of dropdown popover placement
+    useEffect(() => {
+        if (!isOpen || !inputContainerRef.current) {
+            return;
+        }
+
+        const updatePlacement = (): void => {
+            const inputRect = inputContainerRef.current!.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+
+            const spaceBelow = viewportHeight - inputRect.bottom;
+            const spaceAbove = inputRect.top;
+
+            // Extract numerical value of maxDropdownHeight (e.g. "300px" or "40vh")
+            let parsedHeight = 320;
+            if (maxDropdownHeight.endsWith("px")) {
+                parsedHeight = parseInt(maxDropdownHeight, 10);
+            } else if (maxDropdownHeight.endsWith("vh")) {
+                parsedHeight = (parseFloat(maxDropdownHeight) / 100) * viewportHeight;
+            }
+
+            const requiredSpace = parsedHeight + 50;
+
+            if (spaceBelow < requiredSpace && spaceAbove > spaceBelow) {
+                setPopoverPlacement("top");
+            } else {
+                setPopoverPlacement("bottom");
+            }
+        };
+
+        updatePlacement();
+
+        window.addEventListener("resize", updatePlacement);
+        window.addEventListener("scroll", updatePlacement, true);
+
+        return () => {
+            window.removeEventListener("resize", updatePlacement);
+            window.removeEventListener("scroll", updatePlacement, true);
+        };
+    }, [isOpen, maxDropdownHeight]);
+
     // Filter options in real-time (matching primary label or secondary subtitle)
     const getFilteredOptions = (): ComboBoxOption[] => {
-        const query = debouncedSearchText.toLowerCase().trim();
+        const query = normalizeText(debouncedSearchText);
         const matches = (opt: ComboBoxOption): boolean => {
             return (
-                opt.label.toLowerCase().includes(query) ||
-                (!!opt.subtitle && opt.subtitle.toLowerCase().includes(query))
+                normalizeText(opt.label).includes(query) ||
+                (!!opt.subtitle && normalizeText(opt.subtitle).includes(query))
             );
         };
 
@@ -179,17 +276,17 @@ export function ComboBox({
     const typedText = searchText.trim();
     const exactMatchExists = options.some(
         opt =>
-            opt.label.toLowerCase() === typedText.toLowerCase() ||
-            (opt.selectedLabel && opt.selectedLabel.toLowerCase() === typedText.toLowerCase())
+            normalizeText(opt.label) === normalizeText(typedText) ||
+            (opt.selectedLabel && normalizeText(opt.selectedLabel) === normalizeText(typedText))
     );
     const showQuickCreator = hasCreateAction && typedText !== "" && !exactMatchExists;
 
     // Select All / Deselect All computations (v3.4.0)
-    const searchQuery = debouncedSearchText.toLowerCase().trim();
+    const searchQuery = normalizeText(debouncedSearchText);
     const queryMatchedOptions = options.filter(
         opt =>
-            opt.label.toLowerCase().includes(searchQuery) ||
-            (!!opt.subtitle && opt.subtitle.toLowerCase().includes(searchQuery))
+            normalizeText(opt.label).includes(searchQuery) ||
+            (!!opt.subtitle && normalizeText(opt.subtitle).includes(searchQuery))
     );
     const querySelectedOptions = queryMatchedOptions.filter(opt => selectedIds.includes(opt.id));
     const isAllQuerySelected =
@@ -412,28 +509,95 @@ export function ComboBox({
         }
     };
 
-    // Render option list label with high-fidelity highlights
+    // Render option list label with high-fidelity highlights (supports Thai/Latin diacritics normalization)
     const renderOptionLabel = (label: string, search: string): ReactElement => {
         if (!search.trim()) {
             return <span>{label}</span>;
         }
-        const escaped = search.replace(new RegExp("[-/\\\\^$*+?.()|[\\]{}]", "g"), "\\$&");
-        const regex = new RegExp(`(${escaped})`, "gi");
-        const parts = label.split(regex);
 
-        return (
-            <span>
-                {parts.map((part, i) =>
-                    regex.test(part) ? (
+        const normalizedLabel = normalizeText(label);
+        const normalizedSearch = normalizeText(search);
+
+        if (!normalizedLabel || !normalizedSearch || !normalizedLabel.includes(normalizedSearch)) {
+            return <span>{label}</span>;
+        }
+
+        // We want to find matches in normalizedLabel, and map the matches to the original label.
+        // Let's do a character-by-character mapping of original string index to normalized string index!
+        const originalToNormalizedIndices: number[] = [];
+        let normalizedIdx = 0;
+        for (const char of label) {
+            const normalizedChar = normalizeText(char);
+            if (normalizedChar === "") {
+                originalToNormalizedIndices.push(normalizedIdx);
+            } else {
+                originalToNormalizedIndices.push(normalizedIdx);
+                normalizedIdx += normalizedChar.length;
+            }
+        }
+
+        // Now we find all occurrences of normalizedSearch in normalizedLabel
+        const matchRanges: Array<{ start: number; end: number }> = [];
+        let searchIndex = 0;
+        while ((searchIndex = normalizedLabel.indexOf(normalizedSearch, searchIndex)) !== -1) {
+            matchRanges.push({
+                start: searchIndex,
+                end: searchIndex + normalizedSearch.length
+            });
+            searchIndex += normalizedSearch.length;
+        }
+
+        if (matchRanges.length === 0) {
+            return <span>{label}</span>;
+        }
+
+        // Map these normalized ranges back to original label character indices!
+        // An original character at index `i` is highlighted if its mapped index (originalToNormalizedIndices[i])
+        // falls within any of the matchRanges.
+        const highlightedChars: boolean[] = new Array(label.length).fill(false);
+        for (let i = 0; i < label.length; i++) {
+            const normIdx = originalToNormalizedIndices[i];
+            const isMatch = matchRanges.some(r => normIdx >= r.start && normIdx < r.end);
+            highlightedChars[i] = isMatch;
+        }
+
+        // Now reconstruct the React node by grouping sequential highlighted/unhighlighted characters!
+        const elements: Array<string | ReactElement> = [];
+        let currentChunk = "";
+        let isCurrentChunkHighlighted = highlightedChars[0];
+
+        for (let i = 0; i < label.length; i++) {
+            if (highlightedChars[i] === isCurrentChunkHighlighted) {
+                currentChunk += label[i];
+            } else {
+                if (isCurrentChunkHighlighted) {
+                    elements.push(
                         <mark key={i} className="pwb-search-highlight">
-                            {part}
+                            {currentChunk}
                         </mark>
-                    ) : (
-                        part
-                    )
-                )}
-            </span>
-        );
+                    );
+                } else {
+                    elements.push(currentChunk);
+                }
+                currentChunk = label[i];
+                isCurrentChunkHighlighted = highlightedChars[i];
+            }
+        }
+
+        if (currentChunk) {
+            const key = label.length;
+            if (isCurrentChunkHighlighted) {
+                elements.push(
+                    <mark key={key} className="pwb-search-highlight">
+                        {currentChunk}
+                    </mark>
+                );
+            } else {
+                elements.push(currentChunk);
+            }
+        }
+
+        return <span>{elements}</span>;
     };
 
     const getInitials = (label: string): string => {
@@ -748,7 +912,12 @@ export function ComboBox({
 
             {/* Dropdown list popover panel */}
             {isOpen && (
-                <div ref={popoverRef} id={listboxId} className="pwb-combobox-popover animate-slide-up" role="listbox">
+                <div
+                    ref={popoverRef}
+                    id={listboxId}
+                    className={`pwb-combobox-popover animate-slide-up pwb-placement-${popoverPlacement}`}
+                    role="listbox"
+                >
                     {isLoading ? (
                         <div className="pwb-combobox-status-message">
                             <div className="pwb-combobox-spinner" />
@@ -756,7 +925,8 @@ export function ComboBox({
                         </div>
                     ) : filteredOptions.length === 0 ? (
                         showQuickCreator ? (
-                            <div className="pwb-combobox-status-message pwb-combobox-empty-create">
+                            <div className="pwb-combobox-empty-illustration-container pwb-combobox-empty-create">
+                                <EmptySearchIllustration />
                                 <span className="pwb-no-options-text">{noOptionsMessage}</span>
                                 <button
                                     type="button"
@@ -772,8 +942,9 @@ export function ComboBox({
                                 </button>
                             </div>
                         ) : (
-                            <div className="pwb-combobox-status-message">
-                                <span>{noOptionsMessage}</span>
+                            <div className="pwb-combobox-empty-illustration-container">
+                                <EmptySearchIllustration />
+                                <span className="pwb-no-options-text">{noOptionsMessage}</span>
                             </div>
                         )
                     ) : (

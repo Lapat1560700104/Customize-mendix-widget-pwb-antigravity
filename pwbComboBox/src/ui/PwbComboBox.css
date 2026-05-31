@@ -217,6 +217,28 @@
     animation: slideUp 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
+/* Upward Flipping and custom slide animations */
+.pwb-combobox-popover.pwb-placement-top {
+    top: auto;
+    bottom: calc(100% + 8px);
+    transform-origin: bottom;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.99);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.pwb-combobox-popover.pwb-placement-top.animate-slide-up {
+    animation: slideDown 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
 /* Dropdown Options List */
 .pwb-combobox-options-list {
     list-style: none;
@@ -308,6 +330,65 @@
 
 @keyframes pwb-spin {
     to { transform: rotate(360deg); }
+}
+
+/* Illustrated Empty Search States */
+.pwb-combobox-empty-illustration-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 18px 24px;
+    text-align: center;
+}
+
+.pwb-combobox-empty-illustration-container.pwb-combobox-empty-create {
+    padding: 24px 18px 18px;
+}
+
+.pwb-combobox-empty-svg {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 12px;
+}
+
+/* Animations for Empty Search Illustration Elements */
+.pwb-floating-magnifier {
+    animation: pwbFloatMagnifier 3.5s ease-in-out infinite;
+    transform-origin: 70px 70px;
+}
+
+@keyframes pwbFloatMagnifier {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-6px) rotate(5deg);
+    }
+}
+
+.pwb-particle-star-1 {
+    animation: pwbPulseStar 2s ease-in-out infinite alternate;
+    transform-origin: 28px 28px;
+}
+.pwb-particle-star-2 {
+    animation: pwbPulseStar 1.6s ease-in-out infinite alternate 0.4s;
+    transform-origin: 95px 40px;
+}
+.pwb-particle-star-3 {
+    animation: pwbPulseStar 2.4s ease-in-out infinite alternate 0.2s;
+    transform-origin: 85px 20px;
+}
+
+@keyframes pwbPulseStar {
+    0% {
+        transform: scale(0.7);
+        opacity: 0.25;
+    }
+    100% {
+        transform: scale(1.3);
+        opacity: 0.85;
+    }
 }
 
 /* Validation Alert Message */

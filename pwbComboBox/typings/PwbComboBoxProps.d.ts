@@ -31,8 +31,8 @@ export interface PwbComboBoxContainerProps {
     style?: CSSProperties;
     tabIndex?: number;
     sourceMode: SourceModeEnum;
-    optionsSource: ListValue;
-    optionLabel: ListExpressionValue<string>;
+    optionsSource?: ListValue;
+    optionLabel?: ListExpressionValue<string>;
     optionDetail?: ListExpressionValue<string>;
     optionGroup?: ListExpressionValue<string>;
     optionImage?: ListExpressionValue<string>;

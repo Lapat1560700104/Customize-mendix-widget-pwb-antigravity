@@ -146,20 +146,44 @@ export function getProperties(
 export function check(values: PwbComboBoxPreviewProps): Problem[] {
     const errors: Problem[] = [];
 
-    if (values.sourceMode === "enumeration" || values.sourceMode === "boolean") {
+    if (values.sourceMode === "enumeration") {
         if (!values.selectedAttribute) {
             errors.push({
                 property: "selectedAttribute",
                 severity: "error",
-                message: "Please bind 'Selected Attribute' to store your selection."
+                message: "A Selected Attribute is required when Data Source Mode is 'Enumeration Attribute'."
+            });
+        }
+    } else if (values.sourceMode === "boolean") {
+        if (!values.selectedAttribute) {
+            errors.push({
+                property: "selectedAttribute",
+                severity: "error",
+                message: "A Selected Attribute is required when Data Source Mode is 'Boolean Attribute'."
             });
         }
     } else {
+        // ── Association Mode (Mendix Entity Source) ──
+        if (!values.optionsSource) {
+            errors.push({
+                property: "optionsSource",
+                severity: "error",
+                message: "Options Source is required when Data Source Mode is 'Association (Entity Datasource)'."
+            });
+        }
+        if (!values.optionLabel) {
+            errors.push({
+                property: "optionLabel",
+                severity: "error",
+                message: "Option Label is required when Data Source Mode is 'Association (Entity Datasource)'."
+            });
+        }
+
         if (values.selectionMode === "single") {
             if (!values.selectedAttribute && !values.selectedAssociation) {
                 errors.push({
                     property: "selectedAttribute",
-                    severity: "warning",
+                    severity: "error",
                     message:
                         "Please bind either 'Selected Attribute' or 'Selected Association' to save the selected option."
                 });
@@ -168,7 +192,7 @@ export function check(values: PwbComboBoxPreviewProps): Problem[] {
             if (!values.selectedAttribute && !values.selectedAssociation) {
                 errors.push({
                     property: "selectedAssociation",
-                    severity: "warning",
+                    severity: "error",
                     message:
                         "Please bind either 'Selected Association' (ReferenceSet) or 'Selected Attribute' (Delimited String) to save the multiple selections."
                 });

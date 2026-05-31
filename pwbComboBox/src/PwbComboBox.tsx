@@ -61,7 +61,8 @@ export function PwbComboBox({
             : assoc?.readOnly === true || selectedAttribute?.readOnly === true;
 
     // 2. Fetch loading state
-    const isLoading = sourceMode === "association" ? optionsSource && optionsSource.status === "loading" : false;
+    const isLoading =
+        sourceMode === "association" ? (optionsSource ? optionsSource.status === "loading" : false) : false;
 
     // 3. Map options according to sourceMode
     const options: ComboBoxOption[] = [];
@@ -71,7 +72,7 @@ export function PwbComboBox({
             optionsSource.items.forEach(item => {
                 options.push({
                     id: item.id,
-                    label: optionLabel.get(item).value || "",
+                    label: optionLabel ? optionLabel.get(item).value || "" : "",
                     subtitle: optionDetail ? optionDetail.get(item).value || "" : undefined,
                     groupName: optionGroup ? optionGroup.get(item).value : undefined,
                     colorCode: tagColorExpression ? tagColorExpression.get(item).value : undefined,

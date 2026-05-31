@@ -17,11 +17,11 @@
                     <enumerationValue key="boolean">Boolean Attribute</enumerationValue>
                 </enumerationValues>
             </property>
-            <property key="optionsSource" type="datasource" isList="true" required="true">
+            <property key="optionsSource" type="datasource" isList="true" required="false">
                 <caption>Options Source</caption>
                 <description>Dynamic list of options to display in the dropdown</description>
             </property>
-            <property key="optionLabel" type="expression" dataSource="optionsSource" required="true">
+            <property key="optionLabel" type="expression" dataSource="optionsSource" required="false">
                 <caption>Option Label</caption>
                 <description>Expression to display text for each option item (e.g. $currentObject/AttributeName)</description>
                 <returnType type="String"/>

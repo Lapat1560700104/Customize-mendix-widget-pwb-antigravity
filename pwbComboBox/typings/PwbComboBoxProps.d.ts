@@ -38,7 +38,6 @@ export interface PwbComboBoxContainerProps {
     optionDetail?: ListExpressionValue<string>;
     optionGroup?: ListExpressionValue<string>;
     optionImage?: ListExpressionValue<string>;
-    optionsSort?: any;
     selectedOptionLabel?: ListExpressionValue<string>;
     enableGrouping: boolean;
     booleanTrueLabel: string;
@@ -100,7 +99,6 @@ export interface PwbComboBoxPreviewProps {
     optionDetail: string;
     optionGroup: string;
     optionImage: string;
-    optionsSort: any;
     selectedOptionLabel: string;
     enableGrouping: boolean;
     booleanTrueLabel: string;

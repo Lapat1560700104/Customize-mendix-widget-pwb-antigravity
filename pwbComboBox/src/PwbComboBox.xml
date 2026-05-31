@@ -74,10 +74,6 @@
                     <description>Optional expression to display a circular avatar image thumbnail (e.g. $currentObject/AvatarUrl)</description>
                     <returnType type="String"/>
                 </property>
-                <property key="optionsSort" type="sorting" dataSource="optionsSource" required="false">
-                    <caption>Sort Options</caption>
-                    <description>Sort options by entity attributes</description>
-                </property>
                 <property key="selectedOptionLabel" type="expression" dataSource="optionsSource" required="false">
                     <caption>Selected Option Label</caption>
                     <description>Optional expression to display a custom label format ONLY when the option is selected (e.g., a shorter tag name). If empty, Option Label is used.</description>

@@ -12,6 +12,7 @@ export function PwbComboBox({
     optionGroup,
     optionImage,
     sortOrder,
+    sortField,
     selectedOptionLabel,
     selectionMode,
     singleSelectStyle,
@@ -20,9 +21,11 @@ export function PwbComboBox({
     tagColorExpression,
     selectedAttribute,
     delimiter,
+    maxVisibleTags,
     selectedAssociation,
     placeholder,
     accentColor,
+    searchHighlightColor,
     borderRadius,
     bgBlur,
     popoverBg,
@@ -32,6 +35,8 @@ export function PwbComboBox({
     showOptionCheckbox,
     highlightColorMode,
     searchDebounce,
+    onCreateAction,
+    onCreateText,
     noOptionsMessage,
     loadingMessage,
     clearButtonTitle,
@@ -66,10 +71,26 @@ export function PwbComboBox({
         : [];
 
     // Apply sorting if configured
-    if (sortOrder === "asc") {
-        options.sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: "base", numeric: true }));
-    } else if (sortOrder === "desc") {
-        options.sort((a, b) => b.label.localeCompare(a.label, undefined, { sensitivity: "base", numeric: true }));
+    if (sortOrder && sortOrder !== "none") {
+        const fieldKey = sortField || "label";
+        options.sort((a, b) => {
+            let valA = "";
+            let valB = "";
+
+            if (fieldKey === "label") {
+                valA = a.label;
+                valB = b.label;
+            } else if (fieldKey === "detail") {
+                valA = a.subtitle || "";
+                valB = b.subtitle || "";
+            } else if (fieldKey === "group") {
+                valA = a.groupName || "";
+                valB = b.groupName || "";
+            }
+
+            const comparison = valA.localeCompare(valB, undefined, { sensitivity: "base", numeric: true });
+            return sortOrder === "asc" ? comparison : -comparison;
+        });
     }
 
     // 4. Retrieve currently selected IDs
@@ -143,7 +164,7 @@ export function PwbComboBox({
                 const serializedValue = currentIds
                     .map(cid => {
                         const opt = options.find(o => o.id === cid);
-                        return opt ? (opt.selectedLabel || opt.label) : cid;
+                        return opt ? opt.selectedLabel || opt.label : cid;
                     })
                     .join(delim + " ");
                 selectedAttribute.setValue(serializedValue);
@@ -173,7 +194,7 @@ export function PwbComboBox({
                     const serializedValue = currentIds
                         .map(cid => {
                             const opt = options.find(o => o.id === cid);
-                            return opt ? (opt.selectedLabel || opt.label) : cid;
+                            return opt ? opt.selectedLabel || opt.label : cid;
                         })
                         .join(delim + " ");
                     selectedAttribute.setValue(serializedValue);
@@ -197,6 +218,25 @@ export function PwbComboBox({
             if (selectedAttribute) {
                 selectedAttribute.setValue(undefined);
             }
+        }
+    };
+
+    const handleCreateOption = (text: string): void => {
+        if (selectionMode === "single") {
+            if (selectedAttribute) {
+                selectedAttribute.setValue(text);
+            }
+        } else {
+            if (selectedAttribute) {
+                const currentVal = selectedAttribute.value ? String(selectedAttribute.value) : "";
+                const delim = delimiter || ",";
+                const newVal = currentVal.trim() === "" ? text : `${currentVal}${delim} ${text}`;
+                selectedAttribute.setValue(newVal);
+            }
+        }
+
+        if (onCreateAction && onCreateAction.canExecute && !onCreateAction.isExecuting) {
+            onCreateAction.execute();
         }
     };
 
@@ -249,6 +289,7 @@ export function PwbComboBox({
                 isLoading={isLoading}
                 placeholder={placeholder}
                 accentColor={safeAccentColor}
+                searchHighlightColor={searchHighlightColor}
                 borderRadius={safeBorderRadius}
                 bgBlur={safeBgBlur}
                 popoverBg={safePopoverBg}
@@ -258,6 +299,10 @@ export function PwbComboBox({
                 showOptionCheckbox={showOptionCheckbox}
                 highlightColorMode={highlightColorMode}
                 searchDebounce={searchDebounce}
+                maxVisibleTags={maxVisibleTags}
+                onCreateOption={handleCreateOption}
+                hasCreateAction={!!onCreateAction}
+                onCreateText={onCreateText}
                 noOptionsMessage={noOptionsMessage}
                 loadingMessage={loadingMessage}
                 clearButtonTitle={clearButtonTitle}

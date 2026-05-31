@@ -284,6 +284,7 @@ function App() {
 
     // New v3.2.0 simulation states
     const [sortOrder, setSortOrder] = useState<"none" | "asc" | "desc">("none");
+    const [sortField, setSortField] = useState<"label" | "detail" | "group">("label");
     const [singleSelectStyle, setSingleSelectStyle] = useState<"text" | "pill" | "rich">("text");
     const [showSelectedAvatar, setShowSelectedAvatar] = useState(true);
     const [dropdownLayout, setDropdownLayout] = useState<"list" | "grid">("list");
@@ -291,14 +292,26 @@ function App() {
     const [showOptionCheckbox, setShowOptionCheckbox] = useState(false);
     const [highlightColorMode, setHighlightColorMode] = useState<"accent" | "optionColor">("accent");
 
+    // New v3.3.0 Simulation States
+    const [maxVisibleTags, setMaxVisibleTags] = useState(2);
+    const [searchHighlightColor, setSearchHighlightColor] = useState("#f43f5e");
+    const [hasCreateAction, setHasCreateAction] = useState(true);
+    const [onCreateText, setOnCreateText] = useState("+ Add '{value}' dynamically");
+
     // Delimited String simulator states
     const [delimiter, setDelimiter] = useState(",");
     const [simulatedStringVal, setSimulatedStringVal] = useState("");
 
     // Dataset and Loader States
     const [datasetKey, setDatasetKey] = useState<keyof typeof DATASETS>("fruits");
+    const [optionsList, setOptionsList] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isEmpty, setIsEmpty] = useState(false);
+
+    // Set optionsList on dataset switch
+    useEffect(() => {
+        setOptionsList(DATASETS[datasetKey]);
+    }, [datasetKey]);
 
     // Aesthetics Config
     const [placeholder, setPlaceholder] = useState("ค้นหาและเลือกข้อมูล...");
@@ -325,7 +338,7 @@ function App() {
     // Get Active Options list based on simulation controls
     let activeOptions = isEmpty
         ? []
-        : DATASETS[datasetKey].map(opt => ({
+        : optionsList.map(opt => ({
               ...opt,
               // Dynamically strip properties if toggled off to simulate optional mapping
               subtitle: showSubtitles ? opt.subtitle : undefined,
@@ -335,10 +348,26 @@ function App() {
           }));
 
     // Apply sorting in playground if simulated
-    if (sortOrder === "asc") {
-        activeOptions = [...activeOptions].sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: "base", numeric: true }));
-    } else if (sortOrder === "desc") {
-        activeOptions = [...activeOptions].sort((a, b) => b.label.localeCompare(a.label, undefined, { sensitivity: "base", numeric: true }));
+    if (sortOrder && sortOrder !== "none") {
+        const fieldKey = sortField || "label";
+        activeOptions = [...activeOptions].sort((a, b) => {
+            let valA = "";
+            let valB = "";
+            
+            if (fieldKey === "label") {
+                valA = a.label;
+                valB = b.label;
+            } else if (fieldKey === "detail") {
+                valA = a.subtitle || "";
+                valB = b.subtitle || "";
+            } else if (fieldKey === "group") {
+                valA = a.groupName || "";
+                valB = b.groupName || "";
+            }
+            
+            const comparison = valA.localeCompare(valB, undefined, { sensitivity: "base", numeric: true });
+            return sortOrder === "asc" ? comparison : -comparison;
+        });
     }
 
     // Reset selected IDs when changing selection modes to prevent overflow
@@ -351,7 +380,7 @@ function App() {
         const delim = delimiter || ",";
         if (selectionMode === "single") {
             if (selectedIds.length > 0) {
-                const opt = DATASETS[datasetKey].find(o => o.id === selectedIds[0]);
+                const opt = optionsList.find(o => o.id === selectedIds[0]);
                 setSimulatedStringVal(opt ? opt.label : "");
             } else {
                 setSimulatedStringVal("");
@@ -359,13 +388,13 @@ function App() {
         } else {
             const serialized = selectedIds
                 .map(id => {
-                    const opt = DATASETS[datasetKey].find(o => o.id === id);
+                    const opt = optionsList.find(o => o.id === id);
                     return opt ? opt.label : id;
                 })
                 .join(delim + " ");
             setSimulatedStringVal(serialized);
         }
-    }, [selectedIds, delimiter, datasetKey, selectionMode]);
+    }, [selectedIds, delimiter, optionsList, selectionMode]);
 
     // Bidirectional sync: Parse manually typed string attribute values back into selectedIds
     const handleStringValChange = (val: string) => {
@@ -377,7 +406,7 @@ function App() {
 
         const delim = delimiter || ",";
         if (selectionMode === "single") {
-            const matched = DATASETS[datasetKey].find(o => o.id === val.trim() || o.label === val.trim());
+            const matched = optionsList.find(o => o.id === val.trim() || o.label === val.trim());
             if (matched) {
                 setSelectedIds([matched.id]);
             } else {
@@ -387,7 +416,7 @@ function App() {
             const tokens = val.split(delim).map(t => t.trim());
             const matchedIds: string[] = [];
             tokens.forEach(token => {
-                const matched = DATASETS[datasetKey].find(o => o.id === token || o.label === token);
+                const matched = optionsList.find(o => o.id === token || o.label === token);
                 if (matched && !matchedIds.includes(matched.id)) {
                     matchedIds.push(matched.id);
                 }
@@ -413,6 +442,27 @@ function App() {
 
     const handleClear = () => {
         setSelectedIds([]);
+    };
+
+    // Simulate database creation and instant selection
+    const handleCreateOption = (text: string) => {
+        const newId = `created_${Date.now()}`;
+        const newOption = {
+            id: newId,
+            label: text,
+            subtitle: `สร้างขึ้นด่วนผ่าน Inline Creator | ID: ${newId}`,
+            groupName: "รายการที่สร้างใหม่ (Newly Created)",
+            colorCode: "#a855f7",
+            imageUrl: undefined,
+            rawObject: { id: newId, isCreated: true }
+        };
+        setOptionsList(prev => [...prev, newOption]);
+        
+        if (selectionMode === "single") {
+            setSelectedIds([newId]);
+        } else {
+            setSelectedIds(prev => [...prev, newId]);
+        }
     };
 
     return (
@@ -605,6 +655,36 @@ function App() {
                                         <option value="desc">Descending Alphabetical (Z-A / ฮ-ก)</option>
                                     </select>
                                 </label>
+
+                                <label
+                                    style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "6px",
+                                        fontSize: "12px",
+                                        color: "#94a3b8",
+                                        marginTop: "8px"
+                                    }}
+                                >
+                                    <span>Sort Option Field (ฟิลด์ที่ต้องการจัดเรียง)</span>
+                                    <select
+                                        value={sortField}
+                                        onChange={e => setSortField(e.target.value as "label" | "detail" | "group")}
+                                        style={{
+                                            background: "#1e293b",
+                                            color: "#f8fafc",
+                                            border: "1px solid rgba(255,255,255,0.06)",
+                                            borderRadius: "8px",
+                                            padding: "8px",
+                                            outline: "none"
+                                        }}
+                                    >
+                                        <option value="label">Option Label (ชื่อหลัก)</option>
+                                        <option value="detail">Option Detail / Subtitle (รายละเอียดแถวย่อย)</option>
+                                        <option value="group">Option Group Category (ชื่อกลุ่มหมวดหมู่)</option>
+                                    </select>
+                                </label>
+
 
 
                                 {selectionMode === "multi" && (
@@ -948,6 +1028,97 @@ function App() {
                                             <option value="optionColor">Dynamic Option Color (ใช้รหัสสีกำกับตัวเลือก)</option>
                                         </select>
                                     </label>
+
+                                    {/* Collapsible tags limit */}
+                                    {selectionMode === "multi" && (
+                                        <label
+                                            style={{
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                gap: "4px",
+                                                fontSize: "12px",
+                                                color: "#94a3b8",
+                                                marginTop: "8px"
+                                            }}
+                                        >
+                                            <span>Max Visible Tags (จำนวนแท็กสูงสุดที่แสดงก่อนย่อ)</span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value={maxVisibleTags}
+                                                onChange={e => setMaxVisibleTags(parseInt(e.target.value) || 0)}
+                                                style={{
+                                                    background: "#1e293b",
+                                                    color: "#f8fafc",
+                                                    border: "1px solid rgba(255,255,255,0.06)",
+                                                    borderRadius: "8px",
+                                                    padding: "8px",
+                                                    outline: "none",
+                                                    fontSize: "12px"
+                                                }}
+                                            />
+                                        </label>
+                                    )}
+
+                                    {/* Inline Option Creator Action */}
+                                    <div
+                                        style={{
+                                            borderTop: "1px solid rgba(255,255,255,0.05)",
+                                            paddingTop: "10px",
+                                            marginTop: "12px",
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "8px"
+                                        }}
+                                    >
+                                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                            <input
+                                                id="hasCreateActionCheck"
+                                                type="checkbox"
+                                                checked={hasCreateAction}
+                                                onChange={e => setHasCreateAction(e.target.checked)}
+                                                style={{ cursor: "pointer" }}
+                                            />
+                                            <label
+                                                htmlFor="hasCreateActionCheck"
+                                                style={{
+                                                    fontSize: "12px",
+                                                    color: "#cbd5e1",
+                                                    cursor: "pointer"
+                                                }}
+                                            >
+                                                Enable Inline Option Creator (เปิดโหมดสร้างตัวเลือกด่วน)
+                                            </label>
+                                        </div>
+
+                                        {hasCreateAction && (
+                                            <label
+                                                style={{
+                                                    display: "flex",
+                                                    flexDirection: "column",
+                                                    gap: "4px",
+                                                    fontSize: "11px",
+                                                    color: "#94a3b8"
+                                                }}
+                                            >
+                                                <span>Create Button Text Template</span>
+                                                <input
+                                                    type="text"
+                                                    value={onCreateText}
+                                                    onChange={e => setOnCreateText(e.target.value)}
+                                                    style={{
+                                                        background: "#1e293b",
+                                                        color: "#f8fafc",
+                                                        border: "1px solid rgba(255,255,255,0.06)",
+                                                        borderRadius: "8px",
+                                                        padding: "8px",
+                                                        outline: "none",
+                                                        fontSize: "12px"
+                                                    }}
+                                                />
+                                            </label>
+                                        )}
+                                    </div>
                                 </div>
 
 
@@ -1131,6 +1302,49 @@ function App() {
                                             type="text"
                                             value={accentColor}
                                             onChange={e => setAccentColor(e.target.value)}
+                                            style={{
+                                                flex: 1,
+                                                background: "#1e293b",
+                                                color: "#f8fafc",
+                                                border: "1px solid rgba(255,255,255,0.06)",
+                                                borderRadius: "8px",
+                                                padding: "8px",
+                                                outline: "none",
+                                                fontSize: "12px"
+                                            }}
+                                        />
+                                    </div>
+                                </label>
+
+                                <label
+                                    style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "4px",
+                                        fontSize: "12px",
+                                        color: "#94a3b8",
+                                        marginTop: "8px"
+                                    }}
+                                >
+                                    <span>Search Term Highlight Color (สีเน้นคำค้นหา)</span>
+                                    <div style={{ display: "flex", gap: "8px" }}>
+                                        <input
+                                            type="color"
+                                            value={searchHighlightColor}
+                                            onChange={e => setSearchHighlightColor(e.target.value)}
+                                            style={{
+                                                width: "38px",
+                                                height: "38px",
+                                                border: "none",
+                                                borderRadius: "8px",
+                                                background: "transparent",
+                                                cursor: "pointer"
+                                            }}
+                                        />
+                                        <input
+                                            type="text"
+                                            value={searchHighlightColor}
+                                            onChange={e => setSearchHighlightColor(e.target.value)}
                                             style={{
                                                 flex: 1,
                                                 background: "#1e293b",
@@ -1586,6 +1800,7 @@ function App() {
                             {
                                 width: "100%",
                                 "--accent-color": accentColor,
+                                "--search-highlight-color": searchHighlightColor || accentColor,
                                 "--border-radius": borderRadius,
                                 "--bg-blur": bgBlur,
                                 "--popover-bg": popoverBg
@@ -1605,6 +1820,7 @@ function App() {
                             isLoading={isLoading}
                             placeholder={placeholder}
                             accentColor={accentColor}
+                            searchHighlightColor={searchHighlightColor}
                             borderRadius={borderRadius}
                             bgBlur={bgBlur}
                             popoverBg={popoverBg}
@@ -1613,6 +1829,10 @@ function App() {
                             optionAvatarShape={optionAvatarShape}
                             showOptionCheckbox={showOptionCheckbox}
                             highlightColorMode={highlightColorMode}
+                            maxVisibleTags={maxVisibleTags}
+                            onCreateOption={handleCreateOption}
+                            hasCreateAction={hasCreateAction}
+                            onCreateText={onCreateText}
                             noOptionsMessage={noOptionsMessage}
                             loadingMessage={loadingMessage}
                             clearButtonTitle={clearButtonTitle}

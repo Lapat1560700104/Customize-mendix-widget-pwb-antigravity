@@ -79,6 +79,7 @@ _This automatically builds the production JavaScript bundles, runs validations, 
 -   **optionsSource**: Dynamic list of objects to populate the dropdown.
 -   **optionLabel**: Text expression to display for each option item.
 -   **sortOrder**: Sort options alphabetically (`asc` / `desc`) or keep datasource sequence.
+-   **sortField**: Specify item field to sort by: Option Label (`label`), Subtitle/Detail (`detail`), or Group Category (`group`).
 -   **selectedOptionLabel**: Expression to show custom label format ONLY when selected.
 -   **selectionMode**: Choose between `Single Select` and `Multi Select` tags mode.
 -   **singleSelectStyle**: Choose selected presentation: traditional `text`, removable `pill` tag, or premium `rich` avatar card.

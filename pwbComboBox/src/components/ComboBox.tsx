@@ -24,6 +24,7 @@ export interface ComboBoxProps {
     isLoading: boolean;
     placeholder: string;
     accentColor: string;
+    searchHighlightColor?: string;
     borderRadius: string;
     bgBlur: string;
     popoverBg: string;
@@ -33,6 +34,10 @@ export interface ComboBoxProps {
     showOptionCheckbox?: boolean;
     highlightColorMode?: "accent" | "optionColor";
     searchDebounce?: number;
+    maxVisibleTags?: number;
+    onCreateOption?: (text: string) => void;
+    hasCreateAction?: boolean;
+    onCreateText?: string;
     noOptionsMessage: string;
     loadingMessage: string;
     clearButtonTitle: string;
@@ -55,6 +60,7 @@ export function ComboBox({
     isLoading,
     placeholder,
     accentColor,
+    searchHighlightColor,
     borderRadius,
     bgBlur,
     popoverBg,
@@ -64,6 +70,10 @@ export function ComboBox({
     showOptionCheckbox = false,
     highlightColorMode = "accent",
     searchDebounce = 300,
+    maxVisibleTags = 0,
+    onCreateOption,
+    hasCreateAction = false,
+    onCreateText,
     noOptionsMessage,
     loadingMessage,
     clearButtonTitle,
@@ -83,6 +93,7 @@ export function ComboBox({
     const [visibleCount, setVisibleCount] = useState(50);
     const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
     const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
+    const [isTagsExpanded, setIsTagsExpanded] = useState(false);
 
     const popoverRef = useRef<HTMLDivElement>(null);
     const inputContainerRef = useRef<HTMLDivElement>(null);
@@ -93,7 +104,7 @@ export function ComboBox({
         if (!isOpen) {
             if (selectionMode === "single" && selectedIds.length > 0) {
                 const selectedOption = options.find(o => o.id === selectedIds[0]);
-                setSearchText(selectedOption ? (selectedOption.selectedLabel || selectedOption.label) : "");
+                setSearchText(selectedOption ? selectedOption.selectedLabel || selectedOption.label : "");
             } else {
                 setSearchText("");
             }
@@ -158,6 +169,14 @@ export function ComboBox({
     };
 
     const filteredOptions = getFilteredOptions();
+
+    const typedText = searchText.trim();
+    const exactMatchExists = options.some(
+        opt =>
+            opt.label.toLowerCase() === typedText.toLowerCase() ||
+            (opt.selectedLabel && opt.selectedLabel.toLowerCase() === typedText.toLowerCase())
+    );
+    const showQuickCreator = hasCreateAction && typedText !== "" && !exactMatchExists;
 
     // Grouping calculations:
     // Extract unique group names and sort them alphabetically, keeping empty group at the end
@@ -360,6 +379,10 @@ export function ComboBox({
             e.preventDefault();
             if (isOpen && focusedIndex >= 0 && focusedIndex < visibleFilteredOptions.length) {
                 handleSelectOption(visibleFilteredOptions[focusedIndex].id);
+            } else if (isOpen && showQuickCreator) {
+                onCreateOption?.(typedText);
+                setSearchText("");
+                setIsOpen(false);
             } else if (!isOpen) {
                 setIsOpen(true);
             }
@@ -408,7 +431,8 @@ export function ComboBox({
     };
 
     const hasSelection = selectedIds.length > 0;
-    const selectedOption = selectionMode === "single" && hasSelection ? options.find(o => o.id === selectedIds[0]) : null;
+    const selectedOption =
+        selectionMode === "single" && hasSelection ? options.find(o => o.id === selectedIds[0]) : null;
 
     const avatarShapeClass =
         optionAvatarShape === "rounded"
@@ -432,6 +456,7 @@ export function ComboBox({
             style={
                 {
                     "--accent-color": accentColor,
+                    "--search-highlight-color": searchHighlightColor || accentColor,
                     "--border-radius": borderRadius,
                     "--bg-blur": bgBlur,
                     "--popover-bg": popoverBg
@@ -452,8 +477,10 @@ export function ComboBox({
                 }}
             >
                 {/* Pill/Rich display for Single Select */}
-                {selectionMode === "single" && hasSelection && !isOpen && (
-                    singleSelectStyle === "pill" ? (
+                {selectionMode === "single" &&
+                    hasSelection &&
+                    !isOpen &&
+                    (singleSelectStyle === "pill" ? (
                         <div
                             className="pwb-combobox-single-pill-display"
                             style={
@@ -519,19 +546,19 @@ export function ComboBox({
                                     {selectedOption?.selectedLabel || selectedOption?.label}
                                 </span>
                                 {selectedOption?.subtitle && (
-                                    <span className="pwb-combobox-single-rich-subtitle">
-                                        {selectedOption.subtitle}
-                                    </span>
+                                    <span className="pwb-combobox-single-rich-subtitle">{selectedOption.subtitle}</span>
                                 )}
                             </div>
                         </div>
-                    ) : null
-                )}
+                    ) : null)}
 
                 {/* Selected Tag Pills (Multi-Select) */}
                 {selectionMode === "multi" && (
                     <div className="pwb-combobox-tags-list">
-                        {selectedIds.map(id => {
+                        {(maxVisibleTags > 0 && selectedIds.length > maxVisibleTags && !isTagsExpanded
+                            ? selectedIds.slice(0, maxVisibleTags)
+                            : selectedIds
+                        ).map(id => {
                             const option = options.find(o => o.id === id);
                             if (!option) {
                                 return null;
@@ -593,6 +620,35 @@ export function ComboBox({
                                 </div>
                             );
                         })}
+
+                        {/* Collapsed tags badge */}
+                        {maxVisibleTags > 0 &&
+                            selectedIds.length > maxVisibleTags &&
+                            (!isTagsExpanded ? (
+                                <button
+                                    type="button"
+                                    className="pwb-tag-collapsed-pill"
+                                    onClick={e => {
+                                        e.stopPropagation();
+                                        setIsTagsExpanded(true);
+                                    }}
+                                    aria-label={`Show ${selectedIds.length - maxVisibleTags} more selected items`}
+                                >
+                                    +{selectedIds.length - maxVisibleTags} more
+                                </button>
+                            ) : (
+                                <button
+                                    type="button"
+                                    className="pwb-tag-collapsed-pill pwb-tag-expanded-collapse"
+                                    onClick={e => {
+                                        e.stopPropagation();
+                                        setIsTagsExpanded(false);
+                                    }}
+                                    aria-label="Collapse tag list"
+                                >
+                                    Collapse
+                                </button>
+                            ))}
                     </div>
                 )}
 
@@ -682,9 +738,27 @@ export function ComboBox({
                             <span>{loadingMessage}</span>
                         </div>
                     ) : filteredOptions.length === 0 ? (
-                        <div className="pwb-combobox-status-message">
-                            <span>{noOptionsMessage}</span>
-                        </div>
+                        showQuickCreator ? (
+                            <div className="pwb-combobox-status-message pwb-combobox-empty-create">
+                                <span className="pwb-no-options-text">{noOptionsMessage}</span>
+                                <button
+                                    type="button"
+                                    className="pwb-combobox-inline-create-btn"
+                                    onClick={e => {
+                                        e.stopPropagation();
+                                        onCreateOption?.(typedText);
+                                        setSearchText("");
+                                        setIsOpen(false);
+                                    }}
+                                >
+                                    {onCreateText ? onCreateText.replace("{value}", typedText) : `+ Add "${typedText}"`}
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="pwb-combobox-status-message">
+                                <span>{noOptionsMessage}</span>
+                            </div>
+                        )
                     ) : (
                         <div
                             className={`pwb-combobox-options-list ${
@@ -767,20 +841,18 @@ export function ComboBox({
                                                                 : "pwb-checkbox-single"
                                                         }`}
                                                     >
-                                                        {selectionMode === "multi" ? (
-                                                            isSelected && (
-                                                                <svg
-                                                                    className="pwb-combobox-option-checkbox-tick"
-                                                                    viewBox="0 0 24 24"
-                                                                >
-                                                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                                                </svg>
-                                                            )
-                                                        ) : (
-                                                            isSelected && (
-                                                                <div className="pwb-combobox-option-checkbox-dot" />
-                                                            )
-                                                        )}
+                                                        {selectionMode === "multi"
+                                                            ? isSelected && (
+                                                                  <svg
+                                                                      className="pwb-combobox-option-checkbox-tick"
+                                                                      viewBox="0 0 24 24"
+                                                                  >
+                                                                      <polyline points="20 6 9 17 4 12"></polyline>
+                                                                  </svg>
+                                                              )
+                                                            : isSelected && (
+                                                                  <div className="pwb-combobox-option-checkbox-dot" />
+                                                              )}
                                                     </div>
                                                 </div>
                                             )}
@@ -854,6 +926,22 @@ export function ComboBox({
                             </ul>
                         </div>
                     )}
+                    {showQuickCreator && filteredOptions.length > 0 && (
+                        <div className="pwb-combobox-popover-footer">
+                            <button
+                                type="button"
+                                className="pwb-combobox-inline-create-btn"
+                                onClick={e => {
+                                    e.stopPropagation();
+                                    onCreateOption?.(typedText);
+                                    setSearchText("");
+                                    setIsOpen(false);
+                                }}
+                            >
+                                {onCreateText ? onCreateText.replace("{value}", typedText) : `+ Add "${typedText}"`}
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -877,4 +965,3 @@ export function ComboBox({
         </div>
     );
 }
-

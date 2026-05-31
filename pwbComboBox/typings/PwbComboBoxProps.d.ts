@@ -4,10 +4,12 @@
  * @author Mendix Widgets Framework Team
  */
 import { CSSProperties } from "react";
-import { DynamicValue, EditableValue, ListValue, ListExpressionValue, ReferenceValue, ReferenceSetValue } from "mendix";
+import { ActionValue, DynamicValue, EditableValue, ListValue, ListExpressionValue, ReferenceValue, ReferenceSetValue } from "mendix";
 import { Big } from "big.js";
 
 export type SortOrderEnum = "none" | "asc" | "desc";
+
+export type SortFieldEnum = "label" | "detail" | "group";
 
 export type SelectionModeEnum = "single" | "multi";
 
@@ -32,6 +34,7 @@ export interface PwbComboBoxContainerProps {
     optionGroup?: ListExpressionValue<string>;
     optionImage?: ListExpressionValue<string>;
     sortOrder: SortOrderEnum;
+    sortField: SortFieldEnum;
     selectedOptionLabel?: ListExpressionValue<string>;
     selectionMode: SelectionModeEnum;
     singleSelectStyle: SingleSelectStyleEnum;
@@ -40,9 +43,11 @@ export interface PwbComboBoxContainerProps {
     tagColorExpression?: ListExpressionValue<string>;
     selectedAttribute?: EditableValue<string | Big>;
     delimiter: string;
+    maxVisibleTags?: number;
     selectedAssociation?: ReferenceValue | ReferenceSetValue;
     placeholder: string;
     accentColor: string;
+    searchHighlightColor: string;
     borderRadius: string;
     bgBlur: string;
     popoverBg: string;
@@ -52,6 +57,8 @@ export interface PwbComboBoxContainerProps {
     showOptionCheckbox: boolean;
     highlightColorMode: HighlightColorModeEnum;
     searchDebounce?: number;
+    onCreateAction?: ActionValue;
+    onCreateText: string;
     noOptionsMessage: string;
     loadingMessage: string;
     clearButtonTitle: string;
@@ -78,6 +85,7 @@ export interface PwbComboBoxPreviewProps {
     optionGroup: string;
     optionImage: string;
     sortOrder: SortOrderEnum;
+    sortField: SortFieldEnum;
     selectedOptionLabel: string;
     selectionMode: SelectionModeEnum;
     singleSelectStyle: SingleSelectStyleEnum;
@@ -86,9 +94,11 @@ export interface PwbComboBoxPreviewProps {
     tagColorExpression: string;
     selectedAttribute: string;
     delimiter: string;
+    maxVisibleTags: number | null;
     selectedAssociation: string;
     placeholder: string;
     accentColor: string;
+    searchHighlightColor: string;
     borderRadius: string;
     bgBlur: string;
     popoverBg: string;
@@ -98,6 +108,8 @@ export interface PwbComboBoxPreviewProps {
     showOptionCheckbox: boolean;
     highlightColorMode: HighlightColorModeEnum;
     searchDebounce: number | null;
+    onCreateAction: {} | null;
+    onCreateText: string;
     noOptionsMessage: string;
     loadingMessage: string;
     clearButtonTitle: string;

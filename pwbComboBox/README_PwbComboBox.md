@@ -36,6 +36,7 @@
 | `optionGroup` | Option Group Category | Expression (String) | No | - | Expression to group option items by a category name (e.g. `$currentObject/Category`) |
 | `optionImage` | Option Image URL | Expression (String) | No | - | Expression to render dynamic profile avatar thumbnails (e.g. `$currentObject/AvatarUrl`) |
 | `sortOrder` | Sort Dropdown Options | Enumeration | Yes | `none` | Options: `none` (Datasource sequence), `asc` (A to Z), `desc` (Z to A) |
+| `sortField` | Sort Field | Enumeration | Yes | `label` | Specify item field to sort: `label` (Option Label), `detail` (Option Detail/Subtitle), `group` (Group Category) |
 | `selectedOptionLabel` | Selected Option Label | Expression (String) | No | - | Optional expression to render custom label format ONLY when selected |
 
 ### 2. Selection

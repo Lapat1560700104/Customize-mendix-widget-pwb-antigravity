@@ -275,10 +275,10 @@
 
 /* Search Term Highlight */
 .pwb-search-highlight {
-    color: var(--accent-color);
+    color: var(--search-highlight-color, var(--accent-color));
     font-weight: 700;
-    background: rgba(59, 130, 246, 0.05);
-    padding: 0 1px;
+    background: color-mix(in srgb, var(--search-highlight-color, var(--accent-color)) 12%, transparent);
+    padding: 0 2px;
     border-radius: 2px;
 }
 
@@ -758,6 +758,104 @@
 
 .pwb-combobox-option-item.pwb-option-selected.pwb-option-focused.pwb-highlight-dynamic {
     background-color: var(--item-glow-bg-strong) !important;
+}
+
+/* ==========================================
+   🚀 UPGRADES (v3.3.0): COLLAPSIBLE BADGES & INLINE QUICK CREATOR
+   ========================================== */
+
+/* Collapsed tag badge */
+.pwb-tag-collapsed-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    background: var(--slate-100);
+    border: 1px dashed var(--slate-300);
+    border-radius: calc(var(--border-radius) * 0.4);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate-600);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    outline: none;
+}
+
+.pwb-tag-collapsed-pill:hover,
+.pwb-tag-collapsed-pill:focus {
+    background: var(--accent-light);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.pwb-tag-expanded-collapse {
+    border-style: solid;
+    background: rgba(239, 68, 68, 0.05);
+    border-color: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.pwb-tag-expanded-collapse:hover,
+.pwb-tag-expanded-collapse:focus {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+    color: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+}
+
+/* Inline Option Creator */
+.pwb-combobox-empty-create {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px !important;
+    padding: 20px 14px !important;
+}
+
+.pwb-no-options-text {
+    color: var(--slate-400);
+    font-size: 13px;
+}
+
+.pwb-combobox-inline-create-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 10px 16px;
+    background: #ffffff;
+    border: 1px dashed var(--accent-color);
+    border-radius: calc(var(--border-radius) * 0.4);
+    color: var(--accent-color);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    box-sizing: border-box;
+}
+
+.pwb-combobox-inline-create-btn:hover,
+.pwb-combobox-inline-create-btn:focus {
+    background: var(--accent-light);
+    border-style: solid;
+    box-shadow: 0 2px 8px var(--accent-glow);
+    transform: translateY(-1px);
+}
+
+.pwb-combobox-inline-create-btn:active {
+    transform: translateY(0);
+}
+
+.pwb-combobox-popover-footer {
+    padding: 6px;
+    border-top: 1px solid var(--slate-100);
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
 }
 
 

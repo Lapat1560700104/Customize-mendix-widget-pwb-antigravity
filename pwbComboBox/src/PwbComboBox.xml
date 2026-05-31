@@ -41,6 +41,15 @@
                     <enumerationValue key="desc">Descending (Z to A)</enumerationValue>
                 </enumerationValues>
             </property>
+            <property key="sortField" type="enumeration" defaultValue="label">
+                <caption>Sort Field</caption>
+                <description>Specify the field of the option item to sort by.</description>
+                <enumerationValues>
+                    <enumerationValue key="label">Option Label</enumerationValue>
+                    <enumerationValue key="detail">Option Detail (Subtitle)</enumerationValue>
+                    <enumerationValue key="group">Option Group Category</enumerationValue>
+                </enumerationValues>
+            </property>
             <property key="selectedOptionLabel" type="expression" dataSource="optionsSource" required="false">
                 <caption>Selected Option Label</caption>
                 <description>Optional expression to display a custom label format ONLY when the option is selected (e.g., a shorter tag name). If empty, Option Label is used.</description>
@@ -95,6 +104,10 @@
                 <caption>Delimiter (Multi Mode String Only)</caption>
                 <description>Delimiter character used to separate values in Multi Mode String attribute (e.g. , or ; or |)</description>
             </property>
+            <property key="maxVisibleTags" type="integer" defaultValue="0" required="false">
+                <caption>Max Visible Tags</caption>
+                <description>Maximum number of selected tags shown on input before collapsing. Set to 0 to show all.</description>
+            </property>
             <property key="selectedAssociation" type="association" required="false">
                 <caption>Selected Association (Object Reference)</caption>
                 <description>Reference (for Single Mode) or ReferenceSet (for Multi Mode) association to store selected object(s)</description>
@@ -113,6 +126,10 @@
             <property key="accentColor" type="string" required="false" defaultValue="#3b82f6">
                 <caption>Accent Color (Hex)</caption>
                 <description>Accent theme color (e.g. Hex code: #3b82f6)</description>
+            </property>
+            <property key="searchHighlightColor" type="string" required="false">
+                <caption>Search Highlight Color</caption>
+                <description>Optional Hex/CSS color code for matching search term highlight background. If empty, Accent Color is used.</description>
             </property>
             <property key="borderRadius" type="string" required="false" defaultValue="16px">
                 <caption>Border Radius</caption>
@@ -164,6 +181,18 @@
                 <description>Time to wait in milliseconds after the user stops typing before filtering lists (helps optimize database queries)</description>
             </property>
         </propertyGroup>
+
+        <propertyGroup caption="Dynamic Creation">
+            <property key="onCreateAction" type="action" required="false">
+                <caption>On Create Action</caption>
+                <description>Optional microflow or nanoflow triggered when user chooses to create a new option. The typed text will be set as the selected value before triggering.</description>
+            </property>
+            <property key="onCreateText" type="string" required="false" defaultValue="+ Add '{value}'">
+                <caption>Create Option Text Template</caption>
+                <description>Button label template. '{value}' will be replaced by user's search query.</description>
+            </property>
+        </propertyGroup>
+
 
         <propertyGroup caption="Translations">
             <property key="noOptionsMessage" type="string" required="false" defaultValue="ไม่พบตัวเลือก / No options found">

@@ -268,6 +268,78 @@ const DATASETS = {
     massive: MASSIVE_DATASET
 };
 
+function getSmartEnumColor(key: string): string {
+    const lowerKey = key.toLowerCase();
+
+    // 1. Success / Approved / Active / Enabled / Done keys -> Green
+    if (
+        lowerKey.includes("approve") ||
+        lowerKey.includes("active") ||
+        lowerKey.includes("success") ||
+        lowerKey.includes("true") ||
+        lowerKey.includes("complete") ||
+        lowerKey.includes("enable") ||
+        lowerKey.includes("yes") ||
+        lowerKey.includes("done") ||
+        lowerKey.includes("finish") ||
+        lowerKey.includes("pass") ||
+        lowerKey.includes("ok")
+    ) {
+        return "#10b981";
+    }
+
+    // 2. Reject / Danger / Error / False / Disable / Cancel / Fail / Inactive keys -> Red
+    if (
+        lowerKey.includes("reject") ||
+        lowerKey.includes("danger") ||
+        lowerKey.includes("error") ||
+        lowerKey.includes("false") ||
+        lowerKey.includes("disable") ||
+        lowerKey.includes("no") ||
+        lowerKey.includes("cancel") ||
+        lowerKey.includes("fail") ||
+        lowerKey.includes("inactive") ||
+        lowerKey.includes("stop") ||
+        lowerKey.includes("block") ||
+        lowerKey.includes("deny")
+    ) {
+        return "#ef4444";
+    }
+
+    // 3. Pending / Process / Warning / Wait / Review keys -> Amber
+    if (
+        lowerKey.includes("pending") ||
+        lowerKey.includes("process") ||
+        lowerKey.includes("warning") ||
+        lowerKey.includes("wait") ||
+        lowerKey.includes("review") ||
+        lowerKey.includes("hold") ||
+        lowerKey.includes("progress") ||
+        lowerKey.includes("queue")
+    ) {
+        return "#f59e0b";
+    }
+
+    // 4. Draft / New / Prepare / Initial keys -> Blue
+    if (
+        lowerKey.includes("draft") ||
+        lowerKey.includes("new") ||
+        lowerKey.includes("prepare") ||
+        lowerKey.includes("init") ||
+        lowerKey.includes("plan")
+    ) {
+        return "#3b82f6";
+    }
+
+    // 5. Stable color hashing for other statuses (beautiful HSL pastel colors)
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+        hash = (hash * 31 + key.charCodeAt(i)) % 1000000;
+    }
+    const hue = hash % 360;
+    return `hsl(${hue}, 65%, 50%)`;
+}
+
 function App() {
     // ----------------------------------------------------
     // Mendix Properties Simulator States
@@ -362,15 +434,15 @@ function App() {
         }));
     } else if (sourceMode === "enumeration") {
         activeOptions = [
-            { id: "draft", label: "แบบร่าง / Draft", rawObject: "draft" },
-            { id: "submitted", label: "ส่งแล้ว / Submitted", rawObject: "submitted" },
-            { id: "approved", label: "อนุมัติแล้ว / Approved", rawObject: "approved" },
-            { id: "rejected", label: "ปฏิเสธ / Rejected", rawObject: "rejected" }
+            { id: "draft", label: "แบบร่าง / Draft", colorCode: getSmartEnumColor("draft"), rawObject: "draft" },
+            { id: "submitted", label: "ส่งแล้ว / Submitted", colorCode: getSmartEnumColor("submitted"), rawObject: "submitted" },
+            { id: "approved", label: "อนุมัติแล้ว / Approved", colorCode: getSmartEnumColor("approved"), rawObject: "approved" },
+            { id: "rejected", label: "ปฏิเสธ / Rejected", colorCode: getSmartEnumColor("rejected"), rawObject: "rejected" }
         ];
     } else if (sourceMode === "boolean") {
         activeOptions = [
-            { id: "true", label: booleanTrueLabel || "Yes", rawObject: true },
-            { id: "false", label: booleanFalseLabel || "No", rawObject: false }
+            { id: "true", label: booleanTrueLabel || "Yes", colorCode: "#10b981", rawObject: true },
+            { id: "false", label: booleanFalseLabel || "No", colorCode: "#ef4444", rawObject: false }
         ];
     }
 

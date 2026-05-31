@@ -1,4 +1,4 @@
-# PWB ComboBox 📅🚀 (v3.2.0)
+# PWB ComboBox 📅🚀 (v3.7.0)
 
 **PWB ComboBox** is a premium, high-performance, and fully customizable pluggable widget designed for Mendix Studio Pro. It delivers a modern, glassmorphic dropdown search autocomplete interface with full native support for **Single-Select** (featuring text, pill, or rich selection styles) and **Multi-Select Tag mode**, highlighted fuzzy search segments, collapsible grouping, customized alphabetical sorting, left checkboxes, multi-shape avatars, dual vertical-list/grid layouts, WCAG 2.1 AA screen-reader compliance, and zero-code style configurations.
 
@@ -74,21 +74,15 @@ _This automatically builds the production JavaScript bundles, runs validations, 
 
 ---
 
-## ⚙️ Properties Configuration Summary
+## ⚙️ Properties Configuration Summary (v3.7.0 specs)
 
--   **optionsSource**: Dynamic list of objects to populate the dropdown.
+-   **sourceMode**: Data Source Mode: Association (Entity Datasource), Enumeration Attribute, or Boolean Attribute.
+-   **selectedAttribute**: Primary binding attribute to store/retrieve selections (supports String, Integer, Enum, Boolean).
+-   **selectedAssociation**: Reference/ReferenceSet association for database object mapping.
+-   **booleanTrueLabel / booleanFalseLabel**: Custom display text for True/False (e.g. Yes/No, Active/Inactive) in Boolean Mode.
+-   **booleanOutputFormat**: Save native `Boolean` type or custom `String Keys` (e.g., `'Y'`/`'N'`).
+-   **optionsSource**: Dynamic database list of options to populate the dropdown (in Association Mode).
 -   **optionLabel**: Text expression to display for each option item.
--   **sortOrder**: Sort options alphabetically (`asc` / `desc`) or keep datasource sequence.
--   **sortField**: Specify item field to sort by: Option Label (`label`), Subtitle/Detail (`detail`), or Group Category (`group`).
--   **selectedOptionLabel**: Expression to show custom label format ONLY when selected.
--   **selectionMode**: Choose between `Single Select` and `Multi Select` tags mode.
--   **singleSelectStyle**: Choose selected presentation: traditional `text`, removable `pill` tag, or premium `rich` avatar card.
--   **selectedAttribute**: Attribute to store single selected value (String/Integer) or multi delimited string.
--   **maxVisibleTags**: Maximum number of selected tags shown before collapsing in multi-select mode.
--   **selectedAssociation**: Reference/ReferenceSet association to store selected object(s) (must link to optionsSource).
--   **dropdownLayout**: Arrange dropdown list items vertically (`list`) or in a compact card grid (`grid`).
--   **optionAvatarShape**: Style thumbnails as perfect circles (`circle`), squircle/rounded rectangles (`rounded`), or perfect squares (`square`).
--   **showOptionCheckbox**: Display Left-aligned interactive checkboxes (multi) or radio buttons (single).
--   **highlightColorMode**: Highlight hovered items with global `accent` color or dynamic unique `optionColor`.
--   **searchDebounce**: Time in ms to wait after typing stops before filtering dropdown lists to optimize performance.
--   **Aesthetic Parameters**: Corner roundness (`Border Radius`), backdrop-blur (`Background Blur`), and colors customizable straight from Mendix.
+-   **enableGrouping**: Enable/disable collapsible category grouping inside dropdown list options.
+-   **highlightColorMode**: Highlight hovered items with global `accent` color or dynamic unique `optionColor` (which is automatically computed via stable HSL coloring in Enum/Boolean modes).
+-   **Aesthetics & Virtualization**: CSS styling variables (blur power, popover background fill, accent Hex color, maximum scrolling height) and DOM node virtualization are fully integrated straight from Mendix parameters.

@@ -11,7 +11,11 @@ export function PwbComboBox({
     optionDetail,
     optionGroup,
     optionImage,
+    sortOrder,
+    selectedOptionLabel,
     selectionMode,
+    singleSelectStyle,
+    showSelectedAvatar,
     tagStyle,
     tagColorExpression,
     selectedAttribute,
@@ -23,6 +27,10 @@ export function PwbComboBox({
     bgBlur,
     popoverBg,
     maxDropdownHeight,
+    dropdownLayout,
+    optionAvatarShape,
+    showOptionCheckbox,
+    highlightColorMode,
     searchDebounce,
     noOptionsMessage,
     loadingMessage,
@@ -52,9 +60,17 @@ export function PwbComboBox({
               groupName: optionGroup ? optionGroup.get(item).value : undefined,
               colorCode: tagColorExpression ? tagColorExpression.get(item).value : undefined,
               imageUrl: optionImage ? optionImage.get(item).value : undefined,
+              selectedLabel: selectedOptionLabel ? selectedOptionLabel.get(item).value || "" : undefined,
               rawObject: item
           }))
         : [];
+
+    // Apply sorting if configured
+    if (sortOrder === "asc") {
+        options.sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: "base", numeric: true }));
+    } else if (sortOrder === "desc") {
+        options.sort((a, b) => b.label.localeCompare(a.label, undefined, { sensitivity: "base", numeric: true }));
+    }
 
     // 4. Retrieve currently selected IDs
     let selectedIds: string[] = [];
@@ -68,7 +84,7 @@ export function PwbComboBox({
         } else if (selectedAttribute && selectedAttribute.value !== undefined) {
             const attrVal = String(selectedAttribute.value);
             // Match either option ID or option label value
-            const matched = options.find(o => o.id === attrVal || o.label === attrVal);
+            const matched = options.find(o => o.id === attrVal || o.label === attrVal || o.selectedLabel === attrVal);
             if (matched) {
                 selectedIds = [matched.id];
             }
@@ -85,7 +101,7 @@ export function PwbComboBox({
                 const delim = delimiter || ",";
                 const tokens = attrVal.split(delim).map(t => t.trim());
                 tokens.forEach(token => {
-                    const matched = options.find(o => o.id === token || o.label === token);
+                    const matched = options.find(o => o.id === token || o.label === token || o.selectedLabel === token);
                     if (matched && !selectedIds.includes(matched.id)) {
                         selectedIds.push(matched.id);
                     }
@@ -101,12 +117,14 @@ export function PwbComboBox({
             return;
         }
 
+        const displayLabel = option.selectedLabel || option.label;
+
         if (selectionMode === "single") {
             if (assoc) {
                 assoc.setValue(option.rawObject);
             }
             if (selectedAttribute) {
-                selectedAttribute.setValue(option.label);
+                selectedAttribute.setValue(displayLabel);
             }
         } else {
             // Multi-select mode
@@ -125,7 +143,7 @@ export function PwbComboBox({
                 const serializedValue = currentIds
                     .map(cid => {
                         const opt = options.find(o => o.id === cid);
-                        return opt ? opt.label : cid;
+                        return opt ? (opt.selectedLabel || opt.label) : cid;
                     })
                     .join(delim + " ");
                 selectedAttribute.setValue(serializedValue);
@@ -155,7 +173,7 @@ export function PwbComboBox({
                     const serializedValue = currentIds
                         .map(cid => {
                             const opt = options.find(o => o.id === cid);
-                            return opt ? opt.label : cid;
+                            return opt ? (opt.selectedLabel || opt.label) : cid;
                         })
                         .join(delim + " ");
                     selectedAttribute.setValue(serializedValue);
@@ -222,6 +240,8 @@ export function PwbComboBox({
                 options={options}
                 selectedIds={selectedIds}
                 selectionMode={selectionMode}
+                singleSelectStyle={singleSelectStyle}
+                showSelectedAvatar={showSelectedAvatar}
                 tagStyle={tagStyle}
                 onSelect={handleSelect}
                 onRemove={handleRemove}
@@ -233,6 +253,10 @@ export function PwbComboBox({
                 bgBlur={safeBgBlur}
                 popoverBg={safePopoverBg}
                 maxDropdownHeight={maxDropdownHeight}
+                dropdownLayout={dropdownLayout}
+                optionAvatarShape={optionAvatarShape}
+                showOptionCheckbox={showOptionCheckbox}
+                highlightColorMode={highlightColorMode}
                 searchDebounce={searchDebounce}
                 noOptionsMessage={noOptionsMessage}
                 loadingMessage={loadingMessage}

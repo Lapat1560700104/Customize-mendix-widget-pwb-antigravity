@@ -1,18 +1,25 @@
-# README - PWB Advanced ComboBox Ultimate Specification (v3.0.0)
+# README - PWB Advanced ComboBox Ultimate Specification (v3.2.0)
 
-**PWB ComboBox** is a premium, enterprise-grade, high-performance, and fully accessible pluggable autocomplete dropdown search widget designed for Mendix Studio Pro. It delivers a modern, glassmorphic option selection interface with full native support for **Dynamic Option Grouping (หมวดหมู่พับได้)**, **Dynamic Tag Coloring (ระบายสีตามประเภท)**, **Real Avatar Image Rendering (อวาตาร์รูปภาพจริง)**, fuzzy autocomplete segments, and direct delimited string attribute storage.
+**PWB ComboBox** is a premium, enterprise-grade, high-performance, and fully accessible pluggable autocomplete dropdown search widget designed for Mendix Studio Pro. It delivers a modern, glassmorphic option selection interface with native support for **Dynamic Option Grouping (หมวดหมู่พับได้)**, **Dynamic Tag Coloring (ระบายสีตามประเภท)**, **Real Avatar Image Rendering (อวาตาร์รูปภาพจริง)**, **Multi-Style Selected Representations (สไตล์แสดงผลเมื่อเลือก)**, **Grid Option Cards (ตารางกริดสองคอลัมน์)**, fuzzy autocomplete segments, and direct delimited string attribute storage.
 
 ---
 
 ## 🌟 Key Features
 
 * **Dual Selection Modes**: Supports standard `Single Select` list picker and `Multi Select` tag mode (renders selected objects as customizable pill tag badges with close buttons).
+* **Option List Alphabetical Sorting (`sortOrder`)**: Sort dropdown options alphabetically in ascending (`asc` ก-ฮ / A-Z) or descending (`desc` ฮ-ก / Z-A) sequence, or retain original Mendix datasource sequence.
+* **Premium Custom Selected Display Styles (`singleSelectStyle`)**: Renders the selected option in Single-Select mode as a traditional text input field (`text`), a beautiful removable badge (`pill`), or a premium full card (`rich`) showing profile avatar, label, and subtitle.
 * **Dynamic Option Grouping (`optionGroup`)**: Group dropdown list options under styled categories (e.g. Frontend vs Backend) with search highlights, custom headers, and **Collapsible (พับปิด/เปิดได้)** interactivity.
 * **Dynamic Tag Coloring (`tagColorExpression`)**: Apply custom Hex colors or standard CSS color terms individually to selected tag pills based on item properties (e.g. status) using a modern, semi-transparent backdrop-filter (`color-mix` engine).
-* **Real Avatar Image Rendering (`optionImage`)**: Displays dynamic circular profile thumbnails or product vector icons in selected tags and dropdown lists, with an automatic linter fallback to stylized initials.
+* **Real Avatar Image Rendering (`optionImage`)**: Displays dynamic profile thumbnails or product vector icons in selected tags and dropdown lists, with an automatic linter fallback to stylized initials.
+* **Custom Dropdown Layout & Options Customization**:
+  * **Layouts (`dropdownLayout`)**: Select between standard vertical list (`list`) or a compact 2-column grid cards arrangement (`grid`).
+  * **Avatar Shapes (`optionAvatarShape`)**: Style profile/product thumbnails as perfect circles (`circle`), squircle/rounded rectangles (`rounded`), or perfect squares (`square`).
+  * **Option Checkboxes (`showOptionCheckbox`)**: Render customized left-aligned checkboxes (for multi-select) or radio buttons (for single-select) to provide clear interactive indicators.
+  * **Dynamic Hover Highlights (`highlightColorMode`)**: Automatically neon-glow options on hover using the global accent color (`accent`) or each option's unique category color (`optionColor`).
 * **Fuzzy Autocomplete Search with Highlights**: Extremely responsive filtering across primary labels and subtitles with character segment matches highlighted in bold theme accent color.
 * **Large List Lazy Scroll Loading**: Ultra-efficient lazy scrolling optimized to render massive list sources (10,000+ items) cleanly in 60 FPS.
-* **WCAG 2.1 AA Screen Reader Compliance**: Enriched with semantic ARIA roles, active state attributes, and full keyboard navigation loops.
+* **WCAG 2.1 AA Screen Reader Compliance**: Enriched with ARIA roles, checkboxes, active state attributes, and full keyboard navigation loops.
 * **Zero-Code CSS Styling**: Custom variables for accents (`accentColor`), roundness (`borderRadius`), blurs (`bgBlur`), and heights directly configurable inside Mendix.
 
 ---
@@ -28,12 +35,16 @@
 | `optionDetail` | Option Detail (Subtitle) | Expression (String) | No | - | Secondary text displayed below option label (e.g. Email under Name) |
 | `optionGroup` | Option Group Category | Expression (String) | No | - | Expression to group option items by a category name (e.g. `$currentObject/Category`) |
 | `optionImage` | Option Image URL | Expression (String) | No | - | Expression to render dynamic profile avatar thumbnails (e.g. `$currentObject/AvatarUrl`) |
+| `sortOrder` | Sort Dropdown Options | Enumeration | Yes | `none` | Options: `none` (Datasource sequence), `asc` (A to Z), `desc` (Z to A) |
+| `selectedOptionLabel` | Selected Option Label | Expression (String) | No | - | Optional expression to render custom label format ONLY when selected |
 
 ### 2. Selection
 
 | Property Key | Caption | Type | Required | Default Value | Description |
 | :--- | :--- | :--- | :---: | :--- | :--- |
 | `selectionMode` | Selection Mode | Enumeration | Yes | `single` | Choose `single` (Single Select) or `multi` (Multi Select tags mode) |
+| `singleSelectStyle` | Single Select Style | Enumeration | Yes | `text` | Selected value layout: `text` (standard field), `pill` (badge tag), `rich` (Avatar + Label + Subtitle card) |
+| `showSelectedAvatar` | Show Selected Avatar | Boolean | Yes | `true` | Enable or disable rendering avatar thumbnails in tags or selected fields |
 | `tagStyle` | Tag Badge Style | Enumeration | Yes | `pill` | Renders tags as standard pills (`pill`) or round colored avatar circles (`avatar`) |
 | `tagColorExpression` | Tag Color (Hex/CSS) | Expression (String) | No | - | Optional expression returning color code to style tag badges dynamically |
 | `selectedAttribute` | Selected Attribute | Attribute (String/Integer) | No | - | Stores selected key (Single Mode) or Delimited String (Multi Mode) |
@@ -50,6 +61,10 @@
 | `bgBlur` | Background Blur | String | No | `16px` | Backdrop-filter glassmorphic blur level (`16px`, `8px`, `0px` to disable) |
 | `popoverBg` | Dropdown Background | String | No | `rgba(...)` | Fill color of floating popover (`rgba(255,255,255,0.85)`, `#ffffff`) |
 | `maxDropdownHeight` | Max Dropdown Height | String | No | `250px` | Maximum scrolling height of the results panel |
+| `dropdownLayout` | Dropdown List Layout | Enumeration | Yes | `list` | Arrange items vertically (`list`) or in a compact card grid (`grid`) |
+| `optionAvatarShape` | Option Avatar Shape | Enumeration | Yes | `circle` | Shape for thumbnail pictures: `circle` (round), `rounded` (squircle), `square` (sharp block) |
+| `showOptionCheckbox` | Show Checkbox/Radio Option | Boolean | Yes | `false` | Display Left-aligned interactive checkboxes (multi) or radio buttons (single) |
+| `highlightColorMode` | Hover Highlight Color Mode | Enumeration | Yes | `accent` | Highlight color on hover: `accent` (theme main) or `optionColor` (item dynamic category color) |
 
 ---
 
@@ -64,10 +79,15 @@
 * **กลไกการเปลี่ยนสี**: ด้วยการเชื่อมต่อกับ CSS `color-mix` engine ของเบราว์เซอร์ยุคใหม่ เมื่อป้อนค่าสีผ่าน `tagColorExpression` ป้ายแท็กจะระบายสีขอบ ข้อมูลอักษรย่อ และปุ่มลบให้เด่นชัด พร้อมแปลงค่าพื้นหลังให้มีระดับความโปร่งแสงต่ำแบบพรีเมียม (8% translucent overlay) ทันทีอย่างสวยงาม โดยรองรับทั้งรหัส Hex (e.g. `#10b981`) และชื่อสี CSS ทั่วไป (e.g. `gold`, `pink`, `tomato`)
 * **การใช้งานใน Dropdown**: หากใช้ร่วมกับโหมดเปิดอวาตาร์ วงกลมรูปโปรไฟล์ใน Dropdown จะตกแต่งพื้นหลังโปร่งแสงและเส้นขอบล้อมด้วยโทนสีที่ผูกกับตัวเลือกนั้นๆ โดยอัตโนมัติ ช่วยสร้างความโดดเด่นของสถานะ (เช่น สีเขียวสำหรับ Active, สีแดงสำหรับ Error) ได้อย่างเฉียบขาด!
 
-### 3. Delimited String Attribute Mode (การเก็บข้อมูลแบบข้อความคั่นเครื่องหมาย)
-* สำหรับนักพัฒนาที่ต้องการความรวดเร็วระดับ Low-code โดยข้ามการตั้งค่า Object Association ที่ซับซ้อนในฐานข้อมูล คุณสามารถผูกแอตทริบิวต์ประเภท `String` ตัวเดียวเข้ากับ ComboBox ในโหมด Multi-Select ได้ทันที:
-  * **Incoming Hydration**: ตัววิดเจ็ตจะทำความสะอาดข้อมูลข้อความ (เช่น `"React, Next.js, Go"`) แล้วนำมา Split แยกแท็ก badge ขึ้นแสดงบนหน้าจอทันทีเมื่อโหลดหน้าเว็บ
-  * **Outgoing Serialization**: เมื่อผู้ใช้ลบหรือเพิ่มป้าย วิดเจ็ตจะนำค่าป้ายทั้งหมดมาเรียงต่อกันคั่นด้วย `delimiter` ที่ตั้งไว้ (เช่น `, ` หรือ `| `) และเซฟบันทึกลงฐานข้อมูล Mendix แบบ Real-time ทันที!
+### 3. Custom Selected Display Formats (สไตล์แสดงผลเมื่อเลือกรายการเดี่ยว)
+* สำหรับโหมด Single Select เมื่อผู้ใช้เปิดใช้งานคุณสมบัติ `singleSelectStyle` ที่ไม่ใช่ `text`:
+  * **`pill` Style**: รายการที่เลือกจะเปลี่ยนสัณฐานเป็น Badge ป้ายกำกับโค้งมนสวยงามลอยอยู่บนช่องกรอกคั่นกลาง พร้อมรูปอวาตาร์และปุ่มลบค่าอย่างเป็นเอกเทศ
+  * **`rich` Style**: แสดงผลแบบการ์ดประชิดตัวสมบูรณ์แบบ ทั้งไอคอนรูปกลม/เหลี่ยม, หัวข้อหลักตัวหนา และคำบรรยายย่อยซ้อนกันอย่างมีระดับ
+  * **UX Interactive Transform**: เมื่อผู้ใช้ทำการโฟกัสคลิกกล่องอินพุตเพื่อพิมพ์ค้นหา ตัวการ์ดหรือป้ายสะกดค่าจะสไลด์หายไปอย่างแนบเนียนเพื่อเผยช่องพิมพ์ตัวอักษรพิมพ์ค้นหาแบบโล่ง และจะแสดงผลการ์ดสวยงามใหม่อีกครั้งเมื่อปิด Dropdown หรือเลือกรายการเสร็จสิ้น!
+
+### 4. Grid Options Layout & Checkbox Indicators (การแสดงผลแบบตารางและการทำกล่องเครื่องหมาย)
+* **ตารางการ์ด Dropdown (`grid` layout)**: เหมาะอย่างยิ่งสำหรับความต้องการเลือกรูปสินค้า, รูปภาพพนักงาน หรือไอคอนแบบรวดเร็ว โดยจะแปลงรายการ Dropdown เป็นการ์ดสองคอลุมน์แบบขนาน จัดระเบียบด้วย Grid System สวยงาม
+* **กล่องทำเครื่องหมายด่วน (`showOptionCheckbox`)**: แสดงผลช่อง Radio block หรือ Checkbox คัสตอมทางซ้ายมือเพื่อให้ผู้ใช้สัมผัสถึงความลึกของการติ๊กเลือกตัวเลือกได้ดียิ่งขึ้น
 
 ---
 
@@ -83,28 +103,15 @@
 
 ## 🎨 CSS Styling Architecture
 
-### Layout CSS Variables
-
-```css
-.pwb-combobox-wrapper {
-    --accent-color: #3b82f6;      /* Accent theme color */
-    --accent-light: rgba(...);    /* Soft selection glow */
-    --border-radius: 16px;        /* Corner radius ratio */
-    --bg-blur: 16px;              /* Blur filter scale */
-    --popover-bg: rgba(...);      /* Popover background fill */
-}
-```
-
 ### Upgraded HTML Layout Class Targets
 
 * `.pwb-combobox-wrapper`: Root container element.
-* `.pwb-combobox-group-header`: Category section title bar in the list dropdown.
-* `.pwb-combobox-group-chevron`: Rotate chevron vector for collapsible accordion status.
-* `.pwb-combobox-option-avatar-container`: Circular thumbnail container wrapper in the option item.
-* `.pwb-combobox-option-avatar-img`: Profile image avatar loaded dynamically.
-* `.pwb-combobox-tag-img`: Avatar picture loaded inside selected tag pill badges.
-* `.pwb-combobox-tag-pill`: Individual tag pill layout container.
-* `.pwb-search-highlight`: Bold highlights wrapping matching characters in search filter results.
+* `.pwb-avatar-circle`, `.pwb-avatar-rounded`, `.pwb-avatar-square`: Controls shape definitions of image profiles dynamically.
+* `.pwb-layout-grid`: Class injected to container to enable compact two-column card placements.
+* `.pwb-combobox-option-checkbox-wrapper`: Left side custom checkbox or radio button wrapper.
+* `.pwb-combobox-single-rich-display`: Card markup layer displaying selected profile image + title + subtitle.
+* `.pwb-combobox-single-pill-display`: Inline tag displaying single selection as a badge capsule inside input bar.
+* `.pwb-highlight-dynamic`: Applies color-mix glow and unique border boundaries dynamically for category highlights.
 
 ---
 

@@ -32,6 +32,20 @@
                 <description>Optional expression to display a circular avatar image thumbnail (e.g. $currentObject/AvatarUrl)</description>
                 <returnType type="String"/>
             </property>
+            <property key="sortOrder" type="enumeration" defaultValue="none">
+                <caption>Sort Dropdown Options</caption>
+                <description>Sort options alphabetically in ascending or descending order. None retains original data source sequence.</description>
+                <enumerationValues>
+                    <enumerationValue key="none">None (Datasource order)</enumerationValue>
+                    <enumerationValue key="asc">Ascending (A to Z)</enumerationValue>
+                    <enumerationValue key="desc">Descending (Z to A)</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="selectedOptionLabel" type="expression" dataSource="optionsSource" required="false">
+                <caption>Selected Option Label</caption>
+                <description>Optional expression to display a custom label format ONLY when the option is selected (e.g., a shorter tag name). If empty, Option Label is used.</description>
+                <returnType type="String"/>
+            </property>
         </propertyGroup>
 
         <propertyGroup caption="Selection">
@@ -42,6 +56,19 @@
                     <enumerationValue key="single">Single Select</enumerationValue>
                     <enumerationValue key="multi">Multi Select</enumerationValue>
                 </enumerationValues>
+            </property>
+            <property key="singleSelectStyle" type="enumeration" defaultValue="text">
+                <caption>Single Select Style</caption>
+                <description>UI visual format of the selected item in Single Select mode</description>
+                <enumerationValues>
+                    <enumerationValue key="text">Standard Text Field</enumerationValue>
+                    <enumerationValue key="pill">Removable Badge (Pill)</enumerationValue>
+                    <enumerationValue key="rich">Premium Full Row (Avatar + Label + Subtitle)</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="showSelectedAvatar" type="boolean" defaultValue="true">
+                <caption>Show Selected Avatar</caption>
+                <description>Enable or disable showing avatar thumbnail for selected items in the input/tags</description>
             </property>
             <property key="tagStyle" type="enumeration" defaultValue="pill">
                 <caption>Tag Badge Style</caption>
@@ -102,6 +129,35 @@
             <property key="maxDropdownHeight" type="string" required="false" defaultValue="250px">
                 <caption>Max Dropdown Height</caption>
                 <description>Maximum height of the dropdown panel (e.g., 250px, 300px)</description>
+            </property>
+            <property key="dropdownLayout" type="enumeration" defaultValue="list">
+                <caption>Dropdown List Layout</caption>
+                <description>Layout structure of options in the list popover</description>
+                <enumerationValues>
+                    <enumerationValue key="list">Standard Row List</enumerationValue>
+                    <enumerationValue key="grid">Compact 2-Column Grid Cards</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="optionAvatarShape" type="enumeration" defaultValue="circle">
+                <caption>Option Avatar Shape</caption>
+                <description>Geometric shape for dropdown and selected avatars</description>
+                <enumerationValues>
+                    <enumerationValue key="circle">Circular</enumerationValue>
+                    <enumerationValue key="rounded">Rounded Square (macos squircle)</enumerationValue>
+                    <enumerationValue key="square">Perfect Square</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="showOptionCheckbox" type="boolean" defaultValue="false">
+                <caption>Show Checkbox/Radio Option</caption>
+                <description>Show standard checkbox (multi) or radio button (single) next to dropdown list choices</description>
+            </property>
+            <property key="highlightColorMode" type="enumeration" defaultValue="accent">
+                <caption>Hover Highlight Color Mode</caption>
+                <description>Color scheme used when hovering over options</description>
+                <enumerationValues>
+                    <enumerationValue key="accent">Universal Accent Color</enumerationValue>
+                    <enumerationValue key="optionColor">Dynamic Option Color (Uses Tag Color Expression if defined)</enumerationValue>
+                </enumerationValues>
             </property>
             <property key="searchDebounce" type="integer" required="false" defaultValue="300">
                 <caption>Search Input Debounce (ms)</caption>

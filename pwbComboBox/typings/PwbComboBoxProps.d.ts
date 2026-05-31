@@ -7,9 +7,19 @@ import { CSSProperties } from "react";
 import { DynamicValue, EditableValue, ListValue, ListExpressionValue, ReferenceValue, ReferenceSetValue } from "mendix";
 import { Big } from "big.js";
 
+export type SortOrderEnum = "none" | "asc" | "desc";
+
 export type SelectionModeEnum = "single" | "multi";
 
+export type SingleSelectStyleEnum = "text" | "pill" | "rich";
+
 export type TagStyleEnum = "pill" | "avatar";
+
+export type DropdownLayoutEnum = "list" | "grid";
+
+export type OptionAvatarShapeEnum = "circle" | "rounded" | "square";
+
+export type HighlightColorModeEnum = "accent" | "optionColor";
 
 export interface PwbComboBoxContainerProps {
     name: string;
@@ -21,7 +31,11 @@ export interface PwbComboBoxContainerProps {
     optionDetail?: ListExpressionValue<string>;
     optionGroup?: ListExpressionValue<string>;
     optionImage?: ListExpressionValue<string>;
+    sortOrder: SortOrderEnum;
+    selectedOptionLabel?: ListExpressionValue<string>;
     selectionMode: SelectionModeEnum;
+    singleSelectStyle: SingleSelectStyleEnum;
+    showSelectedAvatar: boolean;
     tagStyle: TagStyleEnum;
     tagColorExpression?: ListExpressionValue<string>;
     selectedAttribute?: EditableValue<string | Big>;
@@ -33,6 +47,10 @@ export interface PwbComboBoxContainerProps {
     bgBlur: string;
     popoverBg: string;
     maxDropdownHeight: string;
+    dropdownLayout: DropdownLayoutEnum;
+    optionAvatarShape: OptionAvatarShapeEnum;
+    showOptionCheckbox: boolean;
+    highlightColorMode: HighlightColorModeEnum;
     searchDebounce?: number;
     noOptionsMessage: string;
     loadingMessage: string;
@@ -59,7 +77,11 @@ export interface PwbComboBoxPreviewProps {
     optionDetail: string;
     optionGroup: string;
     optionImage: string;
+    sortOrder: SortOrderEnum;
+    selectedOptionLabel: string;
     selectionMode: SelectionModeEnum;
+    singleSelectStyle: SingleSelectStyleEnum;
+    showSelectedAvatar: boolean;
     tagStyle: TagStyleEnum;
     tagColorExpression: string;
     selectedAttribute: string;
@@ -71,6 +93,10 @@ export interface PwbComboBoxPreviewProps {
     bgBlur: string;
     popoverBg: string;
     maxDropdownHeight: string;
+    dropdownLayout: DropdownLayoutEnum;
+    optionAvatarShape: OptionAvatarShapeEnum;
+    showOptionCheckbox: boolean;
+    highlightColorMode: HighlightColorModeEnum;
     searchDebounce: number | null;
     noOptionsMessage: string;
     loadingMessage: string;

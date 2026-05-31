@@ -7,6 +7,7 @@ export interface ComboBoxOption {
     groupName?: string;
     colorCode?: string;
     imageUrl?: string;
+    selectedLabel?: string;
     rawObject: any;
 }
 
@@ -14,6 +15,8 @@ export interface ComboBoxProps {
     options: ComboBoxOption[];
     selectedIds: string[];
     selectionMode: "single" | "multi";
+    singleSelectStyle?: "text" | "pill" | "rich";
+    showSelectedAvatar?: boolean;
     tagStyle?: "pill" | "avatar";
     onSelect: (id: string) => void;
     onRemove: (id: string) => void;
@@ -25,6 +28,10 @@ export interface ComboBoxProps {
     bgBlur: string;
     popoverBg: string;
     maxDropdownHeight: string;
+    dropdownLayout?: "list" | "grid";
+    optionAvatarShape?: "circle" | "rounded" | "square";
+    showOptionCheckbox?: boolean;
+    highlightColorMode?: "accent" | "optionColor";
     searchDebounce?: number;
     noOptionsMessage: string;
     loadingMessage: string;
@@ -39,6 +46,8 @@ export function ComboBox({
     options,
     selectedIds,
     selectionMode,
+    singleSelectStyle = "text",
+    showSelectedAvatar = true,
     tagStyle = "pill",
     onSelect,
     onRemove,
@@ -50,6 +59,10 @@ export function ComboBox({
     bgBlur,
     popoverBg,
     maxDropdownHeight,
+    dropdownLayout = "list",
+    optionAvatarShape = "circle",
+    showOptionCheckbox = false,
+    highlightColorMode = "accent",
     searchDebounce = 300,
     noOptionsMessage,
     loadingMessage,
@@ -80,7 +93,7 @@ export function ComboBox({
         if (!isOpen) {
             if (selectionMode === "single" && selectedIds.length > 0) {
                 const selectedOption = options.find(o => o.id === selectedIds[0]);
-                setSearchText(selectedOption ? selectedOption.label : "");
+                setSearchText(selectedOption ? (selectedOption.selectedLabel || selectedOption.label) : "");
             } else {
                 setSearchText("");
             }
@@ -395,10 +408,27 @@ export function ComboBox({
     };
 
     const hasSelection = selectedIds.length > 0;
+    const selectedOption = selectionMode === "single" && hasSelection ? options.find(o => o.id === selectedIds[0]) : null;
+
+    const avatarShapeClass =
+        optionAvatarShape === "rounded"
+            ? "pwb-avatar-rounded"
+            : optionAvatarShape === "square"
+            ? "pwb-avatar-square"
+            : "pwb-avatar-circle";
+
+    const hasSelectedClass =
+        selectionMode === "single" && hasSelection && !isOpen
+            ? singleSelectStyle === "pill"
+                ? "pwb-input-has-selected-pill"
+                : singleSelectStyle === "rich"
+                ? "pwb-input-has-selected-rich"
+                : ""
+            : "";
 
     return (
         <div
-            className={`pwb-combobox-wrapper ${readOnly ? "pwb-disabled" : ""}`}
+            className={`pwb-combobox-wrapper ${readOnly ? "pwb-disabled" : ""} ${avatarShapeClass}`}
             style={
                 {
                     "--accent-color": accentColor,
@@ -413,7 +443,7 @@ export function ComboBox({
                 ref={inputContainerRef}
                 className={`pwb-combobox-input-container ${isOpen ? "pwb-input-active" : ""} ${
                     hasError ? "pwb-input-error" : ""
-                }`}
+                } ${hasSelectedClass}`}
                 onClick={() => {
                     if (!readOnly && !isOpen) {
                         setIsOpen(true);
@@ -421,6 +451,83 @@ export function ComboBox({
                     }
                 }}
             >
+                {/* Pill/Rich display for Single Select */}
+                {selectionMode === "single" && hasSelection && !isOpen && (
+                    singleSelectStyle === "pill" ? (
+                        <div
+                            className="pwb-combobox-single-pill-display"
+                            style={
+                                selectedOption?.colorCode
+                                    ? {
+                                          borderColor: selectedOption.colorCode,
+                                          color: selectedOption.colorCode,
+                                          backgroundColor: `color-mix(in srgb, ${selectedOption.colorCode} 8%, transparent)`
+                                      }
+                                    : {}
+                            }
+                        >
+                            {showSelectedAvatar && (tagStyle === "avatar" || !!selectedOption?.imageUrl) && (
+                                <span
+                                    className="pwb-combobox-single-pill-avatar"
+                                    style={
+                                        selectedOption?.colorCode
+                                            ? { backgroundColor: selectedOption.colorCode }
+                                            : { backgroundColor: accentColor }
+                                    }
+                                >
+                                    {selectedOption?.imageUrl && !brokenImages[selectedOption.id] ? (
+                                        <img
+                                            src={selectedOption.imageUrl}
+                                            className="pwb-combobox-tag-img"
+                                            alt=""
+                                            onError={() => handleImageError(selectedOption.id)}
+                                        />
+                                    ) : (
+                                        getInitials(selectedOption?.label || "")
+                                    )}
+                                </span>
+                            )}
+                            <span className="pwb-combobox-single-pill-text">
+                                {selectedOption?.selectedLabel || selectedOption?.label}
+                            </span>
+                        </div>
+                    ) : singleSelectStyle === "rich" ? (
+                        <div className="pwb-combobox-single-rich-display">
+                            {showSelectedAvatar && (tagStyle === "avatar" || !!selectedOption?.imageUrl) && (
+                                <span
+                                    className="pwb-combobox-single-rich-avatar"
+                                    style={
+                                        selectedOption?.colorCode
+                                            ? { backgroundColor: selectedOption.colorCode }
+                                            : { backgroundColor: accentColor }
+                                    }
+                                >
+                                    {selectedOption?.imageUrl && !brokenImages[selectedOption.id] ? (
+                                        <img
+                                            src={selectedOption.imageUrl}
+                                            className="pwb-combobox-tag-img"
+                                            alt=""
+                                            onError={() => handleImageError(selectedOption.id)}
+                                        />
+                                    ) : (
+                                        getInitials(selectedOption?.label || "")
+                                    )}
+                                </span>
+                            )}
+                            <div className="pwb-combobox-single-rich-text">
+                                <span className="pwb-combobox-single-rich-label">
+                                    {selectedOption?.selectedLabel || selectedOption?.label}
+                                </span>
+                                {selectedOption?.subtitle && (
+                                    <span className="pwb-combobox-single-rich-subtitle">
+                                        {selectedOption.subtitle}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    ) : null
+                )}
+
                 {/* Selected Tag Pills (Multi-Select) */}
                 {selectionMode === "multi" && (
                     <div className="pwb-combobox-tags-list">
@@ -445,7 +552,7 @@ export function ComboBox({
                                     className={`pwb-combobox-tag-pill ${hasAvatar ? "pwb-tag-avatar-style" : ""}`}
                                     style={tagStyleObject}
                                 >
-                                    {hasAvatar && (
+                                    {hasAvatar && showSelectedAvatar && (
                                         <span
                                             className="pwb-combobox-tag-avatar"
                                             style={
@@ -466,7 +573,9 @@ export function ComboBox({
                                             )}
                                         </span>
                                     )}
-                                    <span className="pwb-combobox-tag-text">{option.label}</span>
+                                    <span className="pwb-combobox-tag-text">
+                                        {option.selectedLabel || option.label}
+                                    </span>
                                     {!readOnly && (
                                         <button
                                             type="button"
@@ -578,7 +687,9 @@ export function ComboBox({
                         </div>
                     ) : (
                         <div
-                            className="pwb-combobox-options-list"
+                            className={`pwb-combobox-options-list ${
+                                dropdownLayout === "grid" ? "pwb-layout-grid" : ""
+                            }`}
                             style={{ maxHeight: maxDropdownHeight }}
                             onScroll={handleDropdownScroll}
                         >
@@ -622,6 +733,15 @@ export function ComboBox({
                                     const isSelected = !!item.isSelected;
                                     const isFocused = !!item.isFocused;
 
+                                    const isDynamicHighlight = highlightColorMode === "optionColor" && !!opt.colorCode;
+                                    const optionStyle = isDynamicHighlight
+                                        ? ({
+                                              "--item-color-code": opt.colorCode,
+                                              "--item-glow-bg": `color-mix(in srgb, ${opt.colorCode} 8%, transparent)`,
+                                              "--item-glow-bg-strong": `color-mix(in srgb, ${opt.colorCode} 15%, transparent)`
+                                          } as any)
+                                        : {};
+
                                     return (
                                         <li
                                             key={opt.id}
@@ -630,12 +750,41 @@ export function ComboBox({
                                                 isSelected ? "pwb-option-selected" : ""
                                             } ${isFocused ? "pwb-option-focused" : ""} ${
                                                 opt.subtitle ? "pwb-option-two-line" : ""
-                                            }`}
+                                            } ${isDynamicHighlight ? "pwb-highlight-dynamic" : ""}`}
+                                            style={optionStyle}
                                             onClick={() => handleSelectOption(opt.id)}
                                             onMouseEnter={() => setFocusedIndex(idx)}
                                             role="option"
                                             aria-selected={isSelected}
                                         >
+                                            {/* Checkbox or Radio button on the left */}
+                                            {showOptionCheckbox && (
+                                                <div className="pwb-combobox-option-checkbox-wrapper">
+                                                    <div
+                                                        className={`pwb-combobox-option-checkbox ${
+                                                            selectionMode === "multi"
+                                                                ? "pwb-checkbox-multi"
+                                                                : "pwb-checkbox-single"
+                                                        }`}
+                                                    >
+                                                        {selectionMode === "multi" ? (
+                                                            isSelected && (
+                                                                <svg
+                                                                    className="pwb-combobox-option-checkbox-tick"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                                </svg>
+                                                            )
+                                                        ) : (
+                                                            isSelected && (
+                                                                <div className="pwb-combobox-option-checkbox-dot" />
+                                                            )
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+
                                             {shouldShowOptionAvatars && (
                                                 <div
                                                     className="pwb-combobox-option-avatar-container"
@@ -684,7 +833,7 @@ export function ComboBox({
                                                     </div>
                                                 )}
                                             </div>
-                                            {isSelected && (
+                                            {isSelected && !showOptionCheckbox && (
                                                 <svg
                                                     width="16"
                                                     height="16"
@@ -728,3 +877,4 @@ export function ComboBox({
         </div>
     );
 }
+

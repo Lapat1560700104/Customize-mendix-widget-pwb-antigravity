@@ -103,14 +103,18 @@ export function getProperties(
     values: PwbComboBoxPreviewProps,
     defaultProperties: Properties /* , target: Platform*/
 ): Properties {
-    // Hide delimiter when in single-select mode
-    if (values.selectionMode === "single") {
-        defaultProperties.forEach(group => {
-            if (group.properties) {
+    defaultProperties.forEach(group => {
+        if (group.properties) {
+            // Hide delimiter when in single-select mode
+            if (values.selectionMode === "single") {
                 group.properties = group.properties.filter(prop => prop.key !== "delimiter");
             }
-        });
-    }
+            // Hide singleSelectStyle when in multi-select mode
+            if (values.selectionMode === "multi") {
+                group.properties = group.properties.filter(prop => prop.key !== "singleSelectStyle");
+            }
+        }
+    });
     return defaultProperties;
 }
 

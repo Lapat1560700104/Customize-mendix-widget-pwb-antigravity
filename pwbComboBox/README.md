@@ -1,8 +1,6 @@
-# PWB ComboBox 📅🚀 (v2.0.0)
+# PWB ComboBox 📅🚀 (v3.2.0)
 
-**PWB ComboBox** is a premium, high-performance pluggable widget designed for Mendix Studio Pro. It delivers a modern,
-glassmorphic dropdown search autocomplete interface with full native support for **Single-Select** and **Multi-Select
-Tag mode**, highlighted search segments, WCAG 2.1 AA screen-reader compliance, and zero-code CSS configurations.
+**PWB ComboBox** is a premium, high-performance, and fully customizable pluggable widget designed for Mendix Studio Pro. It delivers a modern, glassmorphic dropdown search autocomplete interface with full native support for **Single-Select** (featuring text, pill, or rich selection styles) and **Multi-Select Tag mode**, highlighted fuzzy search segments, collapsible grouping, customized alphabetical sorting, left checkboxes, multi-shape avatars, dual vertical-list/grid layouts, WCAG 2.1 AA screen-reader compliance, and zero-code style configurations.
 
 ---
 
@@ -71,7 +69,7 @@ npm run release
 ```
 
 _This automatically builds the production JavaScript bundles, runs validations, packages everything into
-`pwb.PwbComboBox_1.0.5_...mpk` inside `dist/`, and copies the dated/timed package straight into your Mendix project's
+`pwb.PwbComboBox_3.2.0_...mpk` inside `dist/`, and copies the dated/timed package straight into your Mendix project's
 `widgets/` folder!_
 
 ---
@@ -80,8 +78,14 @@ _This automatically builds the production JavaScript bundles, runs validations, 
 
 -   **optionsSource**: Dynamic list of objects to populate the dropdown.
 -   **optionLabel**: Text expression to display for each option item.
+-   **sortOrder**: Sort options alphabetically (`asc` / `desc`) or keep datasource sequence.
+-   **selectedOptionLabel**: Expression to show custom label format ONLY when selected.
 -   **selectionMode**: Choose between `Single Select` and `Multi Select` tags mode.
--   **selectedAttribute**: Attribute to store single selected value (String/Integer).
+-   **singleSelectStyle**: Choose selected presentation: traditional `text`, removable `pill` tag, or premium `rich` avatar card.
+-   **selectedAttribute**: Attribute to store single selected value (String/Integer) or multi delimited string.
 -   **selectedAssociation**: Reference/ReferenceSet association to store selected object(s).
--   **Aesthetic Parameters**: Corner roundness (`Border Radius`), backdrop-blur (`Background Blur`), and colors
-    customizable straight from Mendix.
+-   **dropdownLayout**: Arrange dropdown list items vertically (`list`) or in a compact card grid (`grid`).
+-   **optionAvatarShape**: Style thumbnails as perfect circles (`circle`), squircle/rounded rectangles (`rounded`), or perfect squares (`square`).
+-   **showOptionCheckbox**: Display Left-aligned interactive checkboxes (multi) or radio buttons (single).
+-   **highlightColorMode**: Highlight hovered items with global `accent` color or dynamic unique `optionColor`.
+-   **Aesthetic Parameters**: Corner roundness (`Border Radius`), backdrop-blur (`Background Blur`), and colors customizable straight from Mendix.

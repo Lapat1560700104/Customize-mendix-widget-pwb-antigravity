@@ -275,6 +275,14 @@ function App() {
     const [selectionMode, setSelectionMode] = useState<"single" | "multi">("single");
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
+    // New v3.7.0 Data Source Mode simulation states
+    const [sourceMode, setSourceMode] = useState<"association" | "enumeration" | "boolean">("association");
+    const [booleanTrueLabel, setBooleanTrueLabel] = useState("Yes");
+    const [booleanFalseLabel, setBooleanFalseLabel] = useState("No");
+    const [booleanOutputFormat, setBooleanOutputFormat] = useState<"boolean" | "string">("boolean");
+    const [booleanTrueValue, setBooleanTrueValue] = useState("true");
+    const [booleanFalseValue, setBooleanFalseValue] = useState("false");
+
     // Premium upgrades simulator states
     const [tagStyle, setTagStyle] = useState<"pill" | "avatar">("pill");
     const [showSubtitles, setShowSubtitles] = useState(true);
@@ -340,17 +348,31 @@ function App() {
     // Collapsible Panel State
     const [openTab, setOpenTab] = useState<string>("general");
 
-    // Get Active Options list based on simulation controls
-    let activeOptions = isEmpty
-        ? []
-        : optionsList.map(opt => ({
-              ...opt,
-              // Dynamically strip properties if toggled off to simulate optional mapping
-              subtitle: showSubtitles ? opt.subtitle : undefined,
-              groupName: showGroups ? (opt as any).groupName : undefined,
-              imageUrl: showAvatars ? (opt as any).imageUrl : undefined,
-              colorCode: showColors ? (opt as any).colorCode : undefined
-          }));
+    // Get Active Options list based on simulation controls and sourceMode
+    let activeOptions: any[] = [];
+    if (isEmpty) {
+        activeOptions = [];
+    } else if (sourceMode === "association") {
+        activeOptions = optionsList.map(opt => ({
+            ...opt,
+            subtitle: showSubtitles ? opt.subtitle : undefined,
+            groupName: showGroups ? (opt as any).groupName : undefined,
+            imageUrl: showAvatars ? (opt as any).imageUrl : undefined,
+            colorCode: showColors ? (opt as any).colorCode : undefined
+        }));
+    } else if (sourceMode === "enumeration") {
+        activeOptions = [
+            { id: "draft", label: "แบบร่าง / Draft", rawObject: "draft" },
+            { id: "submitted", label: "ส่งแล้ว / Submitted", rawObject: "submitted" },
+            { id: "approved", label: "อนุมัติแล้ว / Approved", rawObject: "approved" },
+            { id: "rejected", label: "ปฏิเสธ / Rejected", rawObject: "rejected" }
+        ];
+    } else if (sourceMode === "boolean") {
+        activeOptions = [
+            { id: "true", label: booleanTrueLabel || "Yes", rawObject: true },
+            { id: "false", label: booleanFalseLabel || "No", rawObject: false }
+        ];
+    }
 
     // Apply sorting in playground if simulated
     if (sortOrder && sortOrder !== "none") {
@@ -383,50 +405,97 @@ function App() {
     // Bidirectional sync: Sync from selectedIds -> simulatedStringVal
     useEffect(() => {
         const delim = delimiter || ",";
-        if (selectionMode === "single") {
+        if (sourceMode === "boolean") {
             if (selectedIds.length > 0) {
-                const opt = optionsList.find(o => o.id === selectedIds[0]);
-                setSimulatedStringVal(opt ? opt.label : "");
+                const isTrue = selectedIds[0] === "true";
+                if (booleanOutputFormat === "string") {
+                    setSimulatedStringVal(isTrue ? booleanTrueValue || "true" : booleanFalseValue || "false");
+                } else {
+                    setSimulatedStringVal(isTrue ? "true (boolean)" : "false (boolean)");
+                }
+            } else {
+                setSimulatedStringVal("");
+            }
+        } else if (sourceMode === "enumeration") {
+            if (selectedIds.length > 0) {
+                setSimulatedStringVal(selectedIds[0]);
             } else {
                 setSimulatedStringVal("");
             }
         } else {
-            const serialized = selectedIds
-                .map(id => {
-                    const opt = optionsList.find(o => o.id === id);
-                    return opt ? opt.label : id;
-                })
-                .join(delim + " ");
-            setSimulatedStringVal(serialized);
+            if (selectionMode === "single") {
+                if (selectedIds.length > 0) {
+                    const opt = optionsList.find(o => o.id === selectedIds[0]);
+                    setSimulatedStringVal(opt ? opt.label : "");
+                } else {
+                    setSimulatedStringVal("");
+                }
+            } else {
+                const serialized = selectedIds
+                    .map(id => {
+                        const opt = optionsList.find(o => o.id === id);
+                        return opt ? opt.label : id;
+                    })
+                    .join(delim + " ");
+                setSimulatedStringVal(serialized);
+            }
         }
-    }, [selectedIds, delimiter, optionsList, selectionMode]);
+    }, [selectedIds, delimiter, optionsList, selectionMode, sourceMode, booleanOutputFormat, booleanTrueValue, booleanFalseValue]);
 
     // Bidirectional sync: Parse manually typed string attribute values back into selectedIds
     const handleStringValChange = (val: string) => {
         setSimulatedStringVal(val);
-        if (val.trim() === "") {
+        const trimmed = val.trim();
+        if (trimmed === "") {
             setSelectedIds([]);
             return;
         }
 
-        const delim = delimiter || ",";
-        if (selectionMode === "single") {
-            const matched = optionsList.find(o => o.id === val.trim() || o.label === val.trim());
+        if (sourceMode === "boolean") {
+            const isTrueMatch =
+                trimmed.toLowerCase() === "true" ||
+                trimmed.toLowerCase() === (booleanTrueLabel || "yes").toLowerCase() ||
+                trimmed === booleanTrueValue;
+            const isFalseMatch =
+                trimmed.toLowerCase() === "false" ||
+                trimmed.toLowerCase() === (booleanFalseLabel || "no").toLowerCase() ||
+                trimmed === booleanFalseValue;
+            if (isTrueMatch) {
+                setSelectedIds(["true"]);
+            } else if (isFalseMatch) {
+                setSelectedIds(["false"]);
+            } else {
+                setSelectedIds([]);
+            }
+        } else if (sourceMode === "enumeration") {
+            const matched = activeOptions.find(
+                o => o.id.toLowerCase() === trimmed.toLowerCase() || o.label.toLowerCase() === trimmed.toLowerCase()
+            );
             if (matched) {
                 setSelectedIds([matched.id]);
             } else {
                 setSelectedIds([]);
             }
         } else {
-            const tokens = val.split(delim).map(t => t.trim());
-            const matchedIds: string[] = [];
-            tokens.forEach(token => {
-                const matched = optionsList.find(o => o.id === token || o.label === token);
-                if (matched && !matchedIds.includes(matched.id)) {
-                    matchedIds.push(matched.id);
+            const delim = delimiter || ",";
+            if (selectionMode === "single") {
+                const matched = optionsList.find(o => o.id === trimmed || o.label === trimmed);
+                if (matched) {
+                    setSelectedIds([matched.id]);
+                } else {
+                    setSelectedIds([]);
                 }
-            });
-            setSelectedIds(matchedIds);
+            } else {
+                const tokens = val.split(delim).map(t => t.trim());
+                const matchedIds: string[] = [];
+                tokens.forEach(token => {
+                    const matched = optionsList.find(o => o.id === token || o.label === token);
+                    if (matched && !matchedIds.includes(matched.id)) {
+                        matchedIds.push(matched.id);
+                    }
+                });
+                setSelectedIds(matchedIds);
+            }
         }
     };
 
@@ -523,6 +592,254 @@ function App() {
 
                 {/* Property Categories (Accordion) */}
                 <div style={{ flex: 1, padding: "12px" }}>
+                    {/* Category 0: Data Source Mode Simulator */}
+                    <div
+                        style={{
+                            marginBottom: "10px",
+                            borderRadius: "10px",
+                            overflow: "hidden",
+                            background: openTab === "dataSourceMode" ? "rgba(255,255,255,0.02)" : "transparent"
+                        }}
+                    >
+                        <button
+                            onClick={() => setOpenTab(openTab === "dataSourceMode" ? "" : "dataSourceMode")}
+                            style={{
+                                width: "100%",
+                                padding: "12px",
+                                border: "none",
+                                background: "rgba(255,255,255,0.04)",
+                                color: "#38bdf8",
+                                display: "flex",
+                                justifyContent: "space-between",
+                                cursor: "pointer",
+                                fontSize: "13px",
+                                fontWeight: "bold",
+                                textAlign: "left"
+                            }}
+                        >
+                            <span>⚡ 0. Data Source Mode Simulator</span>
+                            <span>{openTab === "dataSourceMode" ? "▲" : "▼"}</span>
+                        </button>
+                        {openTab === "dataSourceMode" && (
+                            <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                                <label
+                                    style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "6px",
+                                        fontSize: "12px",
+                                        color: "#94a3b8"
+                                    }}
+                                >
+                                    <span>Data Source Mode</span>
+                                    <select
+                                        value={sourceMode}
+                                        onChange={e => {
+                                            setSourceMode(e.target.value as any);
+                                            setSelectedIds([]);
+                                        }}
+                                        style={{
+                                            background: "#1e293b",
+                                            color: "#f8fafc",
+                                            border: "1px solid rgba(255,255,255,0.06)",
+                                            borderRadius: "8px",
+                                            padding: "8px",
+                                            outline: "none",
+                                            fontSize: "12px"
+                                        }}
+                                    >
+                                        <option value="association">Association (Entity Datasource)</option>
+                                        <option value="enumeration">Enumeration Attribute</option>
+                                        <option value="boolean">Boolean Attribute</option>
+                                    </select>
+                                </label>
+
+                                {sourceMode === "association" && (
+                                    <label
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "6px",
+                                            fontSize: "12px",
+                                            color: "#94a3b8"
+                                        }}
+                                    >
+                                        <span>Active Dataset (Association)</span>
+                                        <select
+                                            value={datasetKey}
+                                            onChange={e => setDatasetKey(e.target.value as any)}
+                                            style={{
+                                                background: "#1e293b",
+                                                color: "#f8fafc",
+                                                border: "1px solid rgba(255,255,255,0.06)",
+                                                borderRadius: "8px",
+                                                padding: "8px",
+                                                outline: "none",
+                                                fontSize: "12px"
+                                            }}
+                                        >
+                                            <option value="fruits">Fruits & Veggies (10 items)</option>
+                                            <option value="tech">Tech Stacks (12 items)</option>
+                                            <option value="massive">Massive Database (1,000 items)</option>
+                                        </select>
+                                    </label>
+                                )}
+
+                                {sourceMode === "enumeration" && (
+                                    <div
+                                        style={{
+                                            padding: "10px",
+                                            background: "rgba(56, 189, 248, 0.05)",
+                                            border: "1px solid rgba(56, 189, 248, 0.1)",
+                                            borderRadius: "8px",
+                                            fontSize: "11px",
+                                            color: "#38bdf8",
+                                            lineHeight: "1.4"
+                                        }}
+                                    >
+                                        💡 <b>Enumeration Mode</b>: ดึงค่าตัวเลือกตรงจากโปรเจกต์ Mendix ผ่าน universe API (จำลองจักรวาลตัวเลือก: Draft, Submitted, Approved, Rejected)
+                                    </div>
+                                )}
+
+                                {sourceMode === "boolean" && (
+                                    <>
+                                        <label
+                                            style={{
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                gap: "6px",
+                                                fontSize: "12px",
+                                                color: "#94a3b8"
+                                            }}
+                                        >
+                                            <span>Yes / True Display Label</span>
+                                            <input
+                                                type="text"
+                                                value={booleanTrueLabel}
+                                                onChange={e => setBooleanTrueLabel(e.target.value)}
+                                                style={{
+                                                    background: "#1e293b",
+                                                    color: "#f8fafc",
+                                                    border: "1px solid rgba(255,255,255,0.06)",
+                                                    borderRadius: "8px",
+                                                    padding: "8px",
+                                                    outline: "none",
+                                                    fontSize: "12px"
+                                                }}
+                                            />
+                                        </label>
+                                        <label
+                                            style={{
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                gap: "6px",
+                                                fontSize: "12px",
+                                                color: "#94a3b8"
+                                            }}
+                                        >
+                                            <span>No / False Display Label</span>
+                                            <input
+                                                type="text"
+                                                value={booleanFalseLabel}
+                                                onChange={e => setBooleanFalseLabel(e.target.value)}
+                                                style={{
+                                                    background: "#1e293b",
+                                                    color: "#f8fafc",
+                                                    border: "1px solid rgba(255,255,255,0.06)",
+                                                    borderRadius: "8px",
+                                                    padding: "8px",
+                                                    outline: "none",
+                                                    fontSize: "12px"
+                                                }}
+                                            />
+                                        </label>
+                                        <label
+                                            style={{
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                gap: "6px",
+                                                fontSize: "12px",
+                                                color: "#94a3b8"
+                                            }}
+                                        >
+                                            <span>Output Value Format</span>
+                                            <select
+                                                value={booleanOutputFormat}
+                                                onChange={e => setBooleanOutputFormat(e.target.value as any)}
+                                                style={{
+                                                    background: "#1e293b",
+                                                    color: "#f8fafc",
+                                                    border: "1px solid rgba(255,255,255,0.06)",
+                                                    borderRadius: "8px",
+                                                    padding: "8px",
+                                                    outline: "none",
+                                                    fontSize: "12px"
+                                                }}
+                                            >
+                                                <option value="boolean">Boolean Type (true / false)</option>
+                                                <option value="string">String Key Type (Custom values)</option>
+                                            </select>
+                                        </label>
+                                        {booleanOutputFormat === "string" && (
+                                            <>
+                                                <label
+                                                    style={{
+                                                        display: "flex",
+                                                        flexDirection: "column",
+                                                        gap: "6px",
+                                                        fontSize: "12px",
+                                                        color: "#94a3b8"
+                                                    }}
+                                                >
+                                                    <span>True String Value Key</span>
+                                                    <input
+                                                        type="text"
+                                                        value={booleanTrueValue}
+                                                        onChange={e => setBooleanTrueValue(e.target.value)}
+                                                        style={{
+                                                            background: "#1e293b",
+                                                            color: "#f8fafc",
+                                                            border: "1px solid rgba(255,255,255,0.06)",
+                                                            borderRadius: "8px",
+                                                            padding: "8px",
+                                                            outline: "none",
+                                                            fontSize: "12px"
+                                                        }}
+                                                    />
+                                                </label>
+                                                <label
+                                                    style={{
+                                                        display: "flex",
+                                                        flexDirection: "column",
+                                                        gap: "6px",
+                                                        fontSize: "12px",
+                                                        color: "#94a3b8"
+                                                    }}
+                                                >
+                                                    <span>False String Value Key</span>
+                                                    <input
+                                                        type="text"
+                                                        value={booleanFalseValue}
+                                                        onChange={e => setBooleanFalseValue(e.target.value)}
+                                                        style={{
+                                                            background: "#1e293b",
+                                                            color: "#f8fafc",
+                                                            border: "1px solid rgba(255,255,255,0.06)",
+                                                            borderRadius: "8px",
+                                                            padding: "8px",
+                                                            outline: "none",
+                                                            fontSize: "12px"
+                                                        }}
+                                                    />
+                                                </label>
+                                            </>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
                     {/* Category 1: General Options */}
                     <div
                         style={{

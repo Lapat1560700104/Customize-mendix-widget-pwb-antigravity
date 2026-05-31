@@ -9,10 +9,6 @@ import { Big } from "big.js";
 
 export type SourceModeEnum = "association" | "enumeration" | "boolean";
 
-export type SortOrderEnum = "none" | "asc" | "desc";
-
-export type SortFieldEnum = "label" | "detail" | "group";
-
 export type BooleanOutputFormatEnum = "boolean" | "string";
 
 export type SelectionModeEnum = "single" | "multi";
@@ -33,13 +29,16 @@ export interface PwbComboBoxContainerProps {
     style?: CSSProperties;
     tabIndex?: number;
     sourceMode: SourceModeEnum;
+    selectedAttribute?: EditableValue<string | Big | boolean>;
+    selectedAssociation?: ReferenceValue | ReferenceSetValue;
+    delimiter: string;
+    maxVisibleTags: number;
     optionsSource?: ListValue;
     optionLabel?: ListExpressionValue<string>;
     optionDetail?: ListExpressionValue<string>;
     optionGroup?: ListExpressionValue<string>;
     optionImage?: ListExpressionValue<string>;
-    sortOrder: SortOrderEnum;
-    sortField: SortFieldEnum;
+    optionsSort?: any;
     selectedOptionLabel?: ListExpressionValue<string>;
     enableGrouping: boolean;
     booleanTrueLabel: string;
@@ -52,13 +51,9 @@ export interface PwbComboBoxContainerProps {
     showSelectedAvatar: boolean;
     tagStyle: TagStyleEnum;
     tagColorExpression?: ListExpressionValue<string>;
-    selectedAttribute?: EditableValue<string | Big | boolean>;
-    delimiter: string;
-    maxVisibleTags: number;
     showSelectAll: boolean;
     selectAllText: string;
     deselectAllText: string;
-    selectedAssociation?: ReferenceValue | ReferenceSetValue;
     placeholder: string;
     accentColor: string;
     searchHighlightColor: string;
@@ -96,13 +91,16 @@ export interface PwbComboBoxPreviewProps {
     renderMode: "design" | "xray" | "structure";
     translate: (text: string) => string;
     sourceMode: SourceModeEnum;
+    selectedAttribute: string;
+    selectedAssociation: string;
+    delimiter: string;
+    maxVisibleTags: number | null;
     optionsSource: {} | { caption: string } | { type: string } | null;
     optionLabel: string;
     optionDetail: string;
     optionGroup: string;
     optionImage: string;
-    sortOrder: SortOrderEnum;
-    sortField: SortFieldEnum;
+    optionsSort: any;
     selectedOptionLabel: string;
     enableGrouping: boolean;
     booleanTrueLabel: string;
@@ -115,13 +113,9 @@ export interface PwbComboBoxPreviewProps {
     showSelectedAvatar: boolean;
     tagStyle: TagStyleEnum;
     tagColorExpression: string;
-    selectedAttribute: string;
-    delimiter: string;
-    maxVisibleTags: number | null;
     showSelectAll: boolean;
     selectAllText: string;
     deselectAllText: string;
-    selectedAssociation: string;
     placeholder: string;
     accentColor: string;
     searchHighlightColor: string;

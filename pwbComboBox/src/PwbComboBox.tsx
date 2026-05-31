@@ -12,9 +12,13 @@ export function PwbComboBox({
     optionDetail,
     optionGroup,
     optionImage,
-    sortOrder,
-    sortField,
     selectedOptionLabel,
+    enableGrouping,
+    booleanTrueLabel,
+    booleanFalseLabel,
+    booleanOutputFormat,
+    booleanTrueValue,
+    booleanFalseValue,
     selectionMode,
     singleSelectStyle,
     showSelectedAvatar,
@@ -48,7 +52,6 @@ export function PwbComboBox({
     requiredMessage,
     validationExpression,
     customValidationMessage,
-    enableGrouping,
     showOptionAvatar,
     customItemContent
 }: PwbComboBoxContainerProps): ReactElement {
@@ -96,33 +99,12 @@ export function PwbComboBox({
         }
     } else if (sourceMode === "boolean" && selectedAttribute) {
         options.push(
-            { id: "true", label: "Yes / True", rawObject: true },
-            { id: "false", label: "No / False", rawObject: false }
+            { id: "true", label: booleanTrueLabel || "Yes", rawObject: true },
+            { id: "false", label: booleanFalseLabel || "No", rawObject: false }
         );
     }
 
-    // Apply sorting if configured
-    if (sortOrder && sortOrder !== "none") {
-        const fieldKey = sortField || "label";
-        options.sort((a, b) => {
-            let valA = "";
-            let valB = "";
-
-            if (fieldKey === "label") {
-                valA = a.label;
-                valB = b.label;
-            } else if (fieldKey === "detail") {
-                valA = a.subtitle || "";
-                valB = b.subtitle || "";
-            } else if (fieldKey === "group") {
-                valA = a.groupName || "";
-                valB = b.groupName || "";
-            }
-
-            const comparison = valA.localeCompare(valB, undefined, { sensitivity: "base", numeric: true });
-            return sortOrder === "asc" ? comparison : -comparison;
-        });
-    }
+    // Note: sorting is now handled natively on the entity datasource side using Mendix's optionsSort.
 
     // 4. Retrieve currently selected IDs
     let selectedIds: string[] = [];
@@ -135,8 +117,14 @@ export function PwbComboBox({
             }
         } else if (selectedAttribute && selectedAttribute.value !== undefined && selectedAttribute.value !== null) {
             if (sourceMode === "boolean") {
-                const boolVal = selectedAttribute.value === true || String(selectedAttribute.value) === "true";
-                selectedIds = [boolVal ? "true" : "false"];
+                if (booleanOutputFormat === "string") {
+                    const strVal = String(selectedAttribute.value);
+                    const isTrueKey = strVal === (booleanTrueValue || "true");
+                    selectedIds = [isTrueKey ? "true" : "false"];
+                } else {
+                    const boolVal = selectedAttribute.value === true || String(selectedAttribute.value) === "true";
+                    selectedIds = [boolVal ? "true" : "false"];
+                }
             } else {
                 const attrVal = String(selectedAttribute.value);
                 // Match either option ID or option label value
@@ -184,7 +172,13 @@ export function PwbComboBox({
             }
             if (selectedAttribute) {
                 if (sourceMode === "boolean") {
-                    selectedAttribute.setValue(id === "true");
+                    if (booleanOutputFormat === "string") {
+                        selectedAttribute.setValue(
+                            id === "true" ? booleanTrueValue || "true" : booleanFalseValue || "false"
+                        );
+                    } else {
+                        selectedAttribute.setValue(id === "true");
+                    }
                 } else if (sourceMode === "enumeration") {
                     selectedAttribute.setValue(option.rawObject as any);
                 } else {

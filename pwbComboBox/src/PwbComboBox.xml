@@ -20,7 +20,36 @@
                 </property>
             </propertyGroup>
 
-            <propertyGroup caption="2. Entity Datasource Config">
+            <propertyGroup caption="2. Selection Binding">
+                <property key="selectedAttribute" type="attribute" required="false">
+                    <caption>Selected Attribute</caption>
+                    <description>Attribute to store or read the selected value (supports String, Integer, Enum, or Boolean depending on Mode)</description>
+                    <attributeTypes>
+                        <attributeType name="String"/>
+                        <attributeType name="Integer"/>
+                        <attributeType name="Enum"/>
+                        <attributeType name="Boolean"/>
+                    </attributeTypes>
+                </property>
+                <property key="selectedAssociation" type="association" required="false" selectableObjects="optionsSource">
+                    <caption>Selected Association (Object Reference)</caption>
+                    <description>Reference (for Single Mode) or ReferenceSet (for Multi Mode) association to store selected object(s)</description>
+                    <associationTypes>
+                        <associationType name="Reference"/>
+                        <associationType name="ReferenceSet"/>
+                    </associationTypes>
+                </property>
+                <property key="delimiter" type="string" required="false" defaultValue=",">
+                    <caption>Delimiter (Multi Mode String Only)</caption>
+                    <description>Delimiter character used to separate values in Multi Mode String attribute (e.g. , or ; or |)</description>
+                </property>
+                <property key="maxVisibleTags" type="integer" defaultValue="0" required="true">
+                    <caption>Max Visible Tags</caption>
+                    <description>Maximum number of selected tags shown on input before collapsing. Set to 0 to show all.</description>
+                </property>
+            </propertyGroup>
+
+            <propertyGroup caption="3. Entity Datasource Config">
                 <property key="optionsSource" type="datasource" isList="true" required="false">
                     <caption>Options Source</caption>
                     <description>Dynamic list of options to display in the dropdown</description>
@@ -45,23 +74,9 @@
                     <description>Optional expression to display a circular avatar image thumbnail (e.g. $currentObject/AvatarUrl)</description>
                     <returnType type="String"/>
                 </property>
-                <property key="sortOrder" type="enumeration" defaultValue="none">
-                    <caption>Sort Dropdown Options</caption>
-                    <description>Sort options alphabetically in ascending or descending order. None retains original data source sequence.</description>
-                    <enumerationValues>
-                        <enumerationValue key="none">None (Datasource order)</enumerationValue>
-                        <enumerationValue key="asc">Ascending (A to Z)</enumerationValue>
-                        <enumerationValue key="desc">Descending (Z to A)</enumerationValue>
-                    </enumerationValues>
-                </property>
-                <property key="sortField" type="enumeration" defaultValue="label">
-                    <caption>Sort Field</caption>
-                    <description>Specify the field of the option item to sort by.</description>
-                    <enumerationValues>
-                        <enumerationValue key="label">Option Label</enumerationValue>
-                        <enumerationValue key="detail">Option Detail (Subtitle)</enumerationValue>
-                        <enumerationValue key="group">Option Group Category</enumerationValue>
-                    </enumerationValues>
+                <property key="optionsSort" type="sorting" dataSource="optionsSource" required="false">
+                    <caption>Sort Options</caption>
+                    <description>Sort options by entity attributes</description>
                 </property>
                 <property key="selectedOptionLabel" type="expression" dataSource="optionsSource" required="false">
                     <caption>Selected Option Label</caption>
@@ -74,7 +89,7 @@
                 </property>
             </propertyGroup>
 
-            <propertyGroup caption="3. Boolean Mode Config">
+            <propertyGroup caption="4. Boolean Mode Config">
                 <property key="booleanTrueLabel" type="string" required="false" defaultValue="Yes">
                     <caption>Yes / True Display Label</caption>
                     <description>Text to display for the 'True' option (e.g. Yes, Active, Enabled)</description>
@@ -137,24 +152,6 @@
                 <description>Optional expression returning a dynamic color code or name to style tag badges individually (e.g. $currentObject/Color)</description>
                 <returnType type="String"/>
             </property>
-            <property key="selectedAttribute" type="attribute" required="false">
-                <caption>Selected Attribute</caption>
-                <description>Attribute to store or read the selected value (supports String, Integer, Enum, or Boolean depending on Mode)</description>
-                <attributeTypes>
-                    <attributeType name="String"/>
-                    <attributeType name="Integer"/>
-                    <attributeType name="Enum"/>
-                    <attributeType name="Boolean"/>
-                </attributeTypes>
-            </property>
-            <property key="delimiter" type="string" required="false" defaultValue=",">
-                <caption>Delimiter (Multi Mode String Only)</caption>
-                <description>Delimiter character used to separate values in Multi Mode String attribute (e.g. , or ; or |)</description>
-            </property>
-            <property key="maxVisibleTags" type="integer" defaultValue="0" required="true">
-                <caption>Max Visible Tags</caption>
-                <description>Maximum number of selected tags shown on input before collapsing. Set to 0 to show all.</description>
-            </property>
             <property key="showSelectAll" type="boolean" defaultValue="false">
                 <caption>Show Select All</caption>
                 <description>Enable a button in multi-select mode to quickly select or deselect all items in the list.</description>
@@ -166,14 +163,6 @@
             <property key="deselectAllText" type="string" required="false" defaultValue="ล้างทั้งหมด / Deselect All">
                 <caption>Deselect All Text</caption>
                 <description>Label for Deselect All button.</description>
-            </property>
-            <property key="selectedAssociation" type="association" required="false" selectableObjects="optionsSource">
-                <caption>Selected Association (Object Reference)</caption>
-                <description>Reference (for Single Mode) or ReferenceSet (for Multi Mode) association to store selected object(s)</description>
-                <associationTypes>
-                    <associationType name="Reference"/>
-                    <associationType name="ReferenceSet"/>
-                </associationTypes>
             </property>
         </propertyGroup>
 

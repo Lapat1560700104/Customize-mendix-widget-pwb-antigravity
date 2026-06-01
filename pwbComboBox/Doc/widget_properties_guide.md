@@ -88,7 +88,7 @@ graph TD
 
 | Property Key | Caption (ชื่อใน Mendix) | Type (ประเภท) | Default | คำอธิบายและความสำคัญ | ผลลัพธ์และผลกระทบต่อหน้าตา / ฟังก์ชันการใช้งาน |
 | :--- | :--- | :--- | :---: | :--- | :--- |
-| `onCreateText` | **Create Option Text Template** | String | `+ Add '{value}'` | ข้อความ Template ของปุ่มสร้างรายการใหม่ที่จะแสดงท้าย Dropdown เมื่อการค้นหาไม่พบรายการใดตรงกัน โดย `{value}` จะถูกแทนที่ด้วยคำค้นหาของผู้ใช้ขณะรันไทม์ | **Dynamic Creation UX**: เมื่อผู้ใช้พิมพ์คำที่ยังไม่มีในรายการ ปุ่มนี้จะลอยขึ้นมาเชิญให้สร้างรายการใหม่ทันที เชื่อม **On Change Action** เพื่อ handle การสร้าง Object ใหม่ใน Microflow/Nanoflow |
+| `onCreateText` | **Create Option Text Template** | Expression (String) | — | **Mendix Expression** สำหรับกำหนดข้อความปุ่มสร้างรายการใหม่ที่ท้าย Dropdown เมื่อการค้นหาไม่พบรายการใดตรงกัน:<br>• ใช้ `'{value}'` เป็น placeholder ที่จะถูกแทนที่ด้วยคำค้นหาขณะรันไทม์<br>• สามารถ embed attribute จาก context entity ได้ (เช่น `'+ เพิ่มใน ' + $currentObject/CategoryName`)<br>• ไม่กรอก = ปุ่มสร้างไม่แสดง | **Dynamic Creation UX**: เมื่อผู้ใช้พิมพ์คำที่ยังไม่มีในรายการ ปุ่มนี้จะลอยขึ้นมาเชิญให้สร้างรายการใหม่ทันที ตัวอย่าง expression:<br>`'+ Add ' + typedText` → ใช้ placeholder `{value}`<br>`'+ เพิ่มสินค้า: ' + $currentObject/CategoryName` → ฝัง entity attribute |
 
 ---
 

@@ -98,7 +98,7 @@
 
 | Property Key | Caption | Type | Required | Default Value | Description |
 | :--- | :--- | :--- | :---: | :---: | :--- |
-| `onCreateText` | Create Option Text Template | String | No | `+ Add '{value}'` | Button label template shown at the bottom of the dropdown when user's query matches no existing option. `{value}` will be replaced by user's search query at runtime. |
+| `onCreateText` | Create Option Text Template | Expression (String) | No | Mendix expression สำหรับกำหนดข้อความปุ่มสร้างรายการใหม่ที่ท้าย Dropdown เมื่อค้นหาไม่พบรายการที่ตรงกัน ใช้ `'{value}'` เป็น placeholder ที่จะถูกแทนที่ด้วยคำค้นหาของผู้ใช้ขณะ runtime สามารถ embed entity attribute จาก context entity ได้ (เช่น `'+ Add item to ' + $currentObject/CategoryName`) หากไม่กรอก ปุ่มสร้างจะไม่แสดง |
 
 ---
 

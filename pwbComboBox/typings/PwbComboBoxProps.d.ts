@@ -55,7 +55,7 @@ export interface PwbComboBoxContainerProps {
     showSelectAll: boolean;
     selectAllText: string;
     deselectAllText: string;
-    onCreateText: string;
+    onCreateText?: DynamicValue<string>;
     onChangeAction?: ActionValue;
     onEnterAction?: ActionValue;
     onLeaveAction?: ActionValue;

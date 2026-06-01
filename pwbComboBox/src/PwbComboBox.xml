@@ -159,9 +159,10 @@
             </propertyGroup>
 
             <propertyGroup caption="Dynamic Creation Config">
-                <property key="onCreateText" type="string" required="false" defaultValue="+ Add '{value}'">
+                <property key="onCreateText" type="expression" required="false">
                     <caption>Create Option Text Template</caption>
-                    <description>Button label template. '{value}' will be replaced by user's search query.</description>
+                    <description>Mendix expression for the create-option button label. Use '{value}' as a placeholder that will be replaced by the user's typed search query at runtime. You may embed entity attributes from the page context (e.g. '+ Add item to ' + $currentObject/CategoryName). Leave empty to hide the create button.</description>
+                    <returnType type="String"/>
                 </property>
             </propertyGroup>
         </propertyGroup>

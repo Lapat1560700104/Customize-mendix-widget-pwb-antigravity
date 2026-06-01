@@ -479,8 +479,8 @@ export function PwbComboBox({
                 onEnter={handleEnter}
                 onLeave={handleLeave}
                 onFilterChange={handleFilterChange}
-                hasCreateAction={!!onCreateText}
-                onCreateText={onCreateText}
+                hasCreateAction={true}
+                onCreateText={onCreateText?.value || "+ Add '{value}'"}
                 noOptionsMessage={noOptionsMessage}
                 loadingMessage={loadingMessage}
                 clearButtonTitle={clearButtonTitle}

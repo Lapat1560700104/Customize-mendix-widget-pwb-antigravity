@@ -4,7 +4,33 @@
 
 ---
 
-## [v4.0.0] — Secret Features Edition 🆕
+## [v3.10.0] — Documentation Sync Release 📝
+
+**Release:** `pwb.PwbComboBox_3.10.0_20260601_163852.mpk`
+**Released:** 2026-06-01 16:38:52
+
+### 📚 Documentation Updates
+- อัพเดท `README_PwbComboBox.md` ให้ตรงกับ XML ล่าสุดครบทุก Property:
+  - เพิ่มหัวข้อ **Selection Mode Config** (`selectionMode`, `singleSelectStyle`, `showSelectedAvatar`, `tagStyle`, `tagColorExpression`, `showSelectAll`, `selectAllText`, `deselectAllText`)
+  - เพิ่มหัวข้อ **Dynamic Creation Config** (`onCreateText`)
+  - เพิ่มหัวข้อ **Aesthetics Tab** ครบทุก property (13 รายการ)
+  - เพิ่มหัวข้อ **Translations Tab** (`noOptionsMessage`, `loadingMessage`, `clearButtonTitle`)
+  - เพิ่มหัวข้อ **Validation Tab** (`required`, `requiredMessage`, `validationExpression`, `customValidationMessage`)
+  - เพิ่มตาราง **Conditional Visibility Logic** สรุป editorConfig rules
+  - เพิ่มตาราง **Validation Rules** สรุป check() errors ทั้งหมด
+  - แก้ version header จาก `v4.0.0` → `v3.10.0` ให้ตรงกับ `package.json`
+- อัพเดท `Doc/widget_properties_guide.md` ให้ตรงกับ XML ล่าสุด:
+  - เพิ่ม **Dynamic Creation Config Group** (`onCreateText`) ที่ขาดหายไป
+  - แก้ default values ทั้ง 8 จุดที่ไม่ตรงกับ XML (`placeholder`, `selectAllText`, `deselectAllText`, `noOptionsMessage`, `loadingMessage`, `clearButtonTitle`, `customValidationMessage`)
+  - อัพเดท Mermaid diagram ให้แสดง subgroups ของ General Tab
+  - แก้ version references จาก `v4.0.0` → `v3.10.0`
+
+### 🔧 No Code Changes
+- ไม่มีการเปลี่ยนแปลง source code, XML หรือ logic — documentation sync release เท่านั้น
+
+---
+
+## [v3.10.0] — Secret Features Edition 🆕
 
 **Release:** `pwb.PwbComboBox_3.10.0_20260601_122215.mpk`
 
@@ -83,7 +109,7 @@
 ---
 
 > [!TIP]
-> สำหรับการอัปเกรดจาก v3.10.0 → v4.0.0:
+> สำหรับการอัปเกรดจาก v3.9.x → v3.10.0:
 > - ไม่มี Breaking Changes — properties ใหม่ทั้งหมดมี default value
 > - Properties ใหม่จะปรากฏใน **Advanced → Search & Filtering Config** ทันที
 > - `enableWeightedSearch` และ `enableSearchCache` เปิดโดย default — ผู้ใช้จะรู้สึกถึงความแตกต่างทันที

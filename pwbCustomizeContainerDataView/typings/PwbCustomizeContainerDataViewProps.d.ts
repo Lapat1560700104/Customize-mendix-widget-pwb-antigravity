@@ -8,6 +8,8 @@ import { ActionValue, EditableValue, ListValue, ListWidgetValue } from "mendix";
 
 export type LayoutDirectionEnum = "vertical" | "horizontal";
 
+export type DragHandleDisplayEnum = "left" | "hide";
+
 export interface PwbCustomizeContainerDataViewContainerProps {
     name: string;
     class: string;
@@ -18,6 +20,7 @@ export interface PwbCustomizeContainerDataViewContainerProps {
     sortedAttribute: EditableValue<string>;
     onSortAction?: ActionValue;
     layoutDirection: LayoutDirectionEnum;
+    dragHandleDisplay: DragHandleDisplayEnum;
     accentColor: string;
     borderRadius: string;
 }
@@ -38,6 +41,7 @@ export interface PwbCustomizeContainerDataViewPreviewProps {
     sortedAttribute: string;
     onSortAction: {} | null;
     layoutDirection: LayoutDirectionEnum;
+    dragHandleDisplay: DragHandleDisplayEnum;
     accentColor: string;
     borderRadius: string;
 }

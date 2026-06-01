@@ -83,6 +83,7 @@ _คำสั่งนี้จะ build JavaScript bundle, package ทุกอ
 | `sortedAttribute` | Attribute (String) | ✅ Yes | — | Attribute เก็บผลลัพธ์ GUIDs ที่เรียงลำดับแล้ว (comma-separated) |
 | `onSortAction` | Action | No | — | Microflow/Nanoflow ที่จะถูกเรียกเมื่อลากวางเสร็จ |
 | `layoutDirection` | Enumeration | No | `vertical` | ทิศทางการจัดวาง: `vertical` (แนวตั้ง) หรือ `horizontal` (แนวนอน) |
+| `dragHandleDisplay` | Enumeration | No | `left` | การแสดงผลปุ่ม Drag Handle: `left` (แสดงทางซ้าย) หรือ `hide` (ซ่อนปุ่ม) |
 | `accentColor` | String | No | `#3b82f6` | สีไฮไลต์และ Drop Indicator Glow (เช่น `#3b82f6`, `#10b981`) |
 | `borderRadius` | String | No | `16px` | ความโค้งมนขอบการ์ด (เช่น `8px`, `16px`, `0px`) |
 

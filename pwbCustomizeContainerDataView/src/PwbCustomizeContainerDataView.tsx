@@ -11,6 +11,7 @@ export function PwbCustomizeContainerDataView({
     sortedAttribute,
     onSortAction,
     layoutDirection,
+    dragHandleDisplay,
     accentColor,
     borderRadius
 }: PwbCustomizeContainerDataViewContainerProps): ReactElement {
@@ -109,6 +110,7 @@ export function PwbCustomizeContainerDataView({
                     accentColor={safeAccentColor}
                     borderRadius={safeBorderRadius}
                     layoutDirection={layoutDirection}
+                    dragHandleDisplay={dragHandleDisplay}
                 />
             )}
         </div>

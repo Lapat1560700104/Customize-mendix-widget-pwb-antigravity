@@ -12,6 +12,7 @@ export interface DragContainerProps {
     accentColor: string;
     borderRadius: string;
     layoutDirection: "vertical" | "horizontal";
+    dragHandleDisplay: "left" | "hide";
 }
 
 export function DragContainer({
@@ -20,7 +21,8 @@ export function DragContainer({
     onOrderChange,
     accentColor,
     borderRadius,
-    layoutDirection
+    layoutDirection,
+    dragHandleDisplay
 }: DragContainerProps): ReactElement {
     const [orderedItems, setOrderedItems] = useState<DragItem[]>([]);
     const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
@@ -101,24 +103,26 @@ export function DragContainer({
                         }}
                     >
                         {/* Drag Handle Icon on the left */}
-                        <div className="pwb-drag-handle" title="Drag to reorder">
-                            <svg
-                                viewBox="0 0 24 24"
-                                width="16"
-                                height="16"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2.5"
-                                strokeLinecap="round"
-                            >
-                                <circle cx="9" cy="5" r="1.2" fill="currentColor" />
-                                <circle cx="9" cy="12" r="1.2" fill="currentColor" />
-                                <circle cx="9" cy="19" r="1.2" fill="currentColor" />
-                                <circle cx="15" cy="5" r="1.2" fill="currentColor" />
-                                <circle cx="15" cy="12" r="1.2" fill="currentColor" />
-                                <circle cx="15" cy="19" r="1.2" fill="currentColor" />
-                            </svg>
-                        </div>
+                        {dragHandleDisplay === "left" && (
+                            <div className="pwb-drag-handle" title="Drag to reorder">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    width="16"
+                                    height="16"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                >
+                                    <circle cx="9" cy="5" r="1.2" fill="currentColor" />
+                                    <circle cx="9" cy="12" r="1.2" fill="currentColor" />
+                                    <circle cx="9" cy="19" r="1.2" fill="currentColor" />
+                                    <circle cx="15" cy="5" r="1.2" fill="currentColor" />
+                                    <circle cx="15" cy="12" r="1.2" fill="currentColor" />
+                                    <circle cx="15" cy="19" r="1.2" fill="currentColor" />
+                                </svg>
+                            </div>
+                        )}
 
                         {/* Nested custom widgets container */}
                         <div className="pwb-draggable-item-content">{renderItem(item.rawObject)}</div>

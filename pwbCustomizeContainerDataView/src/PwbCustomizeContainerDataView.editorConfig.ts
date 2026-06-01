@@ -162,7 +162,31 @@ export function getPreview(
         `<circle cx="15" cy="19" r="1.2" fill="#94a3b8"/>` +
         `</svg>`;
 
-    // ── Single item row: [Handle] [DropZone with real widgets] ──
+    // ── Single item row children: [Handle (optional)] [DropZone with real widgets] ──
+    const rowChildren: PreviewProps[] = [];
+    if (values.dragHandleDisplay === "left") {
+        rowChildren.push({
+            type: "Container",
+            grow: 0,
+            children: [
+                {
+                    type: "Image",
+                    document: dragHandleSvg,
+                    width: 14,
+                    height: 14
+                }
+            ],
+            padding: 4
+        });
+    }
+    rowChildren.push({
+        type: "DropZone",
+        property: values.customItemContent as object,
+        placeholder: "⬇ Drop your content widgets here — each item row will display these widgets",
+        showDataSourceHeader: false,
+        grow: 1
+    });
+
     const itemRow: RowLayoutProps = {
         type: "RowLayout",
         columnSize: "grow",
@@ -171,30 +195,7 @@ export function getPreview(
         borderWidth: 1,
         padding: 8,
         backgroundColor: "#ffffff",
-        children: [
-            // Left: drag handle decoration
-            {
-                type: "Container",
-                grow: 0,
-                children: [
-                    {
-                        type: "Image",
-                        document: dragHandleSvg,
-                        width: 14,
-                        height: 14
-                    }
-                ],
-                padding: 4
-            },
-            // Right: the LIVE DropZone — shows actual widgets placed by developer
-            {
-                type: "DropZone",
-                property: values.customItemContent as object,
-                placeholder: "⬇ Drop your content widgets here — each item row will display these widgets",
-                showDataSourceHeader: false,
-                grow: 1
-            }
-        ]
+        children: rowChildren
     };
 
     // ── Direction label in header ──

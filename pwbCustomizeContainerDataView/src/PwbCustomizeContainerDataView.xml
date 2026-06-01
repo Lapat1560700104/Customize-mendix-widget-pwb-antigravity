@@ -44,6 +44,14 @@
                     <enumerationValue key="horizontal">Horizontal Grid Row</enumerationValue>
                 </enumerationValues>
             </property>
+            <property key="dragHandleDisplay" type="enumeration" defaultValue="left">
+                <caption>Drag Handle Position</caption>
+                <description>Choose whether to show the drag handle icon on the left, or hide it entirely.</description>
+                <enumerationValues>
+                    <enumerationValue key="left">Drag Handle on Left</enumerationValue>
+                    <enumerationValue key="hide">Hide Drag Handle</enumerationValue>
+                </enumerationValues>
+            </property>
             <property key="accentColor" type="string" required="false" defaultValue="#3b82f6">
                 <caption>Accent Color (Hex)</caption>
                 <description>Theme color for active drag outlines, markers, and glows (e.g., #3b82f6)</description>

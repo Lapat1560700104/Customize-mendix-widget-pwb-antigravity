@@ -41,6 +41,7 @@
 | Property Key | Caption | Type | Required | Default | Description |
 | :--- | :--- | :--- | :---: | :--- | :--- |
 | `layoutDirection` | Layout Direction | Enumeration | No | `vertical` | `vertical` = column list layout · `horizontal` = row wrap grid layout |
+| `dragHandleDisplay` | Drag Handle Position | Enumeration | No | `left` | `left` = show drag handle icon on the left of each row · `hide` = hide drag handle icon entirely |
 | `accentColor` | Accent Color (Hex) | String | No | `#3b82f6` | Theme color for active drag outlines, drop markers, and glow effects |
 | `borderRadius` | Border Radius | String | No | `16px` | Corner roundness of item rows and drop overlays (e.g. `8px`, `16px`, `0px`) |
 

@@ -36,7 +36,7 @@
                         <attributeType name="Boolean"/>
                     </attributeTypes>
                 </property>
-                <property key="selectedAssociation" type="association" required="false" selectableObjects="optionsSource">
+                <property key="selectedAssociation" type="association" required="false">
                     <caption>Selected Association</caption>
                     <description>Reference (for Single Mode) or ReferenceSet (for Multi Mode) association to store selected object(s)</description>
                     <associationTypes>
@@ -51,42 +51,6 @@
                 <property key="maxVisibleTags" type="integer" defaultValue="0" required="true">
                     <caption>Max Visible Tags</caption>
                     <description>Maximum number of selected tags shown on input before collapsing. Set to 0 to show all.</description>
-                </property>
-            </propertyGroup>
-
-            <propertyGroup caption="Entity Datasource Config">
-                <property key="optionsSource" type="datasource" isList="true" required="false">
-                    <caption>Options Source</caption>
-                    <description>Dynamic list of options to display in the dropdown</description>
-                </property>
-                <property key="optionLabel" type="expression" dataSource="optionsSource" required="false">
-                    <caption>Option Label</caption>
-                    <description>Expression to display text for each option item (e.g. $currentObject/AttributeName)</description>
-                    <returnType type="String"/>
-                </property>
-                <property key="optionDetail" type="expression" dataSource="optionsSource" required="false">
-                    <caption>Option Detail (Subtitle)</caption>
-                    <description>Optional secondary text displayed below the option label (e.g. Email under Name)</description>
-                    <returnType type="String"/>
-                </property>
-                <property key="optionGroup" type="expression" dataSource="optionsSource" required="false">
-                    <caption>Option Group Category</caption>
-                    <description>Optional expression to group option items by a category name (e.g. $currentObject/Category)</description>
-                    <returnType type="String"/>
-                </property>
-                <property key="optionImage" type="expression" dataSource="optionsSource" required="false">
-                    <caption>Option Image URL</caption>
-                    <description>Optional expression to display a circular avatar image thumbnail (e.g. $currentObject/AvatarUrl)</description>
-                    <returnType type="String"/>
-                </property>
-                <property key="selectedOptionLabel" type="expression" dataSource="optionsSource" required="false">
-                    <caption>Selected Option Label</caption>
-                    <description>Optional expression to display a custom label format ONLY when the option is selected (e.g., a shorter tag name). If empty, Option Label is used.</description>
-                    <returnType type="String"/>
-                </property>
-                <property key="enableGrouping" type="boolean" defaultValue="true">
-                    <caption>Enable Grouping</caption>
-                    <description>Enable or disable grouping of options by the Option Group Category expression</description>
                 </property>
             </propertyGroup>
 
@@ -147,11 +111,7 @@
                         <enumerationValue key="avatar">Avatar Circle</enumerationValue>
                     </enumerationValues>
                 </property>
-                <property key="tagColorExpression" type="expression" dataSource="optionsSource" required="false">
-                    <caption>Tag Color (Hex/CSS)</caption>
-                    <description>Optional expression returning a dynamic color code or name to style tag badges individually (e.g. $currentObject/Color)</description>
-                    <returnType type="String"/>
-                </property>
+
                 <property key="showSelectAll" type="boolean" defaultValue="false">
                     <caption>Show Select All</caption>
                     <description>Enable a button in multi-select mode to quickly select or deselect all items in the list.</description>
@@ -284,10 +244,7 @@
                 <caption>Show Option Avatar</caption>
                 <description>Enable or disable showing avatar thumbnail inside the options list dropdown</description>
             </property>
-            <property key="customItemContent" type="widgets" required="false" dataSource="optionsSource">
-                <caption>Custom Option Content</caption>
-                <description>Render custom Mendix widgets inside the dropdown options list for each item instead of standard avatar/label/subtitle.</description>
-            </property>
+
             <property key="showOptionCheckbox" type="boolean" defaultValue="false">
                 <caption>Show Checkbox/Radio Option</caption>
                 <description>Show standard checkbox (multi) or radio button (single) next to dropdown list choices</description>

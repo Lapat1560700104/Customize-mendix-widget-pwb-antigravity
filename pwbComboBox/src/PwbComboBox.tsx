@@ -80,13 +80,10 @@ export function PwbComboBox({
     style,
     source,
     sourceType,
-    optionsSource,
-    optionLabel,
-    optionDetail,
-    optionGroup,
-    optionImage,
-    selectedOptionLabel,
-    enableGrouping,
+    selectedAttribute,
+    delimiter,
+    maxVisibleTags,
+    selectedAssociation,
     booleanTrueLabel,
     booleanFalseLabel,
     booleanOutputFormat,
@@ -94,13 +91,6 @@ export function PwbComboBox({
     booleanFalseValue,
     selectionMode,
     singleSelectStyle,
-    showSelectedAvatar,
-    tagStyle,
-    tagColorExpression,
-    selectedAttribute,
-    delimiter,
-    maxVisibleTags,
-    selectedAssociation,
     showSelectAll,
     selectAllText,
     deselectAllText,
@@ -112,10 +102,7 @@ export function PwbComboBox({
     popoverBg,
     maxDropdownHeight,
     dropdownLayout,
-    optionAvatarShape,
     showOptionCheckbox,
-    highlightColorMode,
-    searchDebounce,
     onCreateText,
     noOptionsMessage,
     loadingMessage,
@@ -124,8 +111,6 @@ export function PwbComboBox({
     requiredMessage,
     validationExpression,
     customValidationMessage,
-    showOptionAvatar,
-    customItemContent,
     onChangeAction,
     onEnterAction,
     onLeaveAction,
@@ -133,6 +118,7 @@ export function PwbComboBox({
     filterAttribute,
     searchMethod,
     searchCaseSensitive,
+    searchDebounce,
     maxSearchResults
 }: PwbComboBoxContainerProps): ReactElement {
     const sourceMode = source === "database" ? "association" : sourceType;
@@ -144,28 +130,26 @@ export function PwbComboBox({
             ? selectedAttribute?.readOnly === true || (assoc && assoc.readOnly)
             : assoc?.readOnly === true || selectedAttribute?.readOnly === true;
 
-    // 2. Fetch loading state
-    const isLoading =
-        sourceMode === "association" ? (optionsSource ? optionsSource.status === "loading" : false) : false;
+    // 2. Fetch loading state (always false since optionsSource is deleted)
+    const isLoading = false;
 
     // 3. Map options according to sourceMode
     const options: ComboBoxOption[] = [];
 
-    if (sourceMode === "association") {
-        if (optionsSource && optionsSource.items) {
-            optionsSource.items.forEach(item => {
+    if (sourceMode === "association" && assoc && assoc.value) {
+        // Since optionsSource is deleted, we populate options array with currently selected objects
+        // so that selected tag badges or pill text display correctly on input.
+        const selectedObjects = assoc.value;
+        const selectedArray = Array.isArray(selectedObjects) ? selectedObjects : [selectedObjects];
+        selectedArray.forEach((item: any) => {
+            if (item) {
                 options.push({
                     id: item.id,
-                    label: optionLabel ? optionLabel.get(item).value || "" : "",
-                    subtitle: optionDetail ? optionDetail.get(item).value || "" : undefined,
-                    groupName: optionGroup ? optionGroup.get(item).value : undefined,
-                    colorCode: tagColorExpression ? tagColorExpression.get(item).value : undefined,
-                    imageUrl: optionImage ? optionImage.get(item).value : undefined,
-                    selectedLabel: selectedOptionLabel ? selectedOptionLabel.get(item).value || "" : undefined,
+                    label: `Object ID: ${item.id}`,
                     rawObject: item
                 });
-            });
-        }
+            }
+        });
     } else if (sourceMode === "enumeration" && selectedAttribute) {
         if (selectedAttribute.universe) {
             selectedAttribute.universe.forEach(value => {
@@ -186,16 +170,15 @@ export function PwbComboBox({
         );
     }
 
-    // Note: sorting is now handled natively on the entity datasource side using Mendix's optionsSort.
-
     // 4. Retrieve currently selected IDs
     let selectedIds: string[] = [];
     if (selectionMode === "single") {
         if (sourceMode === "association" && assoc && assoc.value) {
-            // Find option matching Mendix object GUID
             const matched = options.find(o => o.id === assoc.value.id);
             if (matched) {
                 selectedIds = [matched.id];
+            } else {
+                selectedIds = [assoc.value.id];
             }
         } else if (selectedAttribute && selectedAttribute.value !== undefined && selectedAttribute.value !== null) {
             if (sourceMode === "boolean") {
@@ -209,7 +192,6 @@ export function PwbComboBox({
                 }
             } else {
                 const attrVal = String(selectedAttribute.value);
-                // Match either option ID or option label value
                 const matched = options.find(
                     o => o.id === attrVal || o.label === attrVal || o.selectedLabel === attrVal
                 );
@@ -384,7 +366,6 @@ export function PwbComboBox({
                 selectedAttribute.setValue(newVal);
             }
         }
-
         triggerOnChange();
     };
 
@@ -429,11 +410,14 @@ export function PwbComboBox({
                 selectedIds={selectedIds}
                 selectionMode={selectionMode}
                 singleSelectStyle={singleSelectStyle}
-                showSelectedAvatar={showSelectedAvatar}
-                tagStyle={tagStyle}
+                showSelectedAvatar={false}
+                tagStyle="pill"
                 onSelect={handleSelect}
                 onRemove={handleRemove}
                 onClear={handleClear}
+                onEnter={handleEnter}
+                onLeave={handleLeave}
+                onFilterChange={handleFilterChange}
                 isLoading={isLoading}
                 placeholder={placeholder}
                 accentColor={safeAccentColor}
@@ -443,21 +427,15 @@ export function PwbComboBox({
                 popoverBg={safePopoverBg}
                 maxDropdownHeight={maxDropdownHeight}
                 dropdownLayout={dropdownLayout}
-                optionAvatarShape={optionAvatarShape}
                 showOptionCheckbox={showOptionCheckbox}
-                highlightColorMode={highlightColorMode}
                 searchDebounce={searchDebounce}
                 maxVisibleTags={maxVisibleTags}
-                showOptionAvatar={showOptionAvatar}
-                enableGrouping={enableGrouping}
-                renderCustomItem={customItemContent ? item => customItemContent.get(item) : undefined}
+                showOptionAvatar={false}
+                enableGrouping={false}
                 showSelectAll={showSelectAll}
                 selectAllText={selectAllText}
                 deselectAllText={deselectAllText}
                 onCreateOption={handleCreateOption}
-                onEnter={handleEnter}
-                onLeave={handleLeave}
-                onFilterChange={handleFilterChange}
                 hasCreateAction={!!onCreateText}
                 onCreateText={onCreateText}
                 noOptionsMessage={noOptionsMessage}

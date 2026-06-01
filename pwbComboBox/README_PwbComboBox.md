@@ -1,10 +1,10 @@
-# README - PWB Advanced ComboBox Ultimate Specification (v3.9.0)
+# README - PWB Advanced ComboBox Ultimate Specification (v4.0.0)
 
-**PWB ComboBox v3.9.0 (Focus & Filter Events Edition)** is a premium, enterprise-grade, high-performance, and fully accessible pluggable autocomplete dropdown search widget designed for Mendix Studio Pro. It features a properties panel matching the **native Mendix Studio Pro properties sheet 100%**, supports **complete native events (On Change, On Enter, On Leave, and On filter input change)**, and includes a dedicated **Advanced** tab featuring 5 state-of-the-art searching algorithms (including fuzzy matching).
+**PWB ComboBox v4.0.0 (Pure Attribute & Purged Datasource Edition)** is a premium, enterprise-grade, high-performance, and fully accessible pluggable autocomplete dropdown search widget designed for Mendix Studio Pro. It features a properties panel matching the **native Mendix Studio Pro properties sheet 100%**, supports **complete native events (On Change, On Enter, On Leave, and On filter input change)**, and includes a dedicated **Advanced** tab featuring 5 state-of-the-art searching algorithms (including fuzzy matching).
 
 ---
 
-## 🌟 Key Features (v3.9.0 Specs)
+## 🌟 Key Features (v4.0.0 Specs)
 
 * **100% Screenshot-Identical "Data source" Layout**:
   * **Source**: Toggles between **Context** (options come from page context) and **Database** (options come from database list query).
@@ -45,18 +45,6 @@
 | `selectedAssociation` | Selected Association | Association | No | Reference/ReferenceSet to store selected object. |
 | `delimiter` | Delimiter | String | No | Delimiter character used to join/split multiple values. |
 | `maxVisibleTags` | Max Visible Tags | Integer | Yes | Maximum selected tags shown before collapsing. Set to 0 for all. |
-
-#### Entity Datasource Config (ตั้งค่าฐานข้อมูล)
-
-| Property Key | Caption | Type | Required | Description |
-| :--- | :--- | :--- | :---: | :--- |
-| `optionsSource` | Options Source | Datasource | Yes | Dynamic list of objects to populate the dropdown. |
-| `optionLabel` | Option Label | Expression (String) | Yes | Expression to render text for each option item. |
-| `optionDetail` | Option Detail (Subtitle) | Expression (String) | No | Secondary text displayed below option label. |
-| `optionGroup` | Option Group Category | Expression (String) | No | Expression to group option items by a category name. |
-| `optionImage` | Option Image URL | Expression (String) | No | Expression to render dynamic profile avatar thumbnails. |
-| `selectedOptionLabel` | Selected Option Label | Expression (String) | No | Expression to render custom label format ONLY when selected. |
-| `enableGrouping` | Enable Grouping | Boolean | Yes (Default `true`) | Enable or disable collapsible category grouping. |
 
 #### Boolean Mode Config (ตั้งค่าข้อมูลจริง/เท็จ)
 

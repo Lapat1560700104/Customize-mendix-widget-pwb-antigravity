@@ -347,10 +347,8 @@ function App() {
     const [selectionMode, setSelectionMode] = useState<"single" | "multi">("single");
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-    // New v3.8.0 Data Source Mode simulation states
-    const [source, setSource] = useState<"context" | "database">("context");
-    const [sourceType, setSourceType] = useState<"association" | "enumeration" | "boolean">("association");
-    const sourceMode = source === "database" ? "association" : sourceType;
+    // Consolidated Data Source Mode simulation state to match version 3.10.0 property sheet
+    const [sourceMode, setSourceMode] = useState<"association" | "enumeration" | "boolean">("association");
     const [booleanTrueLabel, setBooleanTrueLabel] = useState("Yes");
     const [booleanFalseLabel, setBooleanFalseLabel] = useState("No");
     const [booleanOutputFormat, setBooleanOutputFormat] = useState<"boolean" | "string">("boolean");
@@ -722,11 +720,11 @@ function App() {
                                         color: "#94a3b8"
                                     }}
                                 >
-                                    <span>Source (แหล่งข้อมูล)</span>
+                                    <span>Data Source Mode (แหล่งข้อมูล)</span>
                                     <select
-                                        value={source}
+                                        value={sourceMode}
                                         onChange={e => {
-                                            setSource(e.target.value as any);
+                                            setSourceMode(e.target.value as any);
                                             setSelectedIds([]);
                                         }}
                                         style={{
@@ -739,44 +737,11 @@ function App() {
                                             fontSize: "12px"
                                         }}
                                     >
-                                        <option value="context">Context (บริบทหน้าจอ)</option>
-                                        <option value="database">Database (ดึงจากฐานข้อมูล)</option>
+                                        <option value="association">Association (Entity Datasource)</option>
+                                        <option value="enumeration">Enumeration Attribute</option>
+                                        <option value="boolean">Boolean Attribute</option>
                                     </select>
                                 </label>
-
-                                {source === "context" && (
-                                    <label
-                                        style={{
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            gap: "6px",
-                                            fontSize: "12px",
-                                            color: "#94a3b8"
-                                        }}
-                                    >
-                                        <span>Type (ประเภทข้อมูล)</span>
-                                        <select
-                                            value={sourceType}
-                                            onChange={e => {
-                                                setSourceType(e.target.value as any);
-                                                setSelectedIds([]);
-                                            }}
-                                            style={{
-                                                background: "#1e293b",
-                                                color: "#f8fafc",
-                                                border: "1px solid rgba(255,255,255,0.06)",
-                                                borderRadius: "8px",
-                                                padding: "8px",
-                                                outline: "none",
-                                                fontSize: "12px"
-                                            }}
-                                        >
-                                            <option value="association">Association (สมาคมข้อมูล)</option>
-                                            <option value="enumeration">Enumeration (ตัวเลือก Enum)</option>
-                                            <option value="boolean">Boolean (ค่าจริง/เท็จ)</option>
-                                        </select>
-                                    </label>
-                                )}
 
                                 {sourceMode === "association" && (
                                     <label

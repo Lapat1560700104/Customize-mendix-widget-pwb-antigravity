@@ -60,7 +60,10 @@ export interface PwbComboBoxContainerProps {
     deselectAllText: string;
     onCreateText: string;
     onChangeAction?: ActionValue;
-    onCreateAction?: ActionValue;
+    onEnterAction?: ActionValue;
+    onLeaveAction?: ActionValue;
+    onFilterChangeAction?: ActionValue;
+    filterAttribute?: EditableValue<string>;
     searchMethod: SearchMethodEnum;
     searchCaseSensitive: boolean;
     searchDebounce: number;
@@ -126,7 +129,10 @@ export interface PwbComboBoxPreviewProps {
     deselectAllText: string;
     onCreateText: string;
     onChangeAction: {} | null;
-    onCreateAction: {} | null;
+    onEnterAction: {} | null;
+    onLeaveAction: {} | null;
+    onFilterChangeAction: {} | null;
+    filterAttribute: string;
     searchMethod: SearchMethodEnum;
     searchCaseSensitive: boolean;
     searchDebounce: number | null;

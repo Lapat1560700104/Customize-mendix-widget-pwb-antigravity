@@ -116,7 +116,6 @@ export function PwbComboBox({
     showOptionCheckbox,
     highlightColorMode,
     searchDebounce,
-    onCreateAction,
     onCreateText,
     noOptionsMessage,
     loadingMessage,
@@ -128,6 +127,10 @@ export function PwbComboBox({
     showOptionAvatar,
     customItemContent,
     onChangeAction,
+    onEnterAction,
+    onLeaveAction,
+    onFilterChangeAction,
+    filterAttribute,
     searchMethod,
     searchCaseSensitive,
     maxSearchResults
@@ -347,6 +350,27 @@ export function PwbComboBox({
         triggerOnChange();
     };
 
+    const handleEnter = (): void => {
+        if (onEnterAction && onEnterAction.canExecute && !onEnterAction.isExecuting) {
+            onEnterAction.execute();
+        }
+    };
+
+    const handleLeave = (): void => {
+        if (onLeaveAction && onLeaveAction.canExecute && !onLeaveAction.isExecuting) {
+            onLeaveAction.execute();
+        }
+    };
+
+    const handleFilterChange = (text: string): void => {
+        if (filterAttribute && !filterAttribute.readOnly) {
+            filterAttribute.setValue(text);
+        }
+        if (onFilterChangeAction && onFilterChangeAction.canExecute && !onFilterChangeAction.isExecuting) {
+            onFilterChangeAction.execute();
+        }
+    };
+
     const handleCreateOption = (text: string): void => {
         if (selectionMode === "single") {
             if (selectedAttribute) {
@@ -361,9 +385,6 @@ export function PwbComboBox({
             }
         }
 
-        if (onCreateAction && onCreateAction.canExecute && !onCreateAction.isExecuting) {
-            onCreateAction.execute();
-        }
         triggerOnChange();
     };
 
@@ -434,7 +455,10 @@ export function PwbComboBox({
                 selectAllText={selectAllText}
                 deselectAllText={deselectAllText}
                 onCreateOption={handleCreateOption}
-                hasCreateAction={!!onCreateAction}
+                onEnter={handleEnter}
+                onLeave={handleLeave}
+                onFilterChange={handleFilterChange}
+                hasCreateAction={!!onCreateText}
                 onCreateText={onCreateText}
                 noOptionsMessage={noOptionsMessage}
                 loadingMessage={loadingMessage}

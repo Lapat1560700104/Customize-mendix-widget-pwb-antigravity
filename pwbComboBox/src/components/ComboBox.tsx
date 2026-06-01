@@ -63,6 +63,9 @@ export interface ComboBoxProps {
     searchMethod?: "contains" | "startsWith" | "endsWith" | "equals" | "fuzzy";
     searchCaseSensitive?: boolean;
     maxSearchResults?: number;
+    onEnter?: () => void;
+    onLeave?: () => void;
+    onFilterChange?: (text: string) => void;
 }
 
 const normalizeText = (str: string): string => {
@@ -162,7 +165,10 @@ export function ComboBox({
     renderCustomItem,
     searchMethod = "contains",
     searchCaseSensitive = false,
-    maxSearchResults = 0
+    maxSearchResults = 0,
+    onEnter,
+    onLeave,
+    onFilterChange
 }: ComboBoxProps): ReactElement {
     const uid = useId();
     const listboxId = `pwb-listbox-${uid}`;
@@ -989,11 +995,13 @@ export function ComboBox({
                     className="pwb-combobox-search-input"
                     value={searchText}
                     onChange={e => {
-                        setSearchText(e.target.value);
+                        const val = e.target.value;
+                        setSearchText(val);
                         setIsTyping(true);
                         if (!isOpen) {
                             setIsOpen(true);
                         }
+                        onFilterChange?.(val);
                     }}
                     onFocus={e => {
                         if (selectionMode === "single" && selectedIds.length > 0) {
@@ -1002,6 +1010,15 @@ export function ComboBox({
                                 target.select();
                             }, 0);
                         }
+                        onEnter?.();
+                    }}
+                    onBlur={e => {
+                        const relatedTarget = e.relatedTarget as Node | null;
+                        const wrapper = inputRef.current?.closest(".pwb-combobox-wrapper");
+                        if (wrapper && relatedTarget && wrapper.contains(relatedTarget)) {
+                            return;
+                        }
+                        onLeave?.();
                     }}
                     onKeyDown={handleKeyDown}
                     placeholder={selectionMode === "multi" && hasSelection ? "" : placeholder}

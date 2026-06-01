@@ -54,43 +54,7 @@
                 </property>
             </propertyGroup>
 
-            <propertyGroup caption="3. Entity Datasource Config">
-                <property key="optionsSource" type="datasource" isList="true" required="false">
-                    <caption>Options Source</caption>
-                    <description>Dynamic list of options to display in the dropdown</description>
-                </property>
-                <property key="optionLabel" type="expression" dataSource="optionsSource" required="false">
-                    <caption>Option Label</caption>
-                    <description>Expression to display text for each option item (e.g. $currentObject/AttributeName)</description>
-                    <returnType type="String"/>
-                </property>
-                <property key="optionDetail" type="expression" dataSource="optionsSource" required="false">
-                    <caption>Option Detail (Subtitle)</caption>
-                    <description>Optional secondary text displayed below the option label (e.g. Email under Name)</description>
-                    <returnType type="String"/>
-                </property>
-                <property key="optionGroup" type="expression" dataSource="optionsSource" required="false">
-                    <caption>Option Group Category</caption>
-                    <description>Optional expression to group option items by a category name (e.g. $currentObject/Category)</description>
-                    <returnType type="String"/>
-                </property>
-                <property key="optionImage" type="expression" dataSource="optionsSource" required="false">
-                    <caption>Option Image URL</caption>
-                    <description>Optional expression to display a circular avatar image thumbnail (e.g. $currentObject/AvatarUrl)</description>
-                    <returnType type="String"/>
-                </property>
-                <property key="selectedOptionLabel" type="expression" dataSource="optionsSource" required="false">
-                    <caption>Selected Option Label</caption>
-                    <description>Optional expression to display a custom label format ONLY when the option is selected (e.g., a shorter tag name). If empty, Option Label is used.</description>
-                    <returnType type="String"/>
-                </property>
-                <property key="enableGrouping" type="boolean" defaultValue="true">
-                    <caption>Enable Grouping</caption>
-                    <description>Enable or disable grouping of options by the Option Group Category expression</description>
-                </property>
-            </propertyGroup>
-
-            <propertyGroup caption="4. Boolean Mode Config">
+            <propertyGroup caption="Boolean Mode Config">
                 <property key="booleanTrueLabel" type="string" required="false" defaultValue="Yes">
                     <caption>Yes / True Display Label</caption>
                     <description>Text to display for the 'True' option (e.g. Yes, Active, Enabled)</description>
@@ -117,7 +81,7 @@
                 </property>
             </propertyGroup>
 
-            <propertyGroup caption="5. Selection Mode Config">
+            <propertyGroup caption="Selection Mode Config">
                 <property key="selectionMode" type="enumeration" defaultValue="single">
                     <caption>Selection Mode</caption>
                     <description>Choose single selection or multi-select tag mode</description>
@@ -180,9 +144,28 @@
                     <caption>On Change Action</caption>
                     <description>Microflow, nanoflow, or action triggered when the selection changes.</description>
                 </property>
-                <property key="onCreateAction" type="action" required="false">
-                    <caption>On Create Action</caption>
-                    <description>Optional microflow or nanoflow triggered when user chooses to create a new option. The typed text will be set as the selected value before triggering.</description>
+            </propertyGroup>
+            <propertyGroup caption="Focus Events">
+                <property key="onEnterAction" type="action" required="false">
+                    <caption>On Enter Action</caption>
+                    <description>Microflow, nanoflow, or action triggered when the widget receives focus.</description>
+                </property>
+                <property key="onLeaveAction" type="action" required="false">
+                    <caption>On Leave Action</caption>
+                    <description>Microflow, nanoflow, or action triggered when the widget loses focus.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Filter Events">
+                <property key="onFilterChangeAction" type="action" required="false">
+                    <caption>On Filter Input Change Action</caption>
+                    <description>Microflow, nanoflow, or action triggered when the search filter input text changes.</description>
+                </property>
+                <property key="filterAttribute" type="attribute" required="false">
+                    <caption>Filter Input Attribute</caption>
+                    <description>Optional String attribute to store the current search filter query. This value is updated dynamically as the user types, before triggering On filter input change.</description>
+                    <attributeTypes>
+                        <attributeType name="String"/>
+                    </attributeTypes>
                 </property>
             </propertyGroup>
         </propertyGroup>

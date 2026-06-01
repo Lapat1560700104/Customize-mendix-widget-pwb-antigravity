@@ -1,18 +1,22 @@
-# README - PWB Advanced ComboBox Ultimate Specification (v3.8.0)
+# README - PWB Advanced ComboBox Ultimate Specification (v3.9.0)
 
-**PWB ComboBox v3.8.0 (Studio Pro Properties Match Edition)** is a premium, enterprise-grade, high-performance, and fully accessible pluggable autocomplete dropdown search widget designed for Mendix Studio Pro. It features a properties panel restructured to match the **native Mendix Studio Pro properties sheet 100%**, supports **native events (On Change)**, and includes a dedicated **Advanced** tab featuring 5 state-of-the-art searching algorithms (including fuzzy matching).
+**PWB ComboBox v3.9.0 (Focus & Filter Events Edition)** is a premium, enterprise-grade, high-performance, and fully accessible pluggable autocomplete dropdown search widget designed for Mendix Studio Pro. It features a properties panel matching the **native Mendix Studio Pro properties sheet 100%**, supports **complete native events (On Change, On Enter, On Leave, and On filter input change)**, and includes a dedicated **Advanced** tab featuring 5 state-of-the-art searching algorithms (including fuzzy matching).
 
 ---
 
-## 🌟 Key Features (v3.8.0 Specs)
+## 🌟 Key Features (v3.9.0 Specs)
 
 * **100% Screenshot-Identical "Data source" Layout**:
   * **Source**: Toggles between **Context** (options come from page context) and **Database** (options come from database list query).
   * **Type**: Toggles between **Association**, **Enumeration**, and **Boolean** (only visible when *Source* is set to **Context**!).
   * **Attribute**: Binds the selected value directly, with caption matched to **"Attribute"** (only visible when *Type* is set to **Enumeration** or **Boolean**!).
   * **Selected Association**: Only visible when *Type* is set to **Association**!
-* **Native On Change Action Event (`onChangeAction`)**:
-  * Triggers a nanoflow, microflow, or action immediately when the user selects a new item, clears selection, or creates a new option, exactly like Mendix's native Combo Box.
+* **Native Focus & Filter Action Events**:
+  * **On Change Action**: Triggers when selection changes (item selected, removed, cleared, or dynamically created).
+  * **On Enter Action**: Triggers immediately when the widget gains focus (via mouse click, touch, or keyboard Tab key).
+  * **On Leave Action**: Triggers when focus leaves the entire widget wrapper (e.g. user tabs away or clicks outside).
+  * **On Filter Input Change Action**: Triggers in real-time as the user types a search query in the text box.
+  * **Filter Input Attribute**: Stores the typed search string in a bound Mendix String Attribute before triggering *On filter input change*, allowing microflows/nanoflows to inspect the active search filter!
 * **Ultimate Advanced Search Matching (5 Algorithms)**:
   * **Contains (Default)**: Normalizes text and matches terms anywhere inside label/subtitle.
   * **Starts With**: Matches only when the option label or subtitle starts with the query.
@@ -68,10 +72,22 @@
 
 ### 2. Events Tab (แถบตั้งค่าเหตุการณ์)
 
+#### Selection Events
 | Property Key | Caption | Type | Required | Description |
 | :--- | :--- | :--- | :---: | :--- |
 | `onChangeAction` | On Change Action | Action | No | Microflow or Nanoflow triggered when selection changes. |
-| `onCreateAction` | On Create Action | Action | No | Optional Microflow or Nanoflow triggered when inline create is used. |
+
+#### Focus Events
+| Property Key | Caption | Type | Required | Description |
+| :--- | :--- | :--- | :---: | :--- |
+| `onEnterAction` | On Enter Action | Action | No | Microflow, nanoflow, or action triggered when the widget receives focus. |
+| `onLeaveAction` | On Leave Action | Action | No | Microflow, nanoflow, or action triggered when the widget loses focus. |
+
+#### Filter Events
+| Property Key | Caption | Type | Required | Description |
+| :--- | :--- | :--- | :---: | :--- |
+| `onFilterChangeAction` | On Filter Input Change Action | Action | No | Microflow, nanoflow, or action triggered when the search query filter changes. |
+| `filterAttribute` | Filter Input Attribute | Attribute | No | Optional String attribute to store the current search filter query. This value is updated dynamically as the user types, before triggering *On filter input change*. |
 
 ---
 
@@ -88,18 +104,15 @@
 
 ## ⚡ Integration Guide (คู่มือการติดตั้งและการนำไปใช้)
 
-### 1. การใช้งานโหมด Enumeration (Zero Configuration)
+### 1. การใช้งานโหมด Focus Events (On Enter / On Leave)
+* **On Enter Action** มีประโยชน์อย่างยิ่งในการโหลดข้อมูลล่วงหน้า (Preloading) หรือนับจำนวนการเปิด dropdown เมื่อได้รับโฟกัส
+* **On Leave Action** เหมาะสำหรับทำการบันทึกข้อมูลแบบร่างโดยอัตโนมัติ (Auto-save) หรือตรวจเช็คเงื่อนไขความถูกต้องทันทีที่ผู้ใช้ออกจากกล่องคำค้น
 
-1. ลากวางวิดเจ็ต `PwbComboBox` ลงบนหน้าเว็บของคุณใน Studio Pro
-2. ในแถบ **General** กลุ่ม **Data source**:
-   - ตั้งค่า **Source** เป็น **`Context`**
-   - ตั้งค่า **Type** เป็น **`Enumeration`**
-3. ผูกช่อง **`Attribute`** เข้ากับ Attribute ชนิด **Enum** ในโปรเจกต์ของคุณ
-4. **เสร็จสิ้น!** วิดเจ็ตจะดึงรายชื่อคำแปล (Caption) ของ Enum มาทำเป็น Dropdown และทำสลักสีสถานะนีออนอัตโนมัติทันที!
+### 2. การค้นหาแบบไดนามิกด้วยโหมด Filter Change Events
+หากคุณต้องการดึงข้อมูลผลลัพธ์มาแสดงผลแบบ Real-time จาก Server-side Database ด้วยคำค้นหาของผู้ใช้ ให้ทำดังนี้:
 
-### 2. การตั้งค่าเหตุการณ์เปลี่ยนค่า (On change action)
-
-1. ดับเบิ้ลคลิกเพื่อเปิดหน้าต่างแก้ไข `PwbComboBox`
-2. คลิกไปที่แถบ **Events**
-3. ที่ช่อง **On Change Action** เลือก Microflow หรือ Nanoflow ที่ต้องการให้ทริกเกอร์
-4. เมื่อผู้ใช้คลิกเลือกข้อมูล ลบแท็ก ปล่อยแท็ก หรือกดยกเลิกข้อมูล ระบบจะทำหน้าที่เรียกรันกระบวนงานตามที่คุณเลือกทันที!
+1. ผูก **Filter Input Attribute** เข้ากับ String attribute ชนิดไม่ถาวร (Non-persistable string attribute) ของ Entity เช่น `$currentObject/SearchQuery`
+2. เลือก Microflow หรือ Nanoflow ในช่อง **On Filter Input Change Action**
+3. ใน Microflow/Nanoflow นั้น ให้คุณสืบค้นข้อมูลจาก Database โดยกรองด้วยเงื่อนไข:
+   `[AttributeName = $currentObject/SearchQuery]`
+4. เมื่อผู้ใช้พิมพ์คำค้นหา เช่น "R" -> "Re" -> "React" ทุกการเคาะตัวอักษรจะทำการบันทึกประโยคนั้นลงใน attribute ทันที จากนั้นเรียกใช้ action เพื่อดึงตัวเลือกที่ตรงกันจาก Server มาแสดงผลในตัวเลือกอย่างนุ่มนวลและทรงพลัง!

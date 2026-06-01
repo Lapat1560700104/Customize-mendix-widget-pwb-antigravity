@@ -425,6 +425,13 @@ function App() {
     const [hasError, setHasError] = useState(false);
     const [errorText, setErrorText] = useState("กรุณาเลือกข้อมูลให้ครบถ้วน");
 
+    // Event Logs Simulation State
+    const [eventLogs, setEventLogs] = useState<string[]>([]);
+    const addLog = (msg: string) => {
+        const time = new Date().toLocaleTimeString();
+        setEventLogs(prev => [`[${time}] ${msg}`, ...prev.slice(0, 19)]);
+    };
+
     // Collapsible Panel State
     const [openTab, setOpenTab] = useState<string>("general");
 
@@ -588,14 +595,17 @@ function App() {
                 setSelectedIds([...selectedIds, id]);
             }
         }
+        addLog(`⚡ onChangeAction: Selected ID "${id}"`);
     };
 
     const handleRemove = (id: string) => {
         setSelectedIds(selectedIds.filter(x => x !== id));
+        addLog(`⚡ onChangeAction: Removed tag ID "${id}"`);
     };
 
     const handleClear = () => {
         setSelectedIds([]);
+        addLog("⚡ onChangeAction: Cleared selection");
     };
 
     // Simulate database creation and instant selection
@@ -617,6 +627,7 @@ function App() {
         } else {
             setSelectedIds(prev => [...prev, newId]);
         }
+        addLog(`➕ Dynamic Creation: Created & Selected option "${text}" (onChangeAction fired)`);
     };
 
     return (
@@ -2479,6 +2490,9 @@ function App() {
                             onSelect={handleSelect}
                             onRemove={handleRemove}
                             onClear={handleClear}
+                            onEnter={() => addLog("🔔 onEnterAction: Widget focused")}
+                            onLeave={() => addLog("🔕 onLeaveAction: Widget blurred (lost focus)")}
+                            onFilterChange={(text) => addLog(`🔍 onFilterChangeAction: Filter text changed to "${text}"`)}
                             isLoading={isLoading}
                             placeholder={placeholder}
                             accentColor={accentColor}
@@ -2605,6 +2619,91 @@ function App() {
                                     </div>
                                 );
                             })
+                        )}
+                    </div>
+                </div>
+
+                {/* Event Actions Log Dashboard */}
+                <div
+                    style={{
+                        marginTop: "20px",
+                        width: "100%",
+                        maxWidth: "500px",
+                        background: "#0f172a",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                        borderRadius: "12px",
+                        padding: "16px 20px"
+                    }}
+                >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span
+                            style={{
+                                fontSize: "11px",
+                                fontWeight: "bold",
+                                color: "#94a3b8",
+                                textTransform: "uppercase",
+                                letterSpacing: "0.05em"
+                            }}
+                        >
+                            การจำลองเหตุการณ์ใน Widget (Widget Events Log)
+                        </span>
+                        <button
+                            type="button"
+                            onClick={() => setEventLogs([])}
+                            style={{
+                                background: "rgba(239, 68, 68, 0.1)",
+                                border: "none",
+                                borderRadius: "4px",
+                                color: "#ef4444",
+                                fontSize: "10px",
+                                fontWeight: "bold",
+                                padding: "3px 6px",
+                                cursor: "pointer"
+                            }}
+                        >
+                            Clear Logs
+                        </button>
+                    </div>
+
+                    <div
+                        style={{
+                            marginTop: "12px",
+                            background: "rgba(0, 0, 0, 0.2)",
+                            border: "1px solid rgba(255,255,255,0.04)",
+                            borderRadius: "8px",
+                            padding: "10px 12px",
+                            height: "150px",
+                            overflowY: "auto",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "6px"
+                        }}
+                    >
+                        {eventLogs.length === 0 ? (
+                            <span style={{ fontSize: "12px", color: "#64748b", fontStyle: "italic", textAlign: "center", marginTop: "50px", display: "block" }}>
+                                (ยังไม่มีการทริกเกอร์เหตุการณ์ / No events triggered yet)
+                            </span>
+                        ) : (
+                            eventLogs.map((log, index) => (
+                                <div
+                                    key={index}
+                                    style={{
+                                        fontSize: "12px",
+                                        fontFamily: "monospace",
+                                        color: log.includes("onFilterChangeAction")
+                                            ? "#38bdf8"
+                                            : log.includes("onEnterAction")
+                                            ? "#34d399"
+                                            : log.includes("onLeaveAction")
+                                            ? "#fb7185"
+                                            : "#fbbf24",
+                                        borderBottom: "1px solid rgba(255,255,255,0.03)",
+                                        paddingBottom: "4px"
+                                    }}
+                                >
+                                    {log}
+                                </div>
+                            ))
                         )}
                     </div>
                 </div>

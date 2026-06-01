@@ -1,205 +1,205 @@
-# README - PWB Customize Container DataView Specification (v1.0.0)
+# คู่มืออ้างอิง - รายละเอียดทางเทคนิค PWB Customize Container DataView (v1.0.0)
 
-**PWB Customize Container DataView** is a premium, enterprise-grade Mendix Pluggable Widget designed as an intelligent **Drag & Drop Sortable Container with full DataView context support**. It enables developers to nest any standard or custom Mendix widget inside it, allow end-users to freely reorder items by dragging, and automatically persist the new sorted order back into a Mendix String Attribute — making it the perfect foundation for sortable Kanban boards, priority lists, and any ranked-content layout.
-
----
-
-## 🌟 Key Features
-
-* **Nested Widget Dropzone**: Accepts any Mendix widget (Cards, Buttons, Images, Custom Widgets) inside each sortable row. Provides per-item Entity Context to nested widgets automatically via `ListWidgetValue` datasource binding.
-* **Drag & Drop Reordering**: HTML5 Native drag events with smooth animations — drop indicator glow, item lift physics, and insertion markers. Works in both **Vertical List** and **Horizontal Grid** layout orientations.
-* **DataView Context Provider**: Declared with `needsEntityContext="true"`, enabling the widget to receive the parent Entity Context from Mendix and bind directly to its attributes.
-* **Sorted Order Persistence**: On every successful drop, serializes the new item order as a comma-separated GUID string (e.g. `"id_3,id_1,id_2"`) and writes it directly to a bound String Attribute via `sortedAttribute.setValue()`.
-* **On Sort Action**: Fires a configurable Mendix Microflow or Nanoflow (`onSortAction`) immediately after sorting completes, enabling server-side order saving workflows.
-* **Loading & Empty States**: Renders a premium spinner during datasource loading and a beautifully illustrated empty state when the items list is blank.
+**PWB Customize Container DataView** เป็น Mendix Pluggable Widget เกรดพรีเมียมระดับองค์กร (Enterprise-grade) ที่ออกแบบมาเพื่อทำหน้าที่เป็น **Container อัจฉริยะแบบลากสลับลำดับได้ (Drag & Drop Sortable) พร้อมรองรับสภาพแวดล้อม DataView เต็มรูปแบบ** ช่วยให้นักพัฒนาสามารถวาง Mendix Widget มาตรฐานหรือ Widget กำหนดเองใดๆ เข้าไปด้านในตัวมันได้ตามใจชอบ ช่วยให้ผู้ใช้งานทั่วไปสามารถลากสลับตำแหน่งสิ่งของต่างๆ ได้อย่างลื่นไหล และบันทึกผลการจัดลำดับกลับไปยัง String Attribute ของ Mendix โดยอัตโนมัติในรูปแบบ Comma-separated GUIDs ทำให้เหมาะอย่างยิ่งสำหรับการสร้างบอร์ดคัมบัง (Kanban Board) รายการจัดลำดับความสำคัญ (Priority List) และการจัดหน้าจอแสดงผลคอนเทนต์ที่สามารถจัดเรียงลำดับขั้นความสำคัญได้
 
 ---
 
-## ⚙️ Properties Configuration (XML Schema)
+## 🌟 คุณสมบัติหลัก (Key Features)
 
-### 1. Data Source
-
-| Property Key | Caption | Type | Required | Default | Description |
-| :--- | :--- | :--- | :---: | :--- | :--- |
-| `itemsSource` | Items Source | Datasource (isList) | ✅ | — | Dynamic list of child items to display and reorder |
-
-### 2. Custom Content
-
-| Property Key | Caption | Type | Required | Default | Description |
-| :--- | :--- | :--- | :---: | :--- | :--- |
-| `customItemContent` | Custom Option Content | Widgets | ✅ | — | Drop any Mendix widget here. Receives each item's Entity Context automatically |
-
-### 3. Sorting Persistence
-
-| Property Key | Caption | Type | Required | Default | Description |
-| :--- | :--- | :--- | :---: | :--- | :--- |
-| `sortedAttribute` | Sorted IDs Attribute | Attribute (String) | ✅ | — | String attribute on the parent context entity to store comma-separated sorted GUIDs |
-| `onSortAction` | On Sort Complete Action | Action | No | — | Microflow or Nanoflow triggered immediately when drag-and-drop sorting completes |
-
-### 4. Aesthetics
-
-| Property Key | Caption | Type | Required | Default | Description |
-| :--- | :--- | :--- | :---: | :--- | :--- |
-| `layoutDirection` | Layout Direction | Enumeration | No | `vertical` | `vertical` = column list layout · `horizontal` = row wrap grid layout |
-| `dragHandleDisplay` | Drag Handle Position | Enumeration | No | `left` | `left` = show drag handle icon on the left of each row · `hide` = hide drag handle icon entirely |
-| `accentColor` | Accent Color (Hex) | String | No | `#3b82f6` | Theme color for active drag outlines, drop markers, and glow effects |
-| `borderRadius` | Border Radius | String | No | `16px` | Corner roundness of item rows and drop overlays (e.g. `8px`, `16px`, `0px`) |
+* **Nested Widget Dropzone (การลากวาง Widget ซ้อนด้านใน)**: รองรับการวาง Mendix Widget ใดๆ (เช่น Cards, Buttons, Images, หรือ Custom Widgets) เข้าไปในแต่ละแถวรายการของตัวลากวาง โดยจะส่งต่อ Entity Context ของแต่ละไอเทมไปยัง Widget ด้านในโดยอัตโนมัติผ่านการผูก Datasource แบบ `ListWidgetValue`
+* **Drag & Drop Reordering (ระบบลากจัดลำดับที่ลื่นไหล)**: ใช้ HTML5 Native drag events พร้อมแอนิเมชันที่สวยงามพรีเมียม — มีไฟเรืองแสงบอกทิศทางการวาง (Drop indicator glow) ฟิสิกส์จังหวะยกการ์ดขณะลาก (Item lift physics) และสัญลักษณ์ระบุการแทรกรายการ รองรับการจัดวางทั้งแบบแนวตั้ง (**Vertical List**) และแนวนอน (**Horizontal Grid**)
+* **DataView Context Provider (การรองรับ Context ของหน้าหลัก)**: ถูกประกาศแบบ `needsEntityContext="true"` ทำให้นักพัฒนาสามารถดึงข้อมูล Context ของ Entity หลักส่งเข้ามาในตัว Widget เพื่อใช้ผูกเข้ากับ Attributes ต่างๆ ได้โดยตรง
+* **Sorted Order Persistence (การบันทึกลำดับแบบอัตโนมัติ)**: ในทุกจังหวะที่ลากสลับตำแหน่งสำเร็จ ตัว Widget จะแปลงการจัดเรียงลำดับใหม่ให้อยู่ในรูปข้อความ GUIDs คั่นด้วยเครื่องหมายจุลภาค (เช่น `"id_3,id_1,id_2"`) แล้วเขียนค่าดังกล่าวลง String Attribute ของ Mendix โดยตรงผ่านคำสั่ง `sortedAttribute.setValue()`
+* **On Sort Action (ทำงานหลังการจัดเรียง)**: เรียกใช้งาน Action แบบ Microflow หรือ Nanoflow (`onSortAction`) ทันทีเมื่อผู้ใช้ลากวางสลับตำแหน่งเสร็จสิ้น ช่วยให้นักพัฒนาสามารถรันโปรเซสบันทึกค่าลงฐานข้อมูลทางฝั่งเซิร์ฟเวอร์ต่อได้ในทันที
+* **Loading & Empty States (สถานะดาวน์โหลดและไม่มีข้อมูล)**: แสดงแอนิเมชัน Spinner ระหว่างดาวน์โหลดแหล่งข้อมูล และแสดงหน้าจอรูปภาพประกอบระบุสถานะว่างเปล่า (Empty State) ที่สวยงามเมื่อไม่มีข้อมูลในรายการ
 
 ---
 
-## 🎨 CSS Styling Architecture
+## ⚙️ การตั้งค่าพารามิเตอร์ (XML Schema Properties)
 
-The widget exposes a set of CSS Custom Properties (Variables) inside `PwbCustomizeContainerDataView.css` for developer theming.
+### 1. แหล่งข้อมูล (Data Source)
 
-### Layout CSS Variables
+| Property Key | Caption | Type | Required | Default | Description |
+| :--- | :--- | :--- | :---: | :--- | :--- |
+| `itemsSource` | Items Source | Datasource (isList) | ✅ | — | รายการข้อมูลแบบไดนามิกที่ต้องการนำมาแสดงผลและจัดเรียงลำดับ |
+
+### 2. คอนเทนต์กำหนดเอง (Custom Content)
+
+| Property Key | Caption | Type | Required | Default | Description |
+| :--- | :--- | :--- | :---: | :--- | :--- |
+| `customItemContent` | Custom Option Content | Widgets | ✅ | — | ลากวาง Mendix Widget ใดๆ ตรงนี้ โดยจะได้รับ Entity Context ของแต่ละแถวโดยอัตโนมัติ |
+
+### 3. การบันทึกข้อมูลเรียงลำดับ (Sorting Persistence)
+
+| Property Key | Caption | Type | Required | Default | Description |
+| :--- | :--- | :--- | :---: | :--- | :--- |
+| `sortedAttribute` | Sorted IDs Attribute | Attribute (String) | ✅ | — | String Attribute บน Entity หลักเพื่อเก็บบันทึกข้อมูลลำดับไอดีคั่นด้วยจุลภาค (Comma-separated GUIDs) |
+| `onSortAction` | On Sort Complete Action | Action | No | — | Action แบบ Microflow หรือ Nanoflow ที่จะทำงานทันทีเมื่อผู้ใช้ลากวางสลับตำแหน่งสำเร็จ |
+
+### 4. รูปลักษณ์และความสวยงาม (Aesthetics)
+
+| Property Key | Caption | Type | Required | Default | Description |
+| :--- | :--- | :--- | :---: | :--- | :--- |
+| `layoutDirection` | Layout Direction | Enumeration | No | `vertical` | ทิศทางการจัดรายการ: `vertical` = คอลัมน์แนวตั้ง · `horizontal` = แถวแนวนอนพันรอบ (Row wrap grid) |
+| `dragHandleDisplay` | Drag Handle Position | Enumeration | No | `left` | การแสดงผลปุ่มลาก: `left` = แสดงปุ่มลากจับด้านซ้ายของแต่ละการ์ด · `hide` = ซ่อนปุ่มลากจับทั้งหมด |
+| `accentColor` | Accent Color (Hex) | String | No | `#3b82f6` | สีหลักสำหรับเน้นกรอบแอกทีฟขณะลาก เส้นบอกทิศการวาง และเอฟเฟกต์ไฟเรืองแสงรอบตัวการ์ด |
+| `borderRadius` | Border Radius | String | No | `16px` | ความโค้งมนมุมขอบของแถวไอเทมและการ์ดวางทับ (เช่น `8px`, `16px`, `0px`) |
+
+---
+
+## 🎨 โครงสร้างการแต่งสไตล์ด้วย CSS (CSS Styling Architecture)
+
+Widget ได้เปิดเผยตัวแปร CSS Custom Properties (Variables) ต่างๆ เอาไว้ใน `PwbCustomizeContainerDataView.css` เพื่อความสะดวกในการกำหนดธีมสีของนักพัฒนา
+
+### Layout CSS Variables (ตัวแปร CSS สำหรับปรับสไตล์)
 
 ```css
 .pwb-drag-container {
-    --accent-color: #3b82f6;    /* Accent color from Mendix property */
-    --border-radius: 16px;      /* Row corner rounding */
-    --accent-glow: rgba(...);   /* Drop-zone insertion glow (auto-computed) */
+    --accent-color: #3b82f6;    /* สีธีมหลักที่ส่งมาจากคุณสมบัติ Mendix */
+    --border-radius: 16px;      /* ความโค้งมนขอบการ์ดของแต่ละแถว */
+    --accent-glow: rgba(...);   /* แสงเรืองรองขณะลากการ์ดมาทับ (คำนวณอัตโนมัติจากสีหลัก) */
 }
 ```
 
-### Core HTML Layout Class Targets
+### คลาสหลักใน HTML สำหรับเขียน CSS เจาะจง (Core HTML Layout Class Targets)
 
-* `.pwb-customize-container-dataview-wrapper` — Root outer wrapper. Target with custom classes.
-* `.pwb-drag-container` — Core flex container for all draggable rows.
-* `.pwb-drag-container.pwb-direction-vertical` — Applied when `layoutDirection = "vertical"`.
-* `.pwb-drag-container.pwb-direction-horizontal` — Applied when `layoutDirection = "horizontal"`.
-* `.pwb-draggable-row-item` — Each individual draggable row card.
-* `.pwb-draggable-row-item.pwb-dragging` — State applied to the row currently being dragged (reduced opacity, dashed border).
-* `.pwb-draggable-row-item.pwb-drag-over` — State applied to a row being hovered as a drop target (glow border indicator).
-* `.pwb-drag-handle` — The 6-dot grip icon on the left of each row.
-* `.pwb-draggable-item-content` — Flex-grow wrapper that hosts the nested Mendix widgets.
-* `.pwb-loading-state` — Animated spinner container shown during datasource loading.
-* `.pwb-empty-state` — Illustrated empty state panel shown when `itemsSource` has zero items.
-* `.pwb-empty-icon` — Pulsing SVG icon inside the empty state panel.
+* `.pwb-customize-container-dataview-wrapper` — กรอบด้านนอกสุดของ Widget สามารถใช้สำหรับเขียนคลาสทับได้
+* `.pwb-drag-container` — คอนเทนเนอร์แกนหลัก (Flex Container) สำหรับแถวรายการที่ลากวางได้
+* `.pwb-drag-container.pwb-direction-vertical` — ทำงานเมื่อคุณสมบัติ `layoutDirection = "vertical"`
+* `.pwb-drag-container.pwb-direction-horizontal` — ทำงานเมื่อคุณสมบัติ `layoutDirection = "horizontal"`
+* `.pwb-draggable-row-item` — แผ่นการ์ด/แถวรายการแต่ละแถวที่สามารถทำการจับลากได้
+* `.pwb-draggable-row-item.pwb-dragging` — คลาสสถานะที่จะทำงานเฉพาะกับการ์ดที่กำลังโดนลากอยู่ ณ ขณะนั้น (ความโปร่งใสลดลง, กรอบเปลี่ยนเป็นเส้นประ)
+* `.pwb-draggable-row-item.pwb-drag-over` — คลาสสถานะที่จะทำงานกับแถวการ์ดอื่นๆ ที่โดนการ์ดตัวลากวางทับซ้อนอยู่ (ขอบจะแสดงแสงเรืองรองสี Accent)
+* `.pwb-drag-handle` — คอนเทนเนอร์ไอคอน 6 จุดสำหรับให้ผู้ใช้เล็งเมาส์มาเพื่อทำการคลิกค้างแล้วลากจับ
+* `.pwb-draggable-item-content` — กรอบครอบสำหรับแสดงผล Mendix Widget ทั้งหมดที่เรานำมาลากวางซ้อนด้านใน (รองรับ Flex-grow เพื่อขยายตามความกว้างของหน้าจอ)
+* `.pwb-loading-state` — คอนเทนเนอร์แอนิเมชันโหลดดิ้งแสดงผลหมุนติ้วๆ ขณะ Mendix กำลังดึงข้อมูล
+* `.pwb-empty-state` — แผงพรีเซนต์ภาพประกอบ empty state แสดงเมื่อรายการจาก `itemsSource` ไม่มีค่าใดๆ เลย
+* `.pwb-empty-icon` — คลาสควบคุมแอนิเมชันชีพจรเต้น (Pulse animation) ของรูปไอคอนในแผง Empty state
 
 ---
 
-## 🔄 Sorted Order Persistence Flow (กลไกการบันทึกลำดับ)
+## 🔄 กลไกการบันทึกการจัดเรียง (Sorted Order Persistence Flow)
 
 ```
-1. End-user drags a row item to a new position
+1. ผู้ใช้ทำการลากการ์ดไปสลับวางในตำแหน่งใหม่
          │
          ▼
-2. DragContainer swaps internal state array
+2. Component 'DragContainer' ทำการคำนวณสลับตำแหน่งอาร์เรย์ในระบบ React State
          │
          ▼
-3. onOrderChange callback fires with new GUID array:
+3. คอลแบ็กฟังก์ชัน 'onOrderChange' ทำงานพร้อมส่งชุด GUIDs ชุดใหม่:
    ["task-3", "task-1", "task-5", "task-2", "task-4"]
          │
          ▼
-4. sortedAttribute.setValue("task-3,task-1,task-5,task-2,task-4")
-   → Writes comma-separated GUIDs to Mendix String attribute
+4. โปรแกรมสั่งบันทึก: sortedAttribute.setValue("task-3,task-1,task-5,task-2,task-4")
+   → ทำการเขียนข้อมูลสายอักขระ (String) คั่นด้วยจุลภาคลงใน Attribute ของ Mendix
          │
          ▼
-5. onSortAction.execute()
-   → Triggers developer-defined Microflow or Nanoflow
+5. โปรแกรมสั่งเรียกใช้: onSortAction.execute()
+   → สั่งรันชุดคำสั่ง Microflow หรือ Nanoflow ที่นักพัฒนากำหนดไว้ทันที
          │
          ▼
-6. On next widget load, sortedAttribute.value is read
-   → Items are re-sorted to match the stored order automatically
+6. เมื่อมีการโหลดหน้าจอขึ้นมาใหม่ในครั้งถัดไป ตัว Widget จะอ่านค่าจาก 'sortedAttribute.value'
+   → แหล่งข้อมูลจะถูกจัดเรียงตำแหน่งใหม่ตาม GUIDs ที่เซฟไว้ล่าสุดโดยอัตโนมัติ
 ```
 
 ---
 
-## 🗂️ Sorted Order Hydration on Load (การโหลดลำดับที่บันทึกไว้)
+## 🗂️ การโหลดเรียงตำแหน่งหน้าแรก (Sorted Order Hydration on Load)
 
-When the widget initializes, it reads `sortedAttribute.value` and re-orders `itemsSource.items` to match the persisted sorted sequence. New items not yet present in the saved order are appended to the end of the list.
+ในขั้นตอนการเริ่มต้นทำงาน (Initialization) ของตัว Widget โปรแกรมจะทำการอ่านข้อมูลล่าสุดที่จัดเก็บอยู่ในคุณสมบัติ `sortedAttribute.value` และนำตำแหน่งของไอเทม GUIDs นั้นมาจัดระเบียบลำดับของตัวแปรอาร์เรย์ `itemsSource.items` ใหม่ให้สอดคล้องกันอย่างสมบูรณ์แบบ ทั้งนี้ หากมีรายการใหม่ที่ถูกเพิ่มเข้ามาในดาต้าเบสทีหลังและยังไม่ถูกจัดลำดับ (ยังไม่มีข้อมูลใน String) ตัว Widget จะจัดลำดับของไอเทมเหล่านั้นให้ออกไปปรากฏต่อท้ายที่สุดของลิสต์รายการโดยอัตโนมัติ
 
 ```typescript
-// Simplified internal logic
+// โครงสร้างตรรกะภายในระบบจัดคิวลำดับของ Widget
 const sortedIds = sortedAttribute.value?.split(",") ?? [];
 const reordered = [
     ...sortedIds.map(id => items.find(i => i.id === id)).filter(Boolean),
-    ...items.filter(i => !sortedIds.includes(i.id))  // new items appended
+    ...items.filter(i => !sortedIds.includes(i.id))  // ไอเทมใหม่จะเอาไปปัดต่อท้ายรายการ
 ];
 ```
 
 ---
 
-## 🛠️ Developer Lifecycle Commands (คู่มือรันพัฒนาและสร้างชิ้นงาน)
+## 🛠️ คำสั่งสำหรับนักพัฒนาในการต่อยอดและบิวด์ชิ้นงาน (Developer Lifecycle Commands)
 
-### 1. Install Dependencies
+### 1. ติดตั้งไลบรารีที่จำเป็น (Install Dependencies)
 
 ```bash
 cd pwbCustomizeContainerDataView
 npm install
 ```
 
-### 2. Standalone Playground (แผงทดสอบจำลอง - แนะนำ!)
+### 2. หน้าบอร์ดทดลองแบบ Standalone (Standalone Playground - แนะนำมาก!)
 
-Launch the interactive **Vite Drag & Drop Live Simulator** at `http://localhost:3002/`:
+คุณสามารถเปิดเซิร์ฟเวอร์จำลองการลากวางได้อย่างรวดเร็วที่พอร์ต `http://localhost:3002/` เพื่อใช้ในการทดสอบแก้ไข UI:
 
 ```bash
 npm run playground
 ```
 
-_Allows testing layout direction, card styles, accent colors, border radius, and drag reordering without compiling an `.mpk` or launching Mendix Studio Pro._
+_มีแผงเมนูด้านข้างที่เปิดให้คุณคลิกสลับปรับทิศทางจัดหน้า (Layout), ปรับสีธีม (Accent color), ความโค้งมนมุมขอบ (Border radius), และลองลากสลับตำแหน่งเล่นได้แบบเรียลไทม์ โดยไม่ต้องรันโปรเซสแพ็กไฟล์หรือเปิดโปรแกรม Mendix Studio Pro แต่อย่างใด_
 
-### 3. Build (Development Check)
+### 3. คอมไพล์ทดสอบความถูกต้อง (Build Development Check)
 
 ```bash
 npm run build
 ```
 
-### 4. Lint & Format
+### 4. ตรวจสอบโค้ดและปรับฟอร์แมต (Lint & Format)
 
 ```bash
 npm run lint:fix
 ```
 
-### 5. Production Release & Bundle
+### 5. แพ็กไฟล์จัดส่งเข้าหน้า Mendix Project (Production Release & Bundle)
 
 ```bash
 npm run release
 ```
 
-_Output: `dist/1.0.0/pwb.PwbCustomizeContainerDataView_1.0.0_YYYYMMDD_HHMMSS.mpk` copied automatically to your Mendix project's `widgets/` folder._
+_ไฟล์ผลลัพธ์: ไฟล์ในรูปแบบแพ็กเกจ `.mpk` จะถูกสร้างขึ้นมาในตำแหน่ง `dist/1.0.0/pwb.PwbCustomizeContainerDataView_1.0.0_YYYYMMDD_HHMMSS.mpk` และตัวสคริปต์จะคัดลอกไฟล์เวอร์ชันนี้ไปทับในโฟลเดอร์ `widgets/` ของโปรเจกต์ Mendix โดยอัตโนมัติทันที_
 
 ---
 
-## 📁 Project File Structure (โครงสร้างไฟล์)
+## 📁 โครงสร้างไฟล์ทั้งหมดภายในโปรเจกต์ (Project File Structure)
 
 ```bash
 pwbCustomizeContainerDataView/
-├── tsconfig.json                 # TypeScript compilation parameters
-├── package.json                  # Package details, scripts, and devDependencies
-├── playground/                   # Interactive local web simulator for development
-│   ├── index.html                # HTML entry point
-│   ├── main.tsx                  # React dashboard: property controls + live canvas
-│   └── vite.config.ts            # Vite server config (port 3002)
+├── tsconfig.json                 # การกำหนดค่าสำหรับการคอมไพล์ TypeScript
+├── package.json                  # ข้อมูลรายละเอียดสคริปต์ และ DevDependencies ต่างๆ
+├── playground/                   # โค้ดระบบบอร์ดบิลเดอร์จำลองลากวางสำหรับทำงานบนเว็บโลคอล
+│   ├── index.html                # ไฟล์ทางเข้าหลัก HTML
+│   ├── main.tsx                  # จุดเริ่มต้น React ของหน้าคอนโซล Playground
+│   └── vite.config.ts            # การตั้งค่า Vite Server (รันบนพอร์ต 3002)
 ├── typings/
-│   └── PwbCustomizeContainerDataViewProps.d.ts  # Mendix generated props interface
+│   └── PwbCustomizeContainerDataViewProps.d.ts  # ไฟล์อินเทอร์เฟซไทป์ดิ้งของ Mendix (บิวด์ออโต้)
 └── src/
-    ├── package.xml                                      # Mendix .mpk packaging config
-    ├── PwbCustomizeContainerDataView.xml                # Widget properties definition
-    ├── PwbCustomizeContainerDataView.tsx                # Main React wrapper component
-    ├── PwbCustomizeContainerDataView.editorPreview.tsx  # Studio Pro design preview
-    ├── PwbCustomizeContainerDataView.editorConfig.ts    # Studio Pro property validation
+    ├── package.xml                                      # ข้อมูลตั้งค่าสำหรับห่อหุ้มไฟล์ .mpk
+    ├── PwbCustomizeContainerDataView.xml                # ข้อมูลโมเดลคุณสมบัติต่างๆ ใน Studio Pro
+    ├── PwbCustomizeContainerDataView.tsx                # จุดเชื่อมแกนหลัก React Component
+    ├── PwbCustomizeContainerDataView.editorPreview.tsx  # ส่วนพรีวิวโครงสร้างแบบสมจริงใน Studio Pro
+    ├── PwbCustomizeContainerDataView.editorConfig.ts    # ชุดตรวจจับกฎปัญหาสำหรับ Studio Pro
     ├── components/
-    │   └── DragContainer.tsx      # HTML5 Drag & Drop sorting engine
+    │   └── DragContainer.tsx      # กลไกระบบ Drag & Drop และ HTML5 Event Engine
     └── ui/
-        └── PwbCustomizeContainerDataView.css  # Widget premium styling & CSS variables
+        └── PwbCustomizeContainerDataView.css  # ชุด CSS และ CSS Variables สำหรับตกแต่งรูปลักษณ์
 ```
 
 ---
 
-## 🧩 Usage Guide in Mendix Studio Pro
+## 🧩 คำแนะนำการใช้งานภายในโปรแกรม Mendix Studio Pro
 
-### Step 1: Add the Widget to a Page
-Drag **Pwb Customize Container Data View** from the Widget toolbox onto any Mendix page that has a DataView context (the parent entity context will be passed in automatically).
+### ขั้นตอนที่ 1: วาง Widget บนหน้าเพจ
+ค้นหาชื่อลากวาง **Pwb Customize Container Data View** จากกล่องเครื่องมือ Toolbox นำมาวางบนหน้าเพจของ Mendix ทั้งนี้กรอบเพจจำเป็นต้องเป็นสเปซที่มีตัวแปร Context ของ Entity อยู่ด้วย (ระบบ Context ของ Entity จะถูกตรวจพบและส่งเข้าตัว Widget โดยอัตโนมัติ)
 
-### Step 2: Configure Data Source
-Under **Data Source** → **Items Source**: Select the list datasource containing the objects you want to display and reorder.
+### ขั้นตอนที่ 2: ตั้งค่าแหล่งข้อมูลดาต้า
+ไปที่แท็บตั้งค่า **Data Source** → หัวข้อ **Items Source**: เลือกแหล่งข้อมูลไอเทมที่คุณต้องการนำข้อมูลขึ้นมาแสดงผลและสลับลำดับบนหน้าเว็บบอร์ด
 
-### Step 3: Design Custom Content
-Under **Custom Content** → **Custom Option Content**: Drop any Mendix widget(s) into the dropzone. The widget has access to each item's full entity context, so you can bind Text, Images, Buttons, etc. directly to item attributes.
+### ขั้นตอนที่ 3: ออกแบบชุดข้อมูลด้านในการ์ด
+ในส่วนตั้งค่าของ **Custom Content** → หัวข้อ **Custom Option Content**: ลากเอาองค์ประกอบต่างๆ ของ Mendix มาหยอดใส่ตรงนี้ (เช่น วางการ์ด, ป้ายกำกับข้อความ, ภาพโปรไฟล์, ปุ่ม) โดยทุกชิ้นจะทำงานในระดับ Context แถวของข้อมูลชิ้นนั้นๆ เสมอ สามารถดึงเอาแอททริบิวต์มาผูกแสดงผลได้โดยตรง
 
-### Step 4: Bind Sorted Attribute
-Under **Sorting Persistence** → **Sorted IDs Attribute**: Select a `String` attribute on your parent entity (e.g. `TaskBoard.SortedTaskIds`). This attribute will be written with the comma-separated GUIDs after each drag-drop.
+### ขั้นตอนที่ 4: เชื่อมตัวแปรจัดเก็บลำดับ
+ไปที่แท็บตั้งค่า **Sorting Persistence** → หัวข้อ **Sorted IDs Attribute**: เลือกเชื่อมคุณสมบัติเข้ากับแอททริบิวต์ประเภท `String` บน Context Entity หลัก (ตัวอย่างเช่นแอททริบิวต์ `TaskBoard.SortedTaskIds`) ซึ่งตัวแปรข้อความยาวๆ นี้จะได้รับการบันทึกข้อมูลไอดีเรียงสลับตัวเลขใหม่ทุกครั้งเมื่อลากวางเสร็จ
 
-### Step 5: Configure On Sort Action (Optional)
-Under **Sorting Persistence** → **On Sort Complete Action**: Select a Microflow or Nanoflow to run after each sort. Typically used to commit the object and propagate the sort order to a backend API or external system.
+### ขั้นตอนที่ 5: ตั้งค่า Action หลังจัดตำแหน่งสำเร็จ (ไม่บังคับ)
+ในส่วนตั้งค่าของ **Sorting Persistence** → หัวข้อ **On Sort Complete Action**: คุณสามารถเลือกผูกเข้ากับ Microflow หรือ Nanoflow เพื่อสั่งการให้ระบบรันโปรเซสเซฟความคืบหน้า คอมมิทข้อมูลการเปลี่ยนแปลงลำดับใหม่ หรือส่งคำสั่งแจ้งเตือน (Notification) ต่อไปยังเซิร์ฟเวอร์ปลายทางภายนอกตามความต้องการได้ทันที

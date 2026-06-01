@@ -7,9 +7,7 @@ import { ComponentType, CSSProperties, ReactNode } from "react";
 import { ActionValue, DynamicValue, EditableValue, ListValue, ListExpressionValue, ListWidgetValue, ReferenceValue, ReferenceSetValue } from "mendix";
 import { Big } from "big.js";
 
-export type SourceEnum = "context" | "database";
-
-export type SourceTypeEnum = "association" | "enumeration" | "boolean";
+export type SourceModeEnum = "association" | "enumeration" | "boolean";
 
 export type BooleanOutputFormatEnum = "boolean" | "string";
 
@@ -32,8 +30,7 @@ export interface PwbComboBoxContainerProps {
     class: string;
     style?: CSSProperties;
     tabIndex?: number;
-    source: SourceEnum;
-    sourceType: SourceTypeEnum;
+    sourceMode: SourceModeEnum;
     selectedAttribute?: EditableValue<string | Big | boolean>;
     selectedAssociation?: ReferenceValue | ReferenceSetValue;
     delimiter: string;
@@ -101,8 +98,7 @@ export interface PwbComboBoxPreviewProps {
     readOnly: boolean;
     renderMode: "design" | "xray" | "structure";
     translate: (text: string) => string;
-    source: SourceEnum;
-    sourceType: SourceTypeEnum;
+    sourceMode: SourceModeEnum;
     selectedAttribute: string;
     selectedAssociation: string;
     delimiter: string;

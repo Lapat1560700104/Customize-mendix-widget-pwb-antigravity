@@ -103,7 +103,7 @@ export function getProperties(
     values: PwbComboBoxPreviewProps,
     defaultProperties: Properties /* , target: Platform*/
 ): Properties {
-    const computedSourceMode = values.source === "database" ? "association" : values.sourceType;
+    const computedSourceMode = values.sourceMode;
 
     // 1. Find "General" group and filter subgroups
     const generalGroup = defaultProperties.find(g => g.caption === "General");
@@ -122,9 +122,6 @@ export function getProperties(
         const dataSourceGroup = generalGroup.propertyGroups.find(g => g.caption === "Data source");
         if (dataSourceGroup && dataSourceGroup.properties) {
             dataSourceGroup.properties = dataSourceGroup.properties.filter(prop => {
-                if (prop.key === "sourceType") {
-                    return values.source === "context";
-                }
                 if (prop.key === "selectedAssociation") {
                     return computedSourceMode === "association";
                 }
@@ -183,7 +180,7 @@ export function getProperties(
 
 export function check(values: PwbComboBoxPreviewProps): Problem[] {
     const errors: Problem[] = [];
-    const computedSourceMode = values.source === "database" ? "association" : values.sourceType;
+    const computedSourceMode = values.sourceMode;
 
     if (computedSourceMode === "enumeration") {
         if (!values.selectedAttribute) {
@@ -223,14 +220,14 @@ export function check(values: PwbComboBoxPreviewProps): Problem[] {
             errors.push({
                 property: "optionsSource",
                 severity: "error",
-                message: "Options Source is required when Data Source is 'Database' or Type is 'Association'."
+                message: "Options Source is required when Data Source Mode is 'Association'."
             });
         }
         if (!values.optionLabel) {
             errors.push({
                 property: "optionLabel",
                 severity: "error",
-                message: "Option Label is required when Data Source is 'Database' or Type is 'Association'."
+                message: "Option Label is required when Data Source Mode is 'Association'."
             });
         }
 

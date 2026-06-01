@@ -1,4 +1,4 @@
-# PWB ComboBox 📅🚀 (v3.9.0)
+# PWB ComboBox 📅🚀 (v3.10.0)
 
 **PWB ComboBox** is a premium, high-performance, and fully customizable pluggable widget designed for Mendix Studio Pro. It delivers a modern, glassmorphic dropdown search autocomplete interface with full native support for **Single-Select** (featuring text, pill, or rich selection styles) and **Multi-Select Tag mode**, restructured to match the **native Mendix Studio Pro properties sheet 100%** with dedicated **General**, **Events** (including native `onChange`, `onEnter`, `onLeave`, and dynamic `onFilterChange` text updates!), and **Advanced** search matching tabs!
 
@@ -66,14 +66,13 @@ To compile and package the production widget cleanly:
 npm run release
 ```
 
-_This automatically builds the production JavaScript bundles, runs validations, packages everything into `pwb.PwbComboBox_3.9.0_...mpk` inside `dist/`, and copies the dated/timed package straight into your Mendix project's `widgets/` folder!_
+_This automatically builds the production JavaScript bundles, runs validations, packages everything into `pwb.PwbComboBox_3.10.0_...mpk` inside `dist/`, and copies the dated/timed package straight into your Mendix project's `widgets/` folder!_
 
 ---
 
-## ⚙️ Properties Configuration Summary (v3.9.0 specs)
+## ⚙️ Properties Configuration Summary (v3.10.0 specs)
 
-- **source**: Data Source: `context` (options come from page context) or `database` (options come from database list query).
-- **sourceType**: Data Source Type: `association` (Association mapping), `enumeration` (Enum Attribute), or `boolean` (Boolean Attribute).
+- **sourceMode**: Data Source Mode: `association` (Association / Entity Datasource), `enumeration` (Enumeration Attribute), or `boolean` (Boolean Attribute).
 - **selectedAttribute**: Attribute selection, matched to the caption **"Attribute"** in Mendix Studio Pro.
 - **selectedAssociation**: Reference/ReferenceSet association for database object mapping.
 - **onChangeAction**: Native event handler triggered instantly when a selection is modified or cleared.

@@ -9,21 +9,13 @@
     <properties>
         <propertyGroup caption="General">
             <propertyGroup caption="Data source">
-                <property key="source" type="enumeration" defaultValue="context">
-                    <caption>Source</caption>
-                    <description>Options source: page context (attributes/associations) or a database list query</description>
+                <property key="sourceMode" type="enumeration" defaultValue="association">
+                    <caption>Data Source Mode</caption>
+                    <description>Choose whether options come from an Association/Datasource, or directly from an Enumeration/Boolean Attribute.</description>
                     <enumerationValues>
-                        <enumerationValue key="context">Context</enumerationValue>
-                        <enumerationValue key="database">Database</enumerationValue>
-                    </enumerationValues>
-                </property>
-                <property key="sourceType" type="enumeration" defaultValue="association">
-                    <caption>Type</caption>
-                    <description>Options type: association mapping, enumeration, or boolean flag</description>
-                    <enumerationValues>
-                        <enumerationValue key="association">Association</enumerationValue>
-                        <enumerationValue key="enumeration">Enumeration</enumerationValue>
-                        <enumerationValue key="boolean">Boolean</enumerationValue>
+                        <enumerationValue key="association">Association (Entity Datasource)</enumerationValue>
+                        <enumerationValue key="enumeration">Enumeration Attribute</enumerationValue>
+                        <enumerationValue key="boolean">Boolean Attribute</enumerationValue>
                     </enumerationValues>
                 </property>
                 <property key="selectedAttribute" type="attribute" required="false">

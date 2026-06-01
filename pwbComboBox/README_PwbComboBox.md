@@ -1,16 +1,15 @@
-# README - PWB Advanced ComboBox Ultimate Specification (v3.9.0)
+# README - PWB Advanced ComboBox Ultimate Specification (v3.10.0)
 
-**PWB ComboBox v3.9.0 (Focus & Filter Events Edition)** is a premium, enterprise-grade, high-performance, and fully accessible pluggable autocomplete dropdown search widget designed for Mendix Studio Pro. It features a properties panel matching the **native Mendix Studio Pro properties sheet 100%**, supports **complete native events (On Change, On Enter, On Leave, and On filter input change)**, and includes a dedicated **Advanced** tab featuring 5 state-of-the-art searching algorithms (including fuzzy matching).
+**PWB ComboBox v3.10.0 (Compilation Fix & Events Edition)** is a premium, enterprise-grade, high-performance, and fully accessible pluggable autocomplete dropdown search widget designed for Mendix Studio Pro. It features a properties panel matching the **native Mendix Studio Pro properties sheet 100%**, supports **complete native events (On Change, On Enter, On Leave, and On filter input change)**, and includes a dedicated **Advanced** tab featuring 5 state-of-the-art searching algorithms (including fuzzy matching).
 
 ---
 
-## 🌟 Key Features (v3.9.0 Specs)
+## 🌟 Key Features (v3.10.0 Specs)
 
 * **100% Screenshot-Identical "Data source" Layout**:
-  * **Source**: Toggles between **Context** (options come from page context) and **Database** (options come from database list query).
-  * **Type**: Toggles between **Association**, **Enumeration**, and **Boolean** (only visible when *Source* is set to **Context**!).
-  * **Attribute**: Binds the selected value directly, with caption matched to **"Attribute"** (only visible when *Type* is set to **Enumeration** or **Boolean**!).
-  * **Selected Association**: Only visible when *Type* is set to **Association**!
+  * **Data Source Mode**: Toggles between **Association (Entity Datasource)**, **Enumeration Attribute**, and **Boolean Attribute**.
+  * **Attribute**: Binds the selected value directly, with caption matched to **"Attribute"** (only visible when *Data Source Mode* is set to **Enumeration Attribute** or **Boolean Attribute**!).
+  * **Selected Association**: Only visible when *Data Source Mode* is set to **Association (Entity Datasource)**!
 * **Native Focus & Filter Action Events**:
   * **On Change Action**: Triggers when selection changes (item selected, removed, cleared, or dynamically created).
   * **On Enter Action**: Triggers immediately when the widget gains focus (via mouse click, touch, or keyboard Tab key).
@@ -39,8 +38,7 @@
 
 | Property Key | Caption | Type | Default Value | Description |
 | :--- | :--- | :--- | :---: | :--- |
-| `source` | Source | Enumeration | `context` | Options: `context` (Page context), `database` (Database list query). |
-| `sourceType` | Type | Enumeration | `association` | Options: `association` (Association mapping), `enumeration` (Enum Attribute), `boolean` (Boolean Attribute). |
+| `sourceMode` | Data Source Mode | Enumeration | `association` | Options: `association` (Association / Entity Datasource), `enumeration` (Enumeration Attribute), `boolean` (Boolean Attribute). |
 | `selectedAttribute` | Attribute | Attribute | No | Binds selected key/boolean or delimited string in Multi Mode. |
 | `selectedAssociation` | Selected Association | Association | No | Reference/ReferenceSet to store selected object. |
 | `delimiter` | Delimiter | String | No | Delimiter character used to join/split multiple values. |

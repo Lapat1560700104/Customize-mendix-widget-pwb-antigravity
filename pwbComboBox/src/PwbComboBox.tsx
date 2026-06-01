@@ -78,7 +78,8 @@ function getSmartEnumColor(key: string): string {
 export function PwbComboBox({
     class: className,
     style,
-    sourceMode,
+    source,
+    sourceType,
     optionsSource,
     optionLabel,
     optionDetail,
@@ -131,6 +132,7 @@ export function PwbComboBox({
     searchCaseSensitive,
     maxSearchResults
 }: PwbComboBoxContainerProps): ReactElement {
+    const sourceMode = source === "database" ? "association" : sourceType;
     const assoc = selectedAssociation as any;
 
     // 1. Check read-only state

@@ -103,25 +103,30 @@ export function getProperties(
     values: PwbComboBoxPreviewProps,
     defaultProperties: Properties /* , target: Platform*/
 ): Properties {
+    const computedSourceMode = values.source === "database" ? "association" : values.sourceType;
+
     // 1. Find "General" group and filter subgroups
     const generalGroup = defaultProperties.find(g => g.caption === "General");
     if (generalGroup && generalGroup.propertyGroups) {
         generalGroup.propertyGroups = generalGroup.propertyGroups.filter(subGroup => {
             if (subGroup.caption === "3. Entity Datasource Config") {
-                return values.sourceMode === "association";
+                return computedSourceMode === "association";
             }
             if (subGroup.caption === "4. Boolean Mode Config") {
-                return values.sourceMode === "boolean";
+                return computedSourceMode === "boolean";
             }
             return true;
         });
 
-        // Inside "2. Selection Binding", filter properties based on sourceMode and selectionMode
-        const selectionBindingGroup = generalGroup.propertyGroups.find(g => g.caption === "2. Selection Binding");
-        if (selectionBindingGroup && selectionBindingGroup.properties) {
-            selectionBindingGroup.properties = selectionBindingGroup.properties.filter(prop => {
+        // Inside "Data source" group, filter properties based on source and selectionMode
+        const dataSourceGroup = generalGroup.propertyGroups.find(g => g.caption === "Data source");
+        if (dataSourceGroup && dataSourceGroup.properties) {
+            dataSourceGroup.properties = dataSourceGroup.properties.filter(prop => {
+                if (prop.key === "sourceType") {
+                    return values.source === "context";
+                }
                 if (prop.key === "selectedAssociation") {
-                    return values.sourceMode === "association";
+                    return computedSourceMode === "association";
                 }
                 if (prop.key === "delimiter" || prop.key === "maxVisibleTags") {
                     return values.selectionMode === "multi";
@@ -167,7 +172,7 @@ export function getProperties(
     if (aestheticsGroup && aestheticsGroup.properties) {
         aestheticsGroup.properties = aestheticsGroup.properties.filter(prop => {
             if (prop.key === "customItemContent") {
-                return values.sourceMode === "association";
+                return computedSourceMode === "association";
             }
             return true;
         });
@@ -178,21 +183,22 @@ export function getProperties(
 
 export function check(values: PwbComboBoxPreviewProps): Problem[] {
     const errors: Problem[] = [];
+    const computedSourceMode = values.source === "database" ? "association" : values.sourceType;
 
-    if (values.sourceMode === "enumeration") {
+    if (computedSourceMode === "enumeration") {
         if (!values.selectedAttribute) {
             errors.push({
                 property: "selectedAttribute",
                 severity: "error",
-                message: "A Selected Attribute is required when Data Source Mode is 'Enumeration Attribute'."
+                message: "An Attribute is required when Data Source Type is 'Enumeration'."
             });
         }
-    } else if (values.sourceMode === "boolean") {
+    } else if (computedSourceMode === "boolean") {
         if (!values.selectedAttribute) {
             errors.push({
                 property: "selectedAttribute",
                 severity: "error",
-                message: "A Selected Attribute is required when Data Source Mode is 'Boolean Attribute'."
+                message: "An Attribute is required when Data Source Type is 'Boolean'."
             });
         }
         if (values.booleanOutputFormat === "string") {
@@ -212,19 +218,19 @@ export function check(values: PwbComboBoxPreviewProps): Problem[] {
             }
         }
     } else {
-        // ── Association Mode (Mendix Entity Source) ──
+        // ── Association / Database Mode ──
         if (!values.optionsSource) {
             errors.push({
                 property: "optionsSource",
                 severity: "error",
-                message: "Options Source is required when Data Source Mode is 'Association (Entity Datasource)'."
+                message: "Options Source is required when Data Source is 'Database' or Type is 'Association'."
             });
         }
         if (!values.optionLabel) {
             errors.push({
                 property: "optionLabel",
                 severity: "error",
-                message: "Option Label is required when Data Source Mode is 'Association (Entity Datasource)'."
+                message: "Option Label is required when Data Source is 'Database' or Type is 'Association'."
             });
         }
 
@@ -233,8 +239,7 @@ export function check(values: PwbComboBoxPreviewProps): Problem[] {
                 errors.push({
                     property: "selectedAttribute",
                     severity: "error",
-                    message:
-                        "Please bind either 'Selected Attribute' or 'Selected Association' to save the selected option."
+                    message: "Please bind either 'Attribute' or 'Selected Association' to save the selected option."
                 });
             }
         } else if (values.selectionMode === "multi") {
@@ -243,7 +248,7 @@ export function check(values: PwbComboBoxPreviewProps): Problem[] {
                     property: "selectedAssociation",
                     severity: "error",
                     message:
-                        "Please bind either 'Selected Association' (ReferenceSet) or 'Selected Attribute' (Delimited String) to save the multiple selections."
+                        "Please bind either 'Selected Association' (ReferenceSet) or 'Attribute' (Delimited String) to save the multiple selections."
                 });
             }
         }

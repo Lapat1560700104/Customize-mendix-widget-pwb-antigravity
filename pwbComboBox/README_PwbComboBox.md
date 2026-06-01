@@ -1,68 +1,60 @@
-# README - PWB Advanced ComboBox Ultimate Specification (v3.7.0)
+# README - PWB Advanced ComboBox Ultimate Specification (v3.8.0)
 
-**PWB ComboBox v3.7.0 (Ultimate Absolute Edition)** is a premium, enterprise-grade, high-performance, and fully accessible pluggable autocomplete dropdown search widget designed for Mendix Studio Pro. It supports **three Data Source Modes (Association, Enumeration, and Boolean)** with a highly polished dynamic settings panel, native database sorting, smart status coloring, fuzzy autocomplete matching (with Thai diacritic normalization strip), collapsible grouping, and DOM recycling virtualization.
+**PWB ComboBox v3.8.0 (Studio Pro Properties Match Edition)** is a premium, enterprise-grade, high-performance, and fully accessible pluggable autocomplete dropdown search widget designed for Mendix Studio Pro. It features a properties panel restructured to match the **native Mendix Studio Pro properties sheet 100%**, supports **native events (On Change)**, and includes a dedicated **Advanced** tab featuring 5 state-of-the-art searching algorithms (including fuzzy matching).
 
 ---
 
-## 🌟 Key Features (v3.7.0 Specs)
+## 🌟 Key Features (v3.8.0 Specs)
 
-* **Multi-Type Data Source Modes (`sourceMode`)**:
-  * **Association (Entity Datasource)**: Populate options dynamically from a database query, supporting full custom Mendix widgets inside options, images, and subtitles.
-  * **Enumeration Attribute**: Zero-configuration integration! Simply bind an Enum attribute, and the widget automatically detects its universe (`selectedAttribute.universe`) and active localized language captions (`selectedAttribute.formatter.format`) with zero extra data source config!
-  * **Boolean Attribute**: Custom-tailor Boolean select fields! Create custom labels for True/False (e.g. "ใช่/ไม่ใช่", "Active/Inactive"), and choose whether to save native `Boolean` (`true`/`false`) or custom `String Keys` (e.g., `'Y'`/`'N'`) directly to a String database attribute.
+* **100% Screenshot-Identical "Data source" Layout**:
+  * **Source**: Toggles between **Context** (options come from page context) and **Database** (options come from database list query).
+  * **Type**: Toggles between **Association**, **Enumeration**, and **Boolean** (only visible when *Source* is set to **Context**!).
+  * **Attribute**: Binds the selected value directly, with caption matched to **"Attribute"** (only visible when *Type* is set to **Enumeration** or **Boolean**!).
+  * **Selected Association**: Only visible when *Type* is set to **Association**!
+* **Native On Change Action Event (`onChangeAction`)**:
+  * Triggers a nanoflow, microflow, or action immediately when the user selects a new item, clears selection, or creates a new option, exactly like Mendix's native Combo Box.
+* **Ultimate Advanced Search Matching (5 Algorithms)**:
+  * **Contains (Default)**: Normalizes text and matches terms anywhere inside label/subtitle.
+  * **Starts With**: Matches only when the option label or subtitle starts with the query.
+  * **Ends With**: Matches only when the option label or subtitle ends with the query.
+  * **Equals**: Exact matching of normalized strings.
+  * **Fuzzy Search**: Matches letters appearing sequentially anywhere in the string, making search extremely forgiving.
+  * **Case Sensitive Toggle**: Strips accent/tone marks (crucial for Thai character sets) while strictly respecting letter casing.
 * **Smart Dynamic Status Coloring (`getSmartEnumColor`)**:
-  * Automatically color-codes dropdown options and selected tag pills using premium HSL values!
-  * **Keyword Overrides**: Identifies words like *approve/active/success* (Emerald Green `#10b981`), *reject/danger/error* (Ruby Red `#ef4444`), *pending/warning* (Amber Gold `#f59e0b`), and *draft/new* (Ocean Blue `#3b82f6`).
-  * **Stable Arithmetic Hashing**: For other values, it uses an arithmetic hashing algorithm (complying with `no-bitwise` ESLint rules) to generate a stable, consistent, and beautiful pastel color code based on the option key string. Every status gets its own consistent, beautiful color theme automatically!
-* **Dynamic Property Visibility (`editorConfig`)**:
-  * Property subgroups in Mendix Studio Pro automatically hide/show to keep the editor clean! Selecting a mode dynamically filters out all irrelevant settings, creating an extremely tidy and clean configuration panel.
-* **Native Database Sorting**:
-  * Replaced manual sorting dropdowns with Mendix's native **`type="sorting"`** support integrated on the `optionsSource` datasource. Developers can sort options using any Entity attribute directly via Mendix's native sort dialog.
-* **Thai Diacritics Normalization Fuzzy Search**:
-  * Strips Thai tone marks and diacritics (e.g. `คาเฟ่` matches typing `คาเฟ`) and matches segments fuzzily, highlighting character matches in bold theme accent color.
-* **Smart Collision Detection (Popover Flipping)**:
-  * Measures browser viewports in real-time, automatically flipping the popover panel upwards (`pwb-placement-top`) if it would collide with the bottom edge of the screen.
+  * Automatically color-codes options and selected pills using premium HSL values. Identifies keywords (*approve/active/success* -> green, *reject/danger/error* -> red, *pending/warning* -> amber, *draft/new* -> blue), applying consistent, beautiful themes automatically!
 * **Large List DOM Recycling Virtualization**:
   * Recycles dropdown viewport rows. Renders only visible options, allowing it to scroll smoothly at 60fps even with massive 1,000+ databases.
-* **Mendix Custom Widgets inside Options (`customItemContent`)**:
-  * Allows developers to drag and drop **any Mendix widgets** directly inside the dropdown list row wrapper, allowing stars, custom badges, or complex card layouts inside the options.
-* **Dual Selection Modes**: Supports standard `Single Select` (renders as text field, tag pill, or rich profile cards) and `Multi Select` tag mode (renders as removable pills with expandable collapses `+X more`).
 
 ---
 
 ## ⚙️ Properties Configuration (XML Schema)
 
-### 1. Data Source
+### 1. General Tab (แถบตั้งค่าทั่วไป)
 
-#### 1. Data Source Mode
+#### Data source (แหล่งข้อมูล)
 
 | Property Key | Caption | Type | Default Value | Description |
 | :--- | :--- | :--- | :---: | :--- |
-| `sourceMode` | Data Source Mode | Enumeration | `association` | Options: `association` (Entity Datasource), `enumeration` (Enum Attribute), `boolean` (Boolean Attribute). |
+| `source` | Source | Enumeration | `context` | Options: `context` (Page context), `database` (Database list query). |
+| `sourceType` | Type | Enumeration | `association` | Options: `association` (Association mapping), `enumeration` (Enum Attribute), `boolean` (Boolean Attribute). |
+| `selectedAttribute` | Attribute | Attribute | No | Binds selected key/boolean or delimited string in Multi Mode. |
+| `selectedAssociation` | Selected Association | Association | No | Reference/ReferenceSet to store selected object. |
+| `delimiter` | Delimiter | String | No | Delimiter character used to join/split multiple values. |
+| `maxVisibleTags` | Max Visible Tags | Integer | Yes | Maximum selected tags shown before collapsing. Set to 0 for all. |
 
-#### 2. Selection Binding (Visible in all Modes)
-
-| Property Key | Caption | Type | Required | Description |
-| :--- | :--- | :--- | :---: | :--- |
-| `selectedAttribute` | Selected Attribute | Attribute (String/Enum/Boolean) | No | Stores single selected key/boolean or delimited string in Multi Mode. |
-| `selectedAssociation` | Selected Association | Association | No | Reference/ReferenceSet to store selected object. Visible in Association Mode. |
-| `delimiter` | Delimiter | String | No | Separator character used to split/join multiple values in Multi Mode String. |
-| `maxVisibleTags` | Max Visible Tags | Integer | Yes | Maximum number of selected tags shown before collapsing. Set to 0 to show all. |
-
-#### 3. Entity Datasource Config (Visible ONLY in Association Mode)
+#### Entity Datasource Config (ตั้งค่าฐานข้อมูล)
 
 | Property Key | Caption | Type | Required | Description |
 | :--- | :--- | :--- | :---: | :--- |
 | `optionsSource` | Options Source | Datasource | Yes | Dynamic list of objects to populate the dropdown. |
-| `optionLabel` | Option Label | Expression (String) | Yes | Expression to render text for each option item (e.g. `$currentObject/Name`). |
-| `optionDetail` | Option Detail (Subtitle) | Expression (String) | No | Secondary text displayed below option label (e.g. Email under Name). |
-| `optionGroup` | Option Group Category | Expression (String) | No | Expression to group option items by a category name (e.g. `$currentObject/Category`). |
+| `optionLabel` | Option Label | Expression (String) | Yes | Expression to render text for each option item. |
+| `optionDetail` | Option Detail (Subtitle) | Expression (String) | No | Secondary text displayed below option label. |
+| `optionGroup` | Option Group Category | Expression (String) | No | Expression to group option items by a category name. |
 | `optionImage` | Option Image URL | Expression (String) | No | Expression to render dynamic profile avatar thumbnails. |
-| `optionsSort` | Sort Options | Native Sorting | No | Mendix native sorting configuration panel to sort datasource items. |
 | `selectedOptionLabel` | Selected Option Label | Expression (String) | No | Expression to render custom label format ONLY when selected. |
 | `enableGrouping` | Enable Grouping | Boolean | Yes (Default `true`) | Enable or disable collapsible category grouping. |
 
-#### 4. Boolean Mode Config (Visible ONLY in Boolean Mode)
+#### Boolean Mode Config (ตั้งค่าข้อมูลจริง/เท็จ)
 
 | Property Key | Caption | Type | Required | Default Value | Description |
 | :--- | :--- | :--- | :---: | :--- | :--- |
@@ -74,36 +66,40 @@
 
 ---
 
+### 2. Events Tab (แถบตั้งค่าเหตุการณ์)
+
+| Property Key | Caption | Type | Required | Description |
+| :--- | :--- | :--- | :---: | :--- |
+| `onChangeAction` | On Change Action | Action | No | Microflow or Nanoflow triggered when selection changes. |
+| `onCreateAction` | On Create Action | Action | No | Optional Microflow or Nanoflow triggered when inline create is used. |
+
+---
+
+### 3. Advanced Tab (แถบตั้งค่าการค้นหาและฟิลเตอร์ขั้นสูง)
+
+| Property Key | Caption | Type | Default Value | Description |
+| :--- | :--- | :--- | :---: | :--- |
+| `searchMethod` | Search Matching Method | Enumeration | `contains` | Search algorithm to use (`contains`, `startsWith`, `endsWith`, `equals`, `fuzzy`). |
+| `searchCaseSensitive` | Case Sensitive Search | Boolean | `false` | Enable/disable case-sensitive matching for queries. |
+| `searchDebounce` | Search Debounce (ms) | Integer | `300` | Input debounce interval to optimize database/nanoflow queries. |
+| `maxSearchResults` | Max Search Results | Integer | `0` | Limits options shown at once. Set to 0 for unlimited. |
+
+---
+
 ## ⚡ Integration Guide (คู่มือการติดตั้งและการนำไปใช้)
 
 ### 1. การใช้งานโหมด Enumeration (Zero Configuration)
 
-1. ดึงวิดเจ็ต `PwbComboBox` ไปวางบนหน้าออกแบบใน Studio Pro
-2. สลับช่อง **Data Source Mode** เป็น **`Enumeration Attribute`**
-3. ที่กลุ่มตั้งค่า **2. Selection Binding** ให้ผูกช่อง **`Selected Attribute`** เข้ากับ Attribute ชนิด **Enum** ในโปรเจกต์ของคุณ
-4. **เสร็จสิ้น!** วิดเจ็ตจะประมวลผลดึงรายชื่อและคำแปลภาษา (Caption) ของ Enum ตัวนั้นมาสร้างเป็น Dropdown และทำสลักสีสถานะที่หรูหราโดยอัตโนมัติทันที!
+1. ลากวางวิดเจ็ต `PwbComboBox` ลงบนหน้าเว็บของคุณใน Studio Pro
+2. ในแถบ **General** กลุ่ม **Data source**:
+   - ตั้งค่า **Source** เป็น **`Context`**
+   - ตั้งค่า **Type** เป็น **`Enumeration`**
+3. ผูกช่อง **`Attribute`** เข้ากับ Attribute ชนิด **Enum** ในโปรเจกต์ของคุณ
+4. **เสร็จสิ้น!** วิดเจ็ตจะดึงรายชื่อคำแปล (Caption) ของ Enum มาทำเป็น Dropdown และทำสลักสีสถานะนีออนอัตโนมัติทันที!
 
-### 2. การตั้งค่า Boolean แบบสลับรหัส String คีย์ (Custom String Return Values)
+### 2. การตั้งค่าเหตุการณ์เปลี่ยนค่า (On change action)
 
-หากต้องการให้ตัวเลือก Boolean บันทึกค่าเป็นตัวอักษรพิเศษ (เช่น `'Y'` / `'N'`) ลงในฟิลด์ String:
-
-1. สลับ **Data Source Mode** เป็น **`Boolean Attribute`**
-2. ผูกช่อง **`Selected Attribute`** เข้ากับแอตทริบิวต์ชนิด **String**
-3. ตั้งข้อความในช่อง **Yes / True Display Label** เป็น `"ใช่"` และ **No / False Display Label** เป็น `"ไม่ใช่"`
-4. ตั้งค่า **Output Value Format** เป็น **`String Key Type`**
-5. ระบุค่าในช่อง **True String Value Key** เป็น `"Y"` และ **False String Value Key** เป็น `"N"`
-6. เมื่อผู้ใช้คลิกเลือก "ใช่" วิดเจ็ตจะบันทึกตัวอักษร `'Y'` ลงสู่ฐานข้อมูลโดยตรงทันทีอย่างแม่นยำ!
-
-### 3. ระบบ Dynamic Status Coloring (สลักโทนสีนีออนตามสถานะ)
-
-* ตัววิดเจ็ตจะวิเคราะห์และสลักโทนสี HSL นุ่มนวลให้แก่ตัวเลือกและป้ายแท็ก (Pills) อัตโนมัติในโหมด Enum และ Boolean
-* แผ่นป้าย tag badges ด้านนอกจะผสมสีพื้นหลังโปร่งแสง 8% (`color-mix`) ล้อมกรอบและไฮไลต์นีออนเวลาผู้ใช้ Hover แถวในดร็อปดาวน์ เพื่อความสวยงามกลมกลืนตามมาตรฐาน Visual Aesthetics ยุคใหม่
-
----
-
-## ♿ Keyboard Navigation Support (คู่มือการนำทางด้วยแป้นพิมพ์)
-
-* **ArrowDown / ArrowUp**: เลื่อนโฟกัสแถวตัวเลือกขึ้นลง (ข้ามหัวข้อกลุ่มย่อยและข้ามกลุ่มที่ถูกพับซ่อนอยู่อย่างอัจฉริยะ)
-* **Enter**: เลือกบันทึกรายการที่กำลังไฮไลต์อยู่ (หรือกางเปิดหน้า dropdown)
-* **Escape**: พับปิดหน้าต่าง dropdown ที่ลอยอยู่ลงทันที
-* **Backspace**: หากช่องค้นหาว่างและอยู่ในโหมดสะสมแท็ก (Multi Mode) การกด Backspace จะลบแท็กตัวเลือกอันล่าสุด (Last Badge) ออกไปให้ทันทีโดยอัตโนมัติ!
+1. ดับเบิ้ลคลิกเพื่อเปิดหน้าต่างแก้ไข `PwbComboBox`
+2. คลิกไปที่แถบ **Events**
+3. ที่ช่อง **On Change Action** เลือก Microflow หรือ Nanoflow ที่ต้องการให้ทริกเกอร์
+4. เมื่อผู้ใช้คลิกเลือกข้อมูล ลบแท็ก ปล่อยแท็ก หรือกดยกเลิกข้อมูล ระบบจะทำหน้าที่เรียกรันกระบวนงานตามที่คุณเลือกทันที!

@@ -158,7 +158,7 @@
                 </property>
             </propertyGroup>
 
-            <propertyGroup caption="6. Dynamic Creation Config">
+            <propertyGroup caption="Dynamic Creation Config">
                 <property key="onCreateText" type="string" required="false" defaultValue="+ Add '{value}'">
                     <caption>Create Option Text Template</caption>
                     <description>Button label template. '{value}' will be replaced by user's search query.</description>

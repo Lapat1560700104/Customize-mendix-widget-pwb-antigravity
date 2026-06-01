@@ -10,6 +10,7 @@
 **Released:** 2026-06-01 16:38:52
 
 ### 📚 Documentation Updates
+
 - อัพเดท `README_PwbComboBox.md` ให้ตรงกับ XML ล่าสุดครบทุก Property:
   - เพิ่มหัวข้อ **Selection Mode Config** (`selectionMode`, `singleSelectStyle`, `showSelectedAvatar`, `tagStyle`, `tagColorExpression`, `showSelectAll`, `selectAllText`, `deselectAllText`)
   - เพิ่มหัวข้อ **Dynamic Creation Config** (`onCreateText`)
@@ -26,6 +27,7 @@
   - แก้ version references จาก `v4.0.0` → `v3.10.0`
 
 ### 🔧 No Code Changes
+
 - ไม่มีการเปลี่ยนแปลง source code, XML หรือ logic — documentation sync release เท่านั้น
 
 ---
@@ -35,9 +37,11 @@
 **Release:** `pwb.PwbComboBox_3.10.0_20260601_122215.mpk`
 
 ### ⚡ New: Weighted Search Ranking
+
 - **Property:** `enableWeightedSearch` (Boolean, default: `true`)
 - **Location:** Advanced → Search & Filtering Config
 - ผลการค้นหาถูกเรียงลำดับตามคะแนนความแม่นยำ 5 ระดับ:
+
   | ระดับ | คะแนน | ตัวอย่าง (ค้นหา "สม") |
   |---|---|---|
   | Exact Match | 1000 | `"สม"` |
@@ -45,9 +49,11 @@
   | Word Start | 600 | `"นาย สมศักดิ์"` |
   | Contains | 400 | `"กิตติ สม ศรี"` |
   | Fuzzy | 200 | `"สัมมนา"` |
+
 - ทำงานร่วมกับทุก `searchMethod` — backward compatible 100%
 
 ### ♾️ New: Infinite Scroll (Lazy Load)
+
 - **Property:** `enableInfiniteScroll` (Boolean, default: `false`)
 - **Location:** Advanced → Search & Filtering Config
 - โหลด datasource ทีละ **30 รายการ** ผ่าน `optionsSource.setLimit()` เมื่อ scroll ลงก้น Dropdown
@@ -55,6 +61,7 @@
 - ⚠️ ใช้ได้เฉพาะ `sourceMode = association` เท่านั้น
 
 ### 🗄️ New: Client-Side LRU Cache
+
 - **Property:** `enableSearchCache` (Boolean, default: `true`)
 - **Location:** Advanced → Search & Filtering Config
 - Cache ผลการกรองสูงสุด **5 queries** ด้วย LRU (Least Recently Used) eviction
@@ -62,6 +69,7 @@
 - Cache clear อัตโนมัติเมื่อ `options.length` เปลี่ยน (เช่น Infinite Scroll โหลดหน้าใหม่)
 
 ### 🔧 Technical Changes
+
 - `ComboBox.tsx`:
   - เพิ่ม `useMemo` import
   - เพิ่ม `createLRUCache<K, V>()` factory function (Map-based)
@@ -83,6 +91,7 @@
 **Release:** `pwb.PwbComboBox_3.10.0_20260601_113040.mpk`
 
 ### 🔄 Breaking: sourceMode Consolidation
+
 - รวม `source` (context/database) + `sourceType` (association/enumeration/boolean) เป็น `sourceMode` เดียว:
   - `association` = Association (Entity Datasource)
   - `enumeration` = Enumeration Attribute
@@ -90,10 +99,12 @@
 - อัปเดต `PwbComboBox.editorConfig.ts` visibility filters และ `PwbComboBox.tsx` destructuring
 
 ### 🐛 Fix: Compilation Error
+
 - แก้ไข error: `Property must specify selectableObjects attribute or have isMetaData="true"`
 - คืน `optionsSource` datasource และ `selectableObjects="optionsSource"` ใน `selectedAssociation`
 
 ### 📚 Documentation
+
 - สร้าง `Doc/widget_properties_guide.md` — คู่มือ Properties ฉบับละเอียด
 - สร้าง `Doc/combobox_comparison_guide.md` — เปรียบเทียบ vs Mendix Native
 - สร้าง `Doc/data_storage_comparison.md` — อธิบาย Data Storage Patterns
@@ -110,6 +121,7 @@
 
 > [!TIP]
 > สำหรับการอัปเกรดจาก v3.9.x → v3.10.0:
+>
 > - ไม่มี Breaking Changes — properties ใหม่ทั้งหมดมี default value
 > - Properties ใหม่จะปรากฏใน **Advanced → Search & Filtering Config** ทันที
 > - `enableWeightedSearch` และ `enableSearchCache` เปิดโดย default — ผู้ใช้จะรู้สึกถึงความแตกต่างทันที

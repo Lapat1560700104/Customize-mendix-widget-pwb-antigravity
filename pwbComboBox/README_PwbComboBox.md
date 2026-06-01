@@ -35,11 +35,13 @@
 ### 1. Data Source
 
 #### 1. Data Source Mode
+
 | Property Key | Caption | Type | Default Value | Description |
 | :--- | :--- | :--- | :---: | :--- |
 | `sourceMode` | Data Source Mode | Enumeration | `association` | Options: `association` (Entity Datasource), `enumeration` (Enum Attribute), `boolean` (Boolean Attribute). |
 
 #### 2. Selection Binding (Visible in all Modes)
+
 | Property Key | Caption | Type | Required | Description |
 | :--- | :--- | :--- | :---: | :--- |
 | `selectedAttribute` | Selected Attribute | Attribute (String/Enum/Boolean) | No | Stores single selected key/boolean or delimited string in Multi Mode. |
@@ -48,6 +50,7 @@
 | `maxVisibleTags` | Max Visible Tags | Integer | Yes | Maximum number of selected tags shown before collapsing. Set to 0 to show all. |
 
 #### 3. Entity Datasource Config (Visible ONLY in Association Mode)
+
 | Property Key | Caption | Type | Required | Description |
 | :--- | :--- | :--- | :---: | :--- |
 | `optionsSource` | Options Source | Datasource | Yes | Dynamic list of objects to populate the dropdown. |
@@ -60,6 +63,7 @@
 | `enableGrouping` | Enable Grouping | Boolean | Yes (Default `true`) | Enable or disable collapsible category grouping. |
 
 #### 4. Boolean Mode Config (Visible ONLY in Boolean Mode)
+
 | Property Key | Caption | Type | Required | Default Value | Description |
 | :--- | :--- | :--- | :---: | :--- | :--- |
 | `booleanTrueLabel` | Yes / True Display Label | String | No | `Yes` | Text to display for the 'True' option (e.g. Yes, Active, Enabled). |
@@ -73,13 +77,16 @@
 ## ⚡ Integration Guide (คู่มือการติดตั้งและการนำไปใช้)
 
 ### 1. การใช้งานโหมด Enumeration (Zero Configuration)
+
 1. ดึงวิดเจ็ต `PwbComboBox` ไปวางบนหน้าออกแบบใน Studio Pro
 2. สลับช่อง **Data Source Mode** เป็น **`Enumeration Attribute`**
 3. ที่กลุ่มตั้งค่า **2. Selection Binding** ให้ผูกช่อง **`Selected Attribute`** เข้ากับ Attribute ชนิด **Enum** ในโปรเจกต์ของคุณ
 4. **เสร็จสิ้น!** วิดเจ็ตจะประมวลผลดึงรายชื่อและคำแปลภาษา (Caption) ของ Enum ตัวนั้นมาสร้างเป็น Dropdown และทำสลักสีสถานะที่หรูหราโดยอัตโนมัติทันที!
 
 ### 2. การตั้งค่า Boolean แบบสลับรหัส String คีย์ (Custom String Return Values)
+
 หากต้องการให้ตัวเลือก Boolean บันทึกค่าเป็นตัวอักษรพิเศษ (เช่น `'Y'` / `'N'`) ลงในฟิลด์ String:
+
 1. สลับ **Data Source Mode** เป็น **`Boolean Attribute`**
 2. ผูกช่อง **`Selected Attribute`** เข้ากับแอตทริบิวต์ชนิด **String**
 3. ตั้งข้อความในช่อง **Yes / True Display Label** เป็น `"ใช่"` และ **No / False Display Label** เป็น `"ไม่ใช่"`
@@ -88,6 +95,7 @@
 6. เมื่อผู้ใช้คลิกเลือก "ใช่" วิดเจ็ตจะบันทึกตัวอักษร `'Y'` ลงสู่ฐานข้อมูลโดยตรงทันทีอย่างแม่นยำ!
 
 ### 3. ระบบ Dynamic Status Coloring (สลักโทนสีนีออนตามสถานะ)
+
 * ตัววิดเจ็ตจะวิเคราะห์และสลักโทนสี HSL นุ่มนวลให้แก่ตัวเลือกและป้ายแท็ก (Pills) อัตโนมัติในโหมด Enum และ Boolean
 * แผ่นป้าย tag badges ด้านนอกจะผสมสีพื้นหลังโปร่งแสง 8% (`color-mix`) ล้อมกรอบและไฮไลต์นีออนเวลาผู้ใช้ Hover แถวในดร็อปดาวน์ เพื่อความสวยงามกลมกลืนตามมาตรฐาน Visual Aesthetics ยุคใหม่
 

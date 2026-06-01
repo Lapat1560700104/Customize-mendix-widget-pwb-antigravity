@@ -165,6 +165,7 @@ export function ComboBox({
     const [isOpen, setIsOpen] = useState(false);
     const [searchText, setSearchText] = useState("");
     const [debouncedSearchText, setDebouncedSearchText] = useState("");
+    const [isTyping, setIsTyping] = useState(false);
     const [focusedIndex, setFocusedIndex] = useState(-1);
     const [visibleCount, setVisibleCount] = useState(50);
     const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
@@ -175,6 +176,7 @@ export function ComboBox({
     const popoverRef = useRef<HTMLDivElement>(null);
     const inputContainerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const prevIsOpenRef = useRef(false);
 
     // Sync input value for single select when dropdown closes
     useEffect(() => {
@@ -186,6 +188,7 @@ export function ComboBox({
                 setSearchText("");
             }
             setFocusedIndex(-1);
+            setIsTyping(false);
         }
     }, [isOpen, selectedIds, selectionMode, options]);
 
@@ -271,8 +274,14 @@ export function ComboBox({
 
     // Filter options in real-time (matching primary label or secondary subtitle)
     const getFilteredOptions = (): ComboBoxOption[] => {
-        const query = normalizeText(debouncedSearchText);
+        // If selectionMode is single and the user hasn't started typing yet, show all options.
+        // This allows them to see the full dropdown list when opening/focusing, even if an option is currently selected.
+        const shouldFilter = selectionMode === "multi" || isTyping || debouncedSearchText === "";
+        const query = shouldFilter ? normalizeText(debouncedSearchText) : "";
         const matches = (opt: ComboBoxOption): boolean => {
+            if (!shouldFilter) {
+                return true;
+            }
             return (
                 normalizeText(opt.label).includes(query) ||
                 (!!opt.subtitle && normalizeText(opt.subtitle).includes(query))
@@ -287,6 +296,23 @@ export function ComboBox({
     };
 
     const filteredOptions = getFilteredOptions();
+
+    // Set initial focused index when dropdown opens
+    useEffect(() => {
+        if (isOpen && !prevIsOpenRef.current) {
+            if (selectionMode === "single" && selectedIds.length > 0) {
+                const idx = filteredOptions.findIndex(o => o.id === selectedIds[0]);
+                if (idx >= 0) {
+                    setFocusedIndex(idx);
+                } else {
+                    setFocusedIndex(0);
+                }
+            } else {
+                setFocusedIndex(0);
+            }
+        }
+        prevIsOpenRef.current = isOpen;
+    }, [isOpen, selectedIds, selectionMode, filteredOptions]);
 
     const typedText = searchText.trim();
     const exactMatchExists = options.some(
@@ -858,8 +884,17 @@ export function ComboBox({
                     value={searchText}
                     onChange={e => {
                         setSearchText(e.target.value);
+                        setIsTyping(true);
                         if (!isOpen) {
                             setIsOpen(true);
+                        }
+                    }}
+                    onFocus={e => {
+                        if (selectionMode === "single" && selectedIds.length > 0) {
+                            const target = e.currentTarget;
+                            setTimeout(() => {
+                                target.select();
+                            }, 0);
                         }
                     }}
                     onKeyDown={handleKeyDown}
@@ -890,6 +925,7 @@ export function ComboBox({
                                 e.stopPropagation();
                                 onClear();
                                 setSearchText("");
+                                setIsTyping(true);
                                 inputRef.current?.focus();
                             }}
                             title={clearButtonTitle}

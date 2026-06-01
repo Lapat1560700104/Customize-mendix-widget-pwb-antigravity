@@ -125,7 +125,11 @@ export function PwbComboBox({
     validationExpression,
     customValidationMessage,
     showOptionAvatar,
-    customItemContent
+    customItemContent,
+    onChangeAction,
+    searchMethod,
+    searchCaseSensitive,
+    maxSearchResults
 }: PwbComboBoxContainerProps): ReactElement {
     const assoc = selectedAssociation as any;
 
@@ -231,6 +235,12 @@ export function PwbComboBox({
     }
 
     // 5. Change Handlers
+    const triggerOnChange = (): void => {
+        if (onChangeAction && onChangeAction.canExecute && !onChangeAction.isExecuting) {
+            onChangeAction.execute();
+        }
+    };
+
     const handleSelect = (id: string): void => {
         const option = options.find(o => o.id === id);
         if (!option) {
@@ -281,6 +291,7 @@ export function PwbComboBox({
                 selectedAttribute.setValue(serializedValue);
             }
         }
+        triggerOnChange();
     };
 
     const handleRemove = (id: string): void => {
@@ -312,6 +323,7 @@ export function PwbComboBox({
                 }
             }
         }
+        triggerOnChange();
     };
 
     const handleClear = (): void => {
@@ -330,6 +342,7 @@ export function PwbComboBox({
                 selectedAttribute.setValue(undefined);
             }
         }
+        triggerOnChange();
     };
 
     const handleCreateOption = (text: string): void => {
@@ -349,6 +362,7 @@ export function PwbComboBox({
         if (onCreateAction && onCreateAction.canExecute && !onCreateAction.isExecuting) {
             onCreateAction.execute();
         }
+        triggerOnChange();
     };
 
     // 6. Validation Checks
@@ -427,6 +441,9 @@ export function PwbComboBox({
                 required={required}
                 hasError={hasError}
                 errorText={activeValidationError}
+                searchMethod={searchMethod}
+                searchCaseSensitive={searchCaseSensitive}
+                maxSearchResults={maxSearchResults}
             />
         </div>
     );

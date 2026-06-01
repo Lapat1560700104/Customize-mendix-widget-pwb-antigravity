@@ -103,10 +103,10 @@ export function getProperties(
     values: PwbComboBoxPreviewProps,
     defaultProperties: Properties /* , target: Platform*/
 ): Properties {
-    // 1. Find "Data Source" group and filter subgroups
-    const dataSourceGroup = defaultProperties.find(g => g.caption === "Data Source");
-    if (dataSourceGroup && dataSourceGroup.propertyGroups) {
-        dataSourceGroup.propertyGroups = dataSourceGroup.propertyGroups.filter(subGroup => {
+    // 1. Find "General" group and filter subgroups
+    const generalGroup = defaultProperties.find(g => g.caption === "General");
+    if (generalGroup && generalGroup.propertyGroups) {
+        generalGroup.propertyGroups = generalGroup.propertyGroups.filter(subGroup => {
             if (subGroup.caption === "3. Entity Datasource Config") {
                 return values.sourceMode === "association";
             }
@@ -117,7 +117,7 @@ export function getProperties(
         });
 
         // Inside "2. Selection Binding", filter properties based on sourceMode and selectionMode
-        const selectionBindingGroup = dataSourceGroup.propertyGroups.find(g => g.caption === "2. Selection Binding");
+        const selectionBindingGroup = generalGroup.propertyGroups.find(g => g.caption === "2. Selection Binding");
         if (selectionBindingGroup && selectionBindingGroup.properties) {
             selectionBindingGroup.properties = selectionBindingGroup.properties.filter(prop => {
                 if (prop.key === "selectedAssociation") {
@@ -131,7 +131,7 @@ export function getProperties(
         }
 
         // Inside "4. Boolean Mode Config", filter properties if output format is native boolean
-        const booleanConfigGroup = dataSourceGroup.propertyGroups.find(g => g.caption === "4. Boolean Mode Config");
+        const booleanConfigGroup = generalGroup.propertyGroups.find(g => g.caption === "4. Boolean Mode Config");
         if (booleanConfigGroup && booleanConfigGroup.properties) {
             booleanConfigGroup.properties = booleanConfigGroup.properties.filter(prop => {
                 if (prop.key === "booleanTrueValue" || prop.key === "booleanFalseValue") {
@@ -140,35 +140,32 @@ export function getProperties(
                 return true;
             });
         }
+
+        // Inside "5. Selection Mode Config", filter properties
+        const selectionGroup = generalGroup.propertyGroups.find(g => g.caption === "5. Selection Mode Config");
+        if (selectionGroup && selectionGroup.properties) {
+            selectionGroup.properties = selectionGroup.properties.filter(prop => {
+                if (prop.key === "singleSelectStyle") {
+                    return values.selectionMode === "single";
+                }
+                if (
+                    prop.key === "tagStyle" ||
+                    prop.key === "tagColorExpression" ||
+                    prop.key === "showSelectAll" ||
+                    prop.key === "selectAllText" ||
+                    prop.key === "deselectAllText"
+                ) {
+                    return values.selectionMode === "multi";
+                }
+                return true;
+            });
+        }
     }
 
-    // 2. Find "Selection" group and filter properties
-    const selectionGroup = defaultProperties.find(g => g.caption === "Selection");
-    if (selectionGroup && selectionGroup.properties) {
-        selectionGroup.properties = selectionGroup.properties.filter(prop => {
-            if (prop.key === "singleSelectStyle") {
-                return values.selectionMode === "single";
-            }
-            if (
-                prop.key === "tagStyle" ||
-                prop.key === "tagColorExpression" ||
-                prop.key === "showSelectAll" ||
-                prop.key === "selectAllText" ||
-                prop.key === "deselectAllText"
-            ) {
-                return values.selectionMode === "multi";
-            }
-            return true;
-        });
-    }
-
-    // 3. Find "Aesthetics" group and filter properties
+    // 2. Find "Aesthetics" group and filter properties
     const aestheticsGroup = defaultProperties.find(g => g.caption === "Aesthetics");
     if (aestheticsGroup && aestheticsGroup.properties) {
         aestheticsGroup.properties = aestheticsGroup.properties.filter(prop => {
-            if (prop.key === "tagColorExpression") {
-                return values.selectionMode === "multi" && values.sourceMode === "association";
-            }
             if (prop.key === "customItemContent") {
                 return values.sourceMode === "association";
             }

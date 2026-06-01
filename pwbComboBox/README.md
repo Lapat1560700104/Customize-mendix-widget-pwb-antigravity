@@ -76,13 +76,13 @@ _This automatically builds the production JavaScript bundles, runs validations, 
 
 ## ⚙️ Properties Configuration Summary (v3.7.0 specs)
 
--   **sourceMode**: Data Source Mode: Association (Entity Datasource), Enumeration Attribute, or Boolean Attribute.
--   **selectedAttribute**: Primary binding attribute to store/retrieve selections (supports String, Integer, Enum, Boolean).
--   **selectedAssociation**: Reference/ReferenceSet association for database object mapping.
--   **booleanTrueLabel / booleanFalseLabel**: Custom display text for True/False (e.g. Yes/No, Active/Inactive) in Boolean Mode.
--   **booleanOutputFormat**: Save native `Boolean` type or custom `String Keys` (e.g., `'Y'`/`'N'`).
--   **optionsSource**: Dynamic database list of options to populate the dropdown (in Association Mode).
--   **optionLabel**: Text expression to display for each option item.
--   **enableGrouping**: Enable/disable collapsible category grouping inside dropdown list options.
--   **highlightColorMode**: Highlight hovered items with global `accent` color or dynamic unique `optionColor` (which is automatically computed via stable HSL coloring in Enum/Boolean modes).
--   **Aesthetics & Virtualization**: CSS styling variables (blur power, popover background fill, accent Hex color, maximum scrolling height) and DOM node virtualization are fully integrated straight from Mendix parameters.
+- **sourceMode**: Data Source Mode: Association (Entity Datasource), Enumeration Attribute, or Boolean Attribute.
+- **selectedAttribute**: Primary binding attribute to store/retrieve selections (supports String, Integer, Enum, Boolean).
+- **selectedAssociation**: Reference/ReferenceSet association for database object mapping.
+- **booleanTrueLabel / booleanFalseLabel**: Custom display text for True/False (e.g. Yes/No, Active/Inactive) in Boolean Mode.
+- **booleanOutputFormat**: Save native `Boolean` type or custom `String Keys` (e.g., `'Y'`/`'N'`).
+- **optionsSource**: Dynamic database list of options to populate the dropdown (in Association Mode).
+- **optionLabel**: Text expression to display for each option item.
+- **enableGrouping**: Enable/disable collapsible category grouping inside dropdown list options.
+- **highlightColorMode**: Highlight hovered items with global `accent` color or dynamic unique `optionColor` (which is automatically computed via stable HSL coloring in Enum/Boolean modes).
+- **Aesthetics & Virtualization**: CSS styling variables (blur power, popover background fill, accent Hex color, maximum scrolling height) and DOM node virtualization are fully integrated straight from Mendix parameters.

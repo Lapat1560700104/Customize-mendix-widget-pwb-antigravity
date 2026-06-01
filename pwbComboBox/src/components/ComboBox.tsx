@@ -60,6 +60,9 @@ export interface ComboBoxProps {
     showOptionAvatar?: boolean;
     enableGrouping?: boolean;
     renderCustomItem?: (item: any) => ReactNode;
+    searchMethod?: "contains" | "startsWith" | "endsWith" | "equals" | "fuzzy";
+    searchCaseSensitive?: boolean;
+    maxSearchResults?: number;
 }
 
 const normalizeText = (str: string): string => {
@@ -156,7 +159,10 @@ export function ComboBox({
     errorText,
     showOptionAvatar = true,
     enableGrouping = true,
-    renderCustomItem
+    renderCustomItem,
+    searchMethod = "contains",
+    searchCaseSensitive = false,
+    maxSearchResults = 0
 }: ComboBoxProps): ReactElement {
     const uid = useId();
     const listboxId = `pwb-listbox-${uid}`;
@@ -277,22 +283,78 @@ export function ComboBox({
         // If selectionMode is single and the user hasn't started typing yet, show all options.
         // This allows them to see the full dropdown list when opening/focusing, even if an option is currently selected.
         const shouldFilter = selectionMode === "multi" || isTyping || debouncedSearchText === "";
-        const query = shouldFilter ? normalizeText(debouncedSearchText) : "";
+
+        let query = debouncedSearchText;
+        if (!searchCaseSensitive) {
+            query = normalizeText(query);
+        } else {
+            query = query
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[\u0e31\u0e34-\u0e3a\u0e47-\u0e4e]/g, "");
+        }
+
         const matches = (opt: ComboBoxOption): boolean => {
             if (!shouldFilter) {
                 return true;
             }
-            return (
-                normalizeText(opt.label).includes(query) ||
-                (!!opt.subtitle && normalizeText(opt.subtitle).includes(query))
-            );
+
+            let labelText = opt.label;
+            let subtitleText = opt.subtitle || "";
+
+            if (!searchCaseSensitive) {
+                labelText = normalizeText(labelText);
+                subtitleText = normalizeText(subtitleText);
+            } else {
+                labelText = labelText
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .replace(/[\u0e31\u0e34-\u0e3a\u0e47-\u0e4e]/g, "");
+                subtitleText = subtitleText
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .replace(/[\u0e31\u0e34-\u0e3a\u0e47-\u0e4e]/g, "");
+            }
+
+            switch (searchMethod) {
+                case "startsWith":
+                    return labelText.startsWith(query) || subtitleText.startsWith(query);
+                case "endsWith":
+                    return labelText.endsWith(query) || subtitleText.endsWith(query);
+                case "equals":
+                    return labelText === query || subtitleText === query;
+                case "fuzzy": {
+                    const fuzzyMatch = (text: string, q: string): boolean => {
+                        let textIdx = 0;
+                        let qIdx = 0;
+                        while (textIdx < text.length && qIdx < q.length) {
+                            if (text[textIdx] === q[qIdx]) {
+                                qIdx++;
+                            }
+                            textIdx++;
+                        }
+                        return qIdx === q.length;
+                    };
+                    return fuzzyMatch(labelText, query) || fuzzyMatch(subtitleText, query);
+                }
+                case "contains":
+                default:
+                    return labelText.includes(query) || subtitleText.includes(query);
+            }
         };
 
+        let result = options;
         if (selectionMode === "multi") {
             // In multi mode, do not show already selected options
-            return options.filter(opt => !selectedIds.includes(opt.id) && matches(opt));
+            result = options.filter(opt => !selectedIds.includes(opt.id) && matches(opt));
+        } else {
+            result = options.filter(matches);
         }
-        return options.filter(matches);
+
+        if (maxSearchResults && maxSearchResults > 0) {
+            return result.slice(0, maxSearchResults);
+        }
+        return result;
     };
 
     const filteredOptions = getFilteredOptions();
@@ -323,12 +385,56 @@ export function ComboBox({
     const showQuickCreator = hasCreateAction && typedText !== "" && !exactMatchExists;
 
     // Select All / Deselect All computations (v3.4.0)
-    const searchQuery = normalizeText(debouncedSearchText);
-    const queryMatchedOptions = options.filter(
-        opt =>
-            normalizeText(opt.label).includes(searchQuery) ||
-            (!!opt.subtitle && normalizeText(opt.subtitle).includes(searchQuery))
-    );
+    const queryMatchedOptions = options.filter(opt => {
+        let query = debouncedSearchText;
+        let labelText = opt.label;
+        let subtitleText = opt.subtitle || "";
+
+        if (!searchCaseSensitive) {
+            query = normalizeText(query);
+            labelText = normalizeText(labelText);
+            subtitleText = normalizeText(subtitleText);
+        } else {
+            query = query
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[\u0e31\u0e34-\u0e3a\u0e47-\u0e4e]/g, "");
+            labelText = labelText
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[\u0e31\u0e34-\u0e3a\u0e47-\u0e4e]/g, "");
+            subtitleText = subtitleText
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[\u0e31\u0e34-\u0e3a\u0e47-\u0e4e]/g, "");
+        }
+
+        switch (searchMethod) {
+            case "startsWith":
+                return labelText.startsWith(query) || subtitleText.startsWith(query);
+            case "endsWith":
+                return labelText.endsWith(query) || subtitleText.endsWith(query);
+            case "equals":
+                return labelText === query || subtitleText === query;
+            case "fuzzy": {
+                const fuzzyMatch = (text: string, q: string): boolean => {
+                    let textIdx = 0;
+                    let qIdx = 0;
+                    while (textIdx < text.length && qIdx < q.length) {
+                        if (text[textIdx] === q[qIdx]) {
+                            qIdx++;
+                        }
+                        textIdx++;
+                    }
+                    return qIdx === q.length;
+                };
+                return fuzzyMatch(labelText, query) || fuzzyMatch(subtitleText, query);
+            }
+            case "contains":
+            default:
+                return labelText.includes(query) || subtitleText.includes(query);
+        }
+    });
     const querySelectedOptions = queryMatchedOptions.filter(opt => selectedIds.includes(opt.id));
     const isAllQuerySelected =
         queryMatchedOptions.length > 0 && querySelectedOptions.length === queryMatchedOptions.length;

@@ -17,6 +17,8 @@ export type SingleSelectStyleEnum = "text" | "pill" | "rich";
 
 export type TagStyleEnum = "pill" | "avatar";
 
+export type SearchMethodEnum = "contains" | "startsWith" | "endsWith" | "equals" | "fuzzy";
+
 export type DropdownLayoutEnum = "list" | "grid";
 
 export type OptionAvatarShapeEnum = "circle" | "rounded" | "square";
@@ -53,6 +55,13 @@ export interface PwbComboBoxContainerProps {
     showSelectAll: boolean;
     selectAllText: string;
     deselectAllText: string;
+    onCreateText: string;
+    onChangeAction?: ActionValue;
+    onCreateAction?: ActionValue;
+    searchMethod: SearchMethodEnum;
+    searchCaseSensitive: boolean;
+    searchDebounce: number;
+    maxSearchResults: number;
     placeholder: string;
     accentColor: string;
     searchHighlightColor: string;
@@ -66,9 +75,6 @@ export interface PwbComboBoxContainerProps {
     customItemContent?: ListWidgetValue;
     showOptionCheckbox: boolean;
     highlightColorMode: HighlightColorModeEnum;
-    searchDebounce: number;
-    onCreateAction?: ActionValue;
-    onCreateText: string;
     noOptionsMessage: string;
     loadingMessage: string;
     clearButtonTitle: string;
@@ -114,6 +120,13 @@ export interface PwbComboBoxPreviewProps {
     showSelectAll: boolean;
     selectAllText: string;
     deselectAllText: string;
+    onCreateText: string;
+    onChangeAction: {} | null;
+    onCreateAction: {} | null;
+    searchMethod: SearchMethodEnum;
+    searchCaseSensitive: boolean;
+    searchDebounce: number | null;
+    maxSearchResults: number | null;
     placeholder: string;
     accentColor: string;
     searchHighlightColor: string;
@@ -127,9 +140,6 @@ export interface PwbComboBoxPreviewProps {
     customItemContent: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     showOptionCheckbox: boolean;
     highlightColorMode: HighlightColorModeEnum;
-    searchDebounce: number | null;
-    onCreateAction: {} | null;
-    onCreateText: string;
     noOptionsMessage: string;
     loadingMessage: string;
     clearButtonTitle: string;

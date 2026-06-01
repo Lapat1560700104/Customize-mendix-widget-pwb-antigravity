@@ -411,6 +411,12 @@ function App() {
     const [loadingMessage, setLoadingMessage] = useState("กำลังโหลดข้อมูล...");
     const [clearButtonTitle, setClearButtonTitle] = useState("ล้างตัวเลือกทั้งหมด");
 
+    // New Advanced Search Config States
+    const [searchMethod, setSearchMethod] = useState<"contains" | "startsWith" | "endsWith" | "equals" | "fuzzy">("contains");
+    const [searchCaseSensitive, setSearchCaseSensitive] = useState(false);
+    const [maxSearchResults, setMaxSearchResults] = useState(0);
+    const [searchDebounce, setSearchDebounce] = useState(300);
+
     // Form Statuses
     const [readOnly, setReadOnly] = useState(false);
     const [required, setRequired] = useState(false);
@@ -2205,6 +2211,139 @@ function App() {
                             </div>
                         )}
                     </div>
+
+                    {/* Collapsible Panel 7: Advanced Search */}
+                    <div
+                        style={{
+                            borderBottom: "1px solid rgba(255,255,255,0.06)",
+                            background: openTab === "advancedSearch" ? "rgba(255,255,255,0.02)" : "transparent"
+                        }}
+                    >
+                        <button
+                            type="button"
+                            onClick={() => setOpenTab(openTab === "advancedSearch" ? "" : "advancedSearch")}
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                padding: "14px 16px",
+                                background: "none",
+                                border: "none",
+                                color: "#f8fafc",
+                                fontWeight: 600,
+                                cursor: "pointer",
+                                outline: "none",
+                                fontSize: "12px"
+                            }}
+                        >
+                            <span>7. Advanced Search (การค้นหาขั้นสูง)</span>
+                            <span>{openTab === "advancedSearch" ? "▲" : "▼"}</span>
+                        </button>
+                        {openTab === "advancedSearch" && (
+                            <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                                <label
+                                    style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "3px",
+                                        fontSize: "11px",
+                                        color: "#94a3b8"
+                                    }}
+                                >
+                                    <span>Search Matching Method (วิธีการค้นหา)</span>
+                                    <select
+                                        value={searchMethod}
+                                        onChange={e => setSearchMethod(e.target.value as any)}
+                                        style={{
+                                            background: "#1e293b",
+                                            color: "#f8fafc",
+                                            border: "1px solid rgba(255,255,255,0.06)",
+                                            borderRadius: "6px",
+                                            padding: "6px",
+                                            outline: "none",
+                                            fontSize: "12px"
+                                        }}
+                                    >
+                                        <option value="contains">Contains (มีข้อความ)</option>
+                                        <option value="startsWith">Starts With (ขึ้นต้นด้วย)</option>
+                                        <option value="endsWith">Ends With (ลงท้ายด้วย)</option>
+                                        <option value="equals">Equals (เท่ากับพอดี)</option>
+                                        <option value="fuzzy">Fuzzy Search (ค้นหาแบบยืดหยุ่น)</option>
+                                    </select>
+                                </label>
+                                <label
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        fontSize: "11px",
+                                        color: "#94a3b8",
+                                        cursor: "pointer",
+                                        marginTop: "4px"
+                                    }}
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={searchCaseSensitive}
+                                        onChange={e => setSearchCaseSensitive(e.target.checked)}
+                                        style={{ cursor: "pointer" }}
+                                    />
+                                    <span>Case Sensitive (ตรงตามพิมพ์เล็ก/ใหญ่)</span>
+                                </label>
+                                <label
+                                    style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "3px",
+                                        fontSize: "11px",
+                                        color: "#94a3b8"
+                                    }}
+                                >
+                                    <span>Max Search Results (0 = Unlimited)</span>
+                                    <input
+                                        type="number"
+                                        value={maxSearchResults}
+                                        onChange={e => setMaxSearchResults(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                                        style={{
+                                            background: "#1e293b",
+                                            color: "#f8fafc",
+                                            border: "1px solid rgba(255,255,255,0.06)",
+                                            borderRadius: "6px",
+                                            padding: "6px",
+                                            outline: "none",
+                                            fontSize: "12px"
+                                        }}
+                                    />
+                                </label>
+                                <label
+                                    style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "3px",
+                                        fontSize: "11px",
+                                        color: "#94a3b8"
+                                    }}
+                                >
+                                    <span>Search Input Debounce (ms)</span>
+                                    <input
+                                        type="number"
+                                        value={searchDebounce}
+                                        onChange={e => setSearchDebounce(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                                        style={{
+                                            background: "#1e293b",
+                                            color: "#f8fafc",
+                                            border: "1px solid rgba(255,255,255,0.06)",
+                                            borderRadius: "6px",
+                                            padding: "6px",
+                                            outline: "none",
+                                            fontSize: "12px"
+                                        }}
+                                    />
+                                </label>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </aside>
 
@@ -2316,7 +2455,7 @@ function App() {
                             dropdownLayout={dropdownLayout}
                             optionAvatarShape={optionAvatarShape}
                             showOptionCheckbox={showOptionCheckbox}
-                            highlightColorMode={highlightColorMode}
+                            searchDebounce={searchDebounce}
                             maxVisibleTags={maxVisibleTags}
                             showSelectAll={showSelectAll}
                             selectAllText={selectAllText}
@@ -2331,6 +2470,9 @@ function App() {
                             required={required}
                             hasError={hasError}
                             errorText={errorText}
+                            searchMethod={searchMethod}
+                            searchCaseSensitive={searchCaseSensitive}
+                            maxSearchResults={maxSearchResults}
                         />
                     </div>
                 </div>

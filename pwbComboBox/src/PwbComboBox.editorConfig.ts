@@ -109,6 +109,9 @@ export function getProperties(
     const generalGroup = defaultProperties.find(g => g.caption === "General");
     if (generalGroup && generalGroup.propertyGroups) {
         generalGroup.propertyGroups = generalGroup.propertyGroups.filter(subGroup => {
+            if (subGroup.caption === "Entity Datasource Config") {
+                return computedSourceMode === "association";
+            }
             if (subGroup.caption === "Boolean Mode Config") {
                 return computedSourceMode === "boolean";
             }
@@ -152,6 +155,7 @@ export function getProperties(
                 }
                 if (
                     prop.key === "tagStyle" ||
+                    prop.key === "tagColorExpression" ||
                     prop.key === "showSelectAll" ||
                     prop.key === "selectAllText" ||
                     prop.key === "deselectAllText"
@@ -161,6 +165,17 @@ export function getProperties(
                 return true;
             });
         }
+    }
+
+    // 2. Find "Aesthetics" group and filter properties
+    const aestheticsGroup = defaultProperties.find(g => g.caption === "Aesthetics");
+    if (aestheticsGroup && aestheticsGroup.properties) {
+        aestheticsGroup.properties = aestheticsGroup.properties.filter(prop => {
+            if (prop.key === "customItemContent") {
+                return computedSourceMode === "association";
+            }
+            return true;
+        });
     }
 
     return defaultProperties;
@@ -204,6 +219,21 @@ export function check(values: PwbComboBoxPreviewProps): Problem[] {
         }
     } else {
         // ── Association / Database Mode ──
+        if (!values.optionsSource) {
+            errors.push({
+                property: "optionsSource",
+                severity: "error",
+                message: "Options Source is required when Data Source is 'Database' or Type is 'Association'."
+            });
+        }
+        if (!values.optionLabel) {
+            errors.push({
+                property: "optionLabel",
+                severity: "error",
+                message: "Option Label is required when Data Source is 'Database' or Type is 'Association'."
+            });
+        }
+
         if (values.selectionMode === "single") {
             if (!values.selectedAttribute && !values.selectedAssociation) {
                 errors.push({

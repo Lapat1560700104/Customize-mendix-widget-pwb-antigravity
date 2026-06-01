@@ -3,8 +3,8 @@
  * WARNING: All changes made to this file will be overwritten
  * @author Mendix Widgets Framework Team
  */
-import { CSSProperties } from "react";
-import { ActionValue, DynamicValue, EditableValue, ReferenceValue, ReferenceSetValue } from "mendix";
+import { ComponentType, CSSProperties, ReactNode } from "react";
+import { ActionValue, DynamicValue, EditableValue, ListValue, ListExpressionValue, ListWidgetValue, ReferenceValue, ReferenceSetValue } from "mendix";
 import { Big } from "big.js";
 
 export type SourceEnum = "context" | "database";
@@ -38,6 +38,13 @@ export interface PwbComboBoxContainerProps {
     selectedAssociation?: ReferenceValue | ReferenceSetValue;
     delimiter: string;
     maxVisibleTags: number;
+    optionsSource?: ListValue;
+    optionLabel?: ListExpressionValue<string>;
+    optionDetail?: ListExpressionValue<string>;
+    optionGroup?: ListExpressionValue<string>;
+    optionImage?: ListExpressionValue<string>;
+    selectedOptionLabel?: ListExpressionValue<string>;
+    enableGrouping: boolean;
     booleanTrueLabel: string;
     booleanFalseLabel: string;
     booleanOutputFormat: BooleanOutputFormatEnum;
@@ -47,6 +54,7 @@ export interface PwbComboBoxContainerProps {
     singleSelectStyle: SingleSelectStyleEnum;
     showSelectedAvatar: boolean;
     tagStyle: TagStyleEnum;
+    tagColorExpression?: ListExpressionValue<string>;
     showSelectAll: boolean;
     selectAllText: string;
     deselectAllText: string;
@@ -70,6 +78,7 @@ export interface PwbComboBoxContainerProps {
     dropdownLayout: DropdownLayoutEnum;
     optionAvatarShape: OptionAvatarShapeEnum;
     showOptionAvatar: boolean;
+    customItemContent?: ListWidgetValue;
     showOptionCheckbox: boolean;
     highlightColorMode: HighlightColorModeEnum;
     noOptionsMessage: string;
@@ -98,6 +107,13 @@ export interface PwbComboBoxPreviewProps {
     selectedAssociation: string;
     delimiter: string;
     maxVisibleTags: number | null;
+    optionsSource: {} | { caption: string } | { type: string } | null;
+    optionLabel: string;
+    optionDetail: string;
+    optionGroup: string;
+    optionImage: string;
+    selectedOptionLabel: string;
+    enableGrouping: boolean;
     booleanTrueLabel: string;
     booleanFalseLabel: string;
     booleanOutputFormat: BooleanOutputFormatEnum;
@@ -107,6 +123,7 @@ export interface PwbComboBoxPreviewProps {
     singleSelectStyle: SingleSelectStyleEnum;
     showSelectedAvatar: boolean;
     tagStyle: TagStyleEnum;
+    tagColorExpression: string;
     showSelectAll: boolean;
     selectAllText: string;
     deselectAllText: string;
@@ -130,6 +147,7 @@ export interface PwbComboBoxPreviewProps {
     dropdownLayout: DropdownLayoutEnum;
     optionAvatarShape: OptionAvatarShapeEnum;
     showOptionAvatar: boolean;
+    customItemContent: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     showOptionCheckbox: boolean;
     highlightColorMode: HighlightColorModeEnum;
     noOptionsMessage: string;

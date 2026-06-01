@@ -1,6 +1,6 @@
-# README - PWB Advanced ComboBox Ultimate Specification (v3.10.0)
+# README - PWB Advanced ComboBox Ultimate Specification (v4.0.0)
 
-**PWB ComboBox v3.10.0 (Compilation Fix & Events Edition)** is a premium, enterprise-grade, high-performance, and fully accessible pluggable autocomplete dropdown search widget designed for Mendix Studio Pro. It features a properties panel matching the **native Mendix Studio Pro properties sheet 100%**, supports **complete native events (On Change, On Enter, On Leave, and On filter input change)**, and includes a dedicated **Advanced** tab featuring 5 state-of-the-art searching algorithms (including fuzzy matching).
+**PWB ComboBox v4.0.0 (Secret Features Edition)** is a premium, enterprise-grade, high-performance, and fully accessible pluggable autocomplete dropdown search widget designed for Mendix Studio Pro. It features a properties panel matching the **native Mendix Studio Pro properties sheet 100%**, supports **complete native events (On Change, On Enter, On Leave, and On filter input change)**, and includes a dedicated **Advanced** tab featuring 5 state-of-the-art searching algorithms (including fuzzy matching) and **3 hidden performance features** (Weighted Search Ranking, Infinite Scroll, and Client-Side LRU Cache).
 
 ---
 
@@ -27,6 +27,12 @@
   * Automatically color-codes options and selected pills using premium HSL values. Identifies keywords (*approve/active/success* -> green, *reject/danger/error* -> red, *pending/warning* -> amber, *draft/new* -> blue), applying consistent, beautiful themes automatically!
 * **Large List DOM Recycling Virtualization**:
   * Recycles dropdown viewport rows. Renders only visible options, allowing it to scroll smoothly at 60fps even with massive 1,000+ databases.
+* **⚡ Secret Feature: Weighted Search Ranking** (`enableWeightedSearch`, default: `true`) 🆕:
+  * Sorts search results by a 5-tier priority score: **Exact (1000)** → **Starts With (800)** → **Word Start (600)** → **Contains (400)** → **Fuzzy (200)**. Users always see the most relevant result first, not the first match in order.
+* **♾️ Secret Feature: Infinite Scroll / Lazy Load** (`enableInfiniteScroll`, default: `false`) 🆕:
+  * Loads the entity datasource in **30-item chunks** via `optionsSource.setLimit()` as the user scrolls down the dropdown. Dramatically reduces initial load time for datasources with hundreds or thousands of records.
+* **🗄️ Secret Feature: Client-Side LRU Cache** (`enableSearchCache`, default: `true`) 🆕:
+  * Maintains a **5-entry LRU (Least Recently Used) cache** of filter results. Re-typing a previously searched query returns results instantly without recomputing. Cache is automatically invalidated when the options list changes (e.g. after Infinite Scroll loads a new page).
 
 ---
 
@@ -97,6 +103,9 @@
 | `searchCaseSensitive` | Case Sensitive Search | Boolean | `false` | Enable/disable case-sensitive matching for queries. |
 | `searchDebounce` | Search Debounce (ms) | Integer | `300` | Input debounce interval to optimize database/nanoflow queries. |
 | `maxSearchResults` | Max Search Results | Integer | `0` | Limits options shown at once. Set to 0 for unlimited. |
+| `enableWeightedSearch` | ⚡ Weighted Search Ranking | Boolean | `true` | **[Secret Feature]** Sort search results by match-quality tier score (Exact > Starts With > Word Start > Contains > Fuzzy). |
+| `enableInfiniteScroll` | ♾️ Infinite Scroll (Lazy Load) | Boolean | `false` | **[Secret Feature]** Load entity datasource in 30-item pages via `setLimit()` as user scrolls down. Association mode only. |
+| `enableSearchCache` | 🗄️ Client-Side Search Cache | Boolean | `true` | **[Secret Feature]** Cache last 5 search results (LRU). Repeat queries return instantly without recomputing. |
 
 ---
 

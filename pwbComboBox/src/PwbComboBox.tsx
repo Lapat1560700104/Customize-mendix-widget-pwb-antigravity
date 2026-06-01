@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import { ReactElement, useRef } from "react";
 import { ComboBox, ComboBoxOption } from "./components/ComboBox";
 import { PwbComboBoxContainerProps } from "../typings/PwbComboBoxProps";
 import "./ui/PwbComboBox.css";
@@ -132,9 +132,32 @@ export function PwbComboBox({
     filterAttribute,
     searchMethod,
     searchCaseSensitive,
-    maxSearchResults
+    maxSearchResults,
+    enableWeightedSearch,
+    enableInfiniteScroll,
+    enableSearchCache
 }: PwbComboBoxContainerProps): ReactElement {
     const assoc = selectedAssociation as any;
+
+    // ─── Infinite Scroll: track current datasource page size ───────────────────
+    // Each "page" is 30 items. We increment when the user scrolls to the bottom.
+    const infinitePageRef = useRef(1);
+    const INFINITE_PAGE_SIZE = 30;
+
+    const handleLoadMore = (): void => {
+        if (!enableInfiniteScroll || sourceMode !== "association" || !optionsSource) {
+            return;
+        }
+        // Only request more if the current page was "full" (meaning there might be more data)
+        const currentLimit = infinitePageRef.current * INFINITE_PAGE_SIZE;
+        if (optionsSource.items && optionsSource.items.length >= currentLimit) {
+            infinitePageRef.current += 1;
+            const nextLimit = infinitePageRef.current * INFINITE_PAGE_SIZE;
+            if (optionsSource.setLimit) {
+                optionsSource.setLimit(nextLimit);
+            }
+        }
+    };
 
     // 1. Check read-only state
     const readOnly =
@@ -468,6 +491,9 @@ export function PwbComboBox({
                 searchMethod={searchMethod}
                 searchCaseSensitive={searchCaseSensitive}
                 maxSearchResults={maxSearchResults}
+                enableWeightedSearch={enableWeightedSearch}
+                enableSearchCache={enableSearchCache}
+                onLoadMore={enableInfiniteScroll ? handleLoadMore : undefined}
             />
         </div>
     );

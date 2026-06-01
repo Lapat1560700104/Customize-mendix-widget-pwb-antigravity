@@ -4,6 +4,7 @@ import {
     useState,
     useEffect,
     useRef,
+    useMemo,
     useId,
     KeyboardEvent as ReactKeyboardEvent,
     UIEvent
@@ -66,6 +67,12 @@ export interface ComboBoxProps {
     onEnter?: () => void;
     onLeave?: () => void;
     onFilterChange?: (text: string) => void;
+    /** [Secret Feature] Weighted Search Ranking — sorts results by match tier quality */
+    enableWeightedSearch?: boolean;
+    /** [Secret Feature] Infinite Scroll — calls this callback when user nears the bottom of dropdown */
+    onLoadMore?: () => void;
+    /** [Secret Feature] Client-Side LRU Cache — caches last 5 search results for instant re-query */
+    enableSearchCache?: boolean;
 }
 
 const normalizeText = (str: string): string => {
@@ -123,6 +130,86 @@ const EmptySearchIllustration = (): ReactElement => (
     </svg>
 );
 
+// ─── LRU Cache Helper (5-entry Map-based) ────────────────────────────────────
+const LRU_CAPACITY = 5;
+
+interface LRUCache<K, V> {
+    get: (key: K) => V | undefined;
+    set: (key: K, value: V) => void;
+    clear: () => void;
+}
+
+function createLRUCache<K, V>(capacity: number): LRUCache<K, V> {
+    const cache = new Map<K, V>();
+    return {
+        get(key: K): V | undefined {
+            if (!cache.has(key)) {
+                return undefined;
+            }
+            // Refresh entry — move to end (most recently used)
+            const val = cache.get(key)!;
+            cache.delete(key);
+            cache.set(key, val);
+            return val;
+        },
+        set(key: K, value: V): void {
+            if (cache.has(key)) {
+                cache.delete(key);
+            } else if (cache.size >= capacity) {
+                // Evict least recently used (first key in Map iteration order)
+                const lruKey = cache.keys().next().value;
+                if (lruKey !== undefined) {
+                    cache.delete(lruKey);
+                }
+            }
+            cache.set(key, value);
+        },
+        clear(): void {
+            cache.clear();
+        }
+    };
+}
+
+// ─── Weighted Scoring ────────────────────────────────────────────────────────
+const SCORE_EXACT = 1000;
+const SCORE_STARTS_WITH = 800;
+const SCORE_WORD_START = 600;
+const SCORE_CONTAINS = 400;
+const SCORE_FUZZY = 200;
+const SCORE_NO_MATCH = -1;
+
+function computeMatchScore(text: string, query: string): number {
+    if (!query) {
+        return SCORE_CONTAINS; // No filter → treat all as "contains" tier
+    }
+    if (text === query) {
+        return SCORE_EXACT;
+    }
+    if (text.startsWith(query)) {
+        return SCORE_STARTS_WITH;
+    }
+    // Word-start: any word within text begins with query
+    if (text.split(/[\s\-_]+/).some(word => word.startsWith(query))) {
+        return SCORE_WORD_START;
+    }
+    if (text.includes(query)) {
+        return SCORE_CONTAINS;
+    }
+    // Fuzzy check
+    let tIdx = 0;
+    let qIdx = 0;
+    while (tIdx < text.length && qIdx < query.length) {
+        if (text[tIdx] === query[qIdx]) {
+            qIdx++;
+        }
+        tIdx++;
+    }
+    if (qIdx === query.length) {
+        return SCORE_FUZZY;
+    }
+    return SCORE_NO_MATCH;
+}
+
 export function ComboBox({
     options,
     selectedIds,
@@ -168,7 +255,10 @@ export function ComboBox({
     maxSearchResults = 0,
     onEnter,
     onLeave,
-    onFilterChange
+    onFilterChange,
+    enableWeightedSearch = true,
+    onLoadMore,
+    enableSearchCache = true
 }: ComboBoxProps): ReactElement {
     const uid = useId();
     const listboxId = `pwb-listbox-${uid}`;
@@ -184,6 +274,18 @@ export function ComboBox({
     const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
     const [isTagsExpanded, setIsTagsExpanded] = useState(false);
     const [popoverPlacement, setPopoverPlacement] = useState<"bottom" | "top">("bottom");
+
+    // LRU search results cache (5 entries, key = "query::method::caseSensitive")
+    const searchCacheRef = useRef(createLRUCache<string, ComboBoxOption[]>(LRU_CAPACITY));
+
+    // Clear cache when options list changes (e.g. new page loaded by Infinite Scroll)
+    const optionsLengthRef = useRef(options.length);
+    useEffect(() => {
+        if (options.length !== optionsLengthRef.current) {
+            searchCacheRef.current.clear();
+            optionsLengthRef.current = options.length;
+        }
+    }, [options.length]);
 
     const popoverRef = useRef<HTMLDivElement>(null);
     const inputContainerRef = useRef<HTMLDivElement>(null);
@@ -284,10 +386,22 @@ export function ComboBox({
         };
     }, [isOpen, maxDropdownHeight]);
 
-    // Filter options in real-time (matching primary label or secondary subtitle)
-    const getFilteredOptions = (): ComboBoxOption[] => {
+    // Filter + optionally rank options in real-time
+    const filteredOptions = useMemo((): ComboBoxOption[] => {
+        // Cache key encodes all filter parameters
+        const cacheKey = `${debouncedSearchText}::${searchMethod}::${searchCaseSensitive}::${selectionMode}::${selectedIds.join(
+            ","
+        )}::${enableWeightedSearch}`;
+
+        // LRU cache hit check (only when cache is enabled and we have a non-trivial query)
+        if (enableSearchCache && debouncedSearchText.trim() !== "") {
+            const cached = searchCacheRef.current.get(cacheKey);
+            if (cached) {
+                return cached;
+            }
+        }
+
         // If selectionMode is single and the user hasn't started typing yet, show all options.
-        // This allows them to see the full dropdown list when opening/focusing, even if an option is currently selected.
         const shouldFilter = selectionMode === "multi" || isTyping || debouncedSearchText === "";
 
         let query = debouncedSearchText;
@@ -300,70 +414,96 @@ export function ComboBox({
                 .replace(/[\u0e31\u0e34-\u0e3a\u0e47-\u0e4e]/g, "");
         }
 
-        const matches = (opt: ComboBoxOption): boolean => {
-            if (!shouldFilter) {
-                return true;
-            }
-
-            let labelText = opt.label;
-            let subtitleText = opt.subtitle || "";
-
+        // Helper: normalize option text the same way as the query
+        const normalizeOpt = (text: string): string => {
             if (!searchCaseSensitive) {
-                labelText = normalizeText(labelText);
-                subtitleText = normalizeText(subtitleText);
-            } else {
-                labelText = labelText
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "")
-                    .replace(/[\u0e31\u0e34-\u0e3a\u0e47-\u0e4e]/g, "");
-                subtitleText = subtitleText
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "")
-                    .replace(/[\u0e31\u0e34-\u0e3a\u0e47-\u0e4e]/g, "");
+                return normalizeText(text);
             }
-
-            switch (searchMethod) {
-                case "startsWith":
-                    return labelText.startsWith(query) || subtitleText.startsWith(query);
-                case "endsWith":
-                    return labelText.endsWith(query) || subtitleText.endsWith(query);
-                case "equals":
-                    return labelText === query || subtitleText === query;
-                case "fuzzy": {
-                    const fuzzyMatch = (text: string, q: string): boolean => {
-                        let textIdx = 0;
-                        let qIdx = 0;
-                        while (textIdx < text.length && qIdx < q.length) {
-                            if (text[textIdx] === q[qIdx]) {
-                                qIdx++;
-                            }
-                            textIdx++;
-                        }
-                        return qIdx === q.length;
-                    };
-                    return fuzzyMatch(labelText, query) || fuzzyMatch(subtitleText, query);
-                }
-                case "contains":
-                default:
-                    return labelText.includes(query) || subtitleText.includes(query);
-            }
+            return text
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[\u0e31\u0e34-\u0e3a\u0e47-\u0e4e]/g, "");
         };
 
+        // Weighted scoring — returns best score of label vs subtitle
+        const getOptionScore = (opt: ComboBoxOption): number => {
+            if (!shouldFilter || !query) {
+                return SCORE_CONTAINS; // Not filtering → neutral score
+            }
+            const labelText = normalizeOpt(opt.label);
+            const subtitleText = normalizeOpt(opt.subtitle || "");
+
+            if (searchMethod === "startsWith") {
+                const hit = labelText.startsWith(query) || subtitleText.startsWith(query);
+                return hit ? SCORE_STARTS_WITH : SCORE_NO_MATCH;
+            }
+            if (searchMethod === "endsWith") {
+                const hit = labelText.endsWith(query) || subtitleText.endsWith(query);
+                return hit ? SCORE_CONTAINS : SCORE_NO_MATCH;
+            }
+            if (searchMethod === "equals") {
+                const hit = labelText === query || subtitleText === query;
+                return hit ? SCORE_EXACT : SCORE_NO_MATCH;
+            }
+            if (searchMethod === "fuzzy") {
+                // In fuzzy mode, weighted ranking still applies but max tier is FUZZY
+                const labelScore = computeMatchScore(labelText, query);
+                const subtitleScore = computeMatchScore(subtitleText, query);
+                return Math.max(labelScore, subtitleScore);
+            }
+            // "contains" mode — use full weighted scoring for richer ranking
+            const labelScore = computeMatchScore(labelText, query);
+            const subtitleScore = computeMatchScore(subtitleText, query);
+            return Math.max(labelScore, subtitleScore);
+        };
+
+        // 1. Filter options
         let result = options;
         if (selectionMode === "multi") {
-            // In multi mode, do not show already selected options
-            result = options.filter(opt => !selectedIds.includes(opt.id) && matches(opt));
+            result = options.filter(opt => {
+                if (selectedIds.includes(opt.id)) {
+                    return false;
+                }
+                return getOptionScore(opt) > SCORE_NO_MATCH;
+            });
         } else {
-            result = options.filter(matches);
+            result = options.filter(opt => {
+                if (!shouldFilter) {
+                    return true;
+                }
+                return getOptionScore(opt) > SCORE_NO_MATCH;
+            });
         }
 
+        // 2. Sort by weighted score (highest first) when enabled and a query exists
+        if (enableWeightedSearch && debouncedSearchText.trim() !== "") {
+            result = [...result].sort((a, b) => getOptionScore(b) - getOptionScore(a));
+        }
+
+        // 3. Apply max results limit
         if (maxSearchResults && maxSearchResults > 0) {
-            return result.slice(0, maxSearchResults);
+            result = result.slice(0, maxSearchResults);
         }
-        return result;
-    };
 
-    const filteredOptions = getFilteredOptions();
+        // 4. Write to cache
+        if (enableSearchCache && debouncedSearchText.trim() !== "") {
+            searchCacheRef.current.set(cacheKey, result);
+        }
+
+        return result;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        options,
+        debouncedSearchText,
+        searchMethod,
+        searchCaseSensitive,
+        selectionMode,
+        selectedIds,
+        enableWeightedSearch,
+        enableSearchCache,
+        maxSearchResults,
+        isTyping
+    ]);
 
     // Set initial focused index when dropdown opens
     useEffect(() => {
@@ -534,11 +674,15 @@ export function ComboBox({
 
     const shouldShowOptionAvatars = showOptionAvatar && (options.some(o => !!o.imageUrl) || tagStyle === "avatar");
 
-    // Handle lazy scroll loading
+    // Handle lazy scroll loading (local virtual paging) + Infinite Scroll callback (external datasource paging)
     const handleDropdownScroll = (e: UIEvent<HTMLDivElement>): void => {
         const target = e.currentTarget;
-        if (target.scrollHeight - target.scrollTop <= target.clientHeight + 40) {
+        const nearBottom = target.scrollHeight - target.scrollTop <= target.clientHeight + 60;
+        if (nearBottom) {
+            // Local virtual paging: increase visible render window
             setVisibleCount(prev => prev + 50);
+            // External datasource paging: call onLoadMore when provided (Infinite Scroll feature)
+            onLoadMore?.();
         }
     };
 

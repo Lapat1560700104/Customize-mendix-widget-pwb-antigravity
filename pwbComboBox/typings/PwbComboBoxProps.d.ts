@@ -65,6 +65,9 @@ export interface PwbComboBoxContainerProps {
     searchCaseSensitive: boolean;
     searchDebounce: number;
     maxSearchResults: number;
+    enableWeightedSearch: boolean;
+    enableInfiniteScroll: boolean;
+    enableSearchCache: boolean;
     placeholder: string;
     accentColor: string;
     searchHighlightColor: string;
@@ -133,6 +136,9 @@ export interface PwbComboBoxPreviewProps {
     searchCaseSensitive: boolean;
     searchDebounce: number | null;
     maxSearchResults: number | null;
+    enableWeightedSearch: boolean;
+    enableInfiniteScroll: boolean;
+    enableSearchCache: boolean;
     placeholder: string;
     accentColor: string;
     searchHighlightColor: string;

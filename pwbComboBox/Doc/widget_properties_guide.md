@@ -1,6 +1,6 @@
 # คู่มือการตั้งค่าคุณสมบัติ PWB Advanced ComboBox (Widget Properties Guide)
 
-เอกสารฉบับนี้เป็นคู่มือสรุปรายละเอียดและอธิบายการตั้งค่า Properties ของตัวใช้งานปลั๊กอิน **PwbComboBox (v3.10.0)** โดยอ้างอิงตรงจากโครงสร้าง [PwbComboBox.xml](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbComboBox/src/PwbComboBox.xml) เพื่อให้ผู้พัฒนาของ PWB เข้าใจถึงหน้าที่, ความสำคัญ และผลลัพธ์ในการปรับปรุงแต่ละหัวข้อภายใน Mendix Studio Pro
+เอกสารฉบับนี้เป็นคู่มือสรุปรายละเอียดและอธิบายการตั้งค่า Properties ของตัวใช้งานปลั๊กอิน **PwbComboBox (v4.0.0)** โดยอ้างอิงตรงจากโครงสร้าง [PwbComboBox.xml](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbComboBox/src/PwbComboBox.xml) เพื่อให้ผู้พัฒนาของ PWB เข้าใจถึงหน้าที่, ความสำคัญ และผลลัพธ์ในการปรับปรุงแต่ละหัวข้อภายใน Mendix Studio Pro
 
 ---
 
@@ -123,6 +123,19 @@ graph TD
 
 ---
 
+### 📂 Secret Performance Features (คุณสมบัติลับเพิ่มประสิทธิภาพ) 🆕 v4.0.0
+
+> [!NOTE]
+> Properties ชุดนี้ถูกซ่อนอยู่ในกลุ่ม **Advanced › Search & Filtering Config** เช่นกัน — ออกแบบมาให้เปิด/ปิดได้อิสระและ **backward compatible** กับการตั้งค่าเดิมทั้งหมด
+
+| Property Key | Caption (ชื่อใน Mendix) | Type (ประเภท) | Default | คำอธิบายและความสำคัญ | ผลลัพธ์และผลกระทบต่อหน้าตา / ฟังก์ชันการใช้งาน |
+| :--- | :--- | :--- | :---: | :--- | :--- |
+| `enableWeightedSearch` | **⚡ Weighted Search Ranking** | Boolean | `true` | **[Secret Feature]** เปิดระบบจัดลำดับผลค้นหาด้วยน้ำหนักคะแนน (Score-based Ranking) แทนการแสดงผลแบบตามลำดับเดิม | **ผลลัพธ์เรียงลำดับฉลาดขึ้นทันที**: Exact Match (1000) → Starts With (800) → Word Start (600) → Contains (400) → Fuzzy (200) — ผู้ใช้เห็นสิ่งที่ตรงกันมากที่สุดก่อนเสมอ |
+| `enableInfiniteScroll` | **♾️ Infinite Scroll (Lazy Load)** | Boolean | `false` | **[Secret Feature]** เปิดระบบโหลดข้อมูล Datasource ทีละ **30 รายการ** ผ่าน `optionsSource.setLimit()` เมื่อผู้ใช้ scroll ลงก้น Dropdown | **ลดเวลาโหลดครั้งแรกอย่างมหาศาล**: เหมาะกับ Entity datasource ที่มีข้อมูลหลายพันรายการ — ไม่ต้องรอโหลดทั้งหมดก่อนใช้งาน ⚠️ *ใช้ได้เฉพาะ sourceMode = Association* |
+| `enableSearchCache` | **🗄️ Client-Side Search Cache** | Boolean | `true` | **[Secret Feature]** เปิดระบบ LRU Cache 5 entries สำหรับเก็บผลการกรองข้อมูลฝั่ง Client — คำค้นหาที่เคยพิมพ์แล้วจะแสดงผลทันทีโดยไม่ต้อง recompute | **ประสบการณ์ค้นหาเร็วขึ้นทันตา**: เมื่อผู้ใช้ลบตัวอักษรแล้วพิมพ์กลับคืน ระบบดึงผลจาก Cache แทนการกรองใหม่ทุกครั้ง Cache จะถูก clear อัตโนมัติเมื่อข้อมูลในรายการเปลี่ยน |
+
+---
+
 ## 4. Aesthetics Tab (แถบความสวยงามและการออกแบบ)
 
 ใช้สำหรับควบคุมการเรนเดอร์องค์ประกอบอินเทอร์เฟซ การเลือกใช้ชุดสี แสงเงา Glassmorphism และการปรับแต่งสไตล์ UI
@@ -174,3 +187,5 @@ graph TD
 > **ข้อแนะนำการปฏิบัติ**: 
 > 1. ควรตั้งค่า `searchDebounce` สูงขึ้นเป็น `500ms` หรือมากกว่า หากใช้งานร่วมกับ `onFilterChangeAction` ที่ดึงข้อมูลผ่านระบบเครือข่ายอินเทอร์เน็ตที่ล่าช้า เพื่อลดโหลดของ Server
 > 2. พยายามเปิดใช้ `required` ร่วมกับ `requiredMessage` เสมอในส่วนของช่องกรอกข้อมูลสำคัญ เพื่อลดโอกาสการเกิดข้อผิดพลาดด้านข้อมูลในระดับของ Microflow
+> 3. **Secret Feature Combo**: เปิด `enableWeightedSearch` + `enableSearchCache` พร้อมกันเสมอ (default แล้ว) เพื่อได้ประสบการณ์ค้นหาที่เร็วและฉลาดสูงสุด
+> 4. เปิด `enableInfiniteScroll` เฉพาะเมื่อ Entity datasource มีข้อมูล **มากกว่า 200 รายการ** และตั้งค่า datasource ให้มี Sort Order ที่ชัดเจนก่อนเสมอ มิเช่นนั้นข้อมูลหน้าถัดไปอาจมาไม่เป็นระเบียบ

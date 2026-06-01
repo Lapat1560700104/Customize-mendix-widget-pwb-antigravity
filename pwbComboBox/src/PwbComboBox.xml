@@ -223,6 +223,18 @@
                     <caption>Max Search Results</caption>
                     <description>Limit the maximum number of matching items displayed in the dropdown at once. Set to 0 for unlimited (virtualized).</description>
                 </property>
+                <property key="enableWeightedSearch" type="boolean" defaultValue="true">
+                    <caption>⚡ Weighted Search Ranking</caption>
+                    <description>[Secret Feature] Enable intelligent result ranking: Exact matches are shown first, followed by Starts-With, Word-Start, Contains, and Fuzzy matches. Produces far more intuitive search results.</description>
+                </property>
+                <property key="enableInfiniteScroll" type="boolean" defaultValue="false">
+                    <caption>♾️ Infinite Scroll (Lazy Load)</caption>
+                    <description>[Secret Feature] Enable lazy loading of the options datasource in 30-item chunks as the user scrolls down the dropdown. Significantly reduces initial load time for large entity lists.</description>
+                </property>
+                <property key="enableSearchCache" type="boolean" defaultValue="true">
+                    <caption>🗄️ Client-Side Search Cache</caption>
+                    <description>[Secret Feature] Enable a 5-entry LRU (Least Recently Used) cache for search results. Re-typing a previously searched query returns results instantly without recomputing filters.</description>
+                </property>
             </propertyGroup>
         </propertyGroup>
 

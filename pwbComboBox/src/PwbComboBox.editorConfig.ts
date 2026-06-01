@@ -109,10 +109,10 @@ export function getProperties(
     const generalGroup = defaultProperties.find(g => g.caption === "General");
     if (generalGroup && generalGroup.propertyGroups) {
         generalGroup.propertyGroups = generalGroup.propertyGroups.filter(subGroup => {
-            if (subGroup.caption === "3. Entity Datasource Config") {
+            if (subGroup.caption === "Entity Datasource Config") {
                 return computedSourceMode === "association";
             }
-            if (subGroup.caption === "4. Boolean Mode Config") {
+            if (subGroup.caption === "Boolean Mode Config") {
                 return computedSourceMode === "boolean";
             }
             return true;
@@ -135,8 +135,8 @@ export function getProperties(
             });
         }
 
-        // Inside "4. Boolean Mode Config", filter properties if output format is native boolean
-        const booleanConfigGroup = generalGroup.propertyGroups.find(g => g.caption === "4. Boolean Mode Config");
+        // Inside "Boolean Mode Config", filter properties if output format is native boolean
+        const booleanConfigGroup = generalGroup.propertyGroups.find(g => g.caption === "Boolean Mode Config");
         if (booleanConfigGroup && booleanConfigGroup.properties) {
             booleanConfigGroup.properties = booleanConfigGroup.properties.filter(prop => {
                 if (prop.key === "booleanTrueValue" || prop.key === "booleanFalseValue") {
@@ -146,8 +146,8 @@ export function getProperties(
             });
         }
 
-        // Inside "5. Selection Mode Config", filter properties
-        const selectionGroup = generalGroup.propertyGroups.find(g => g.caption === "5. Selection Mode Config");
+        // Inside "Selection Mode Config", filter properties
+        const selectionGroup = generalGroup.propertyGroups.find(g => g.caption === "Selection Mode Config");
         if (selectionGroup && selectionGroup.properties) {
             selectionGroup.properties = selectionGroup.properties.filter(prop => {
                 if (prop.key === "singleSelectStyle") {

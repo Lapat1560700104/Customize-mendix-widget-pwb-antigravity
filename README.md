@@ -1,29 +1,29 @@
-# Customize Mendix Pluggable Widgets (PWB Monorepo)
+# การปรับแต่งเมนดิกซ์พลักเกเบิลวิจเจต (โมโนรีโป PWB)
 
-This repository is structured as an **npm Monorepo Workspace** for developing, managing, and building multiple custom Mendix Pluggable Widgets. Using a unified monorepo architecture, developers can install, lint, test, build, and deploy all widgets simultaneously or individually from the root folder.
+คลังเก็บรหัสต้นฉบับ (Repository) นี้ ได้รับการจัดโครงสร้างในรูปแบบ **พื้นที่ทำงานร่วมโมโนรีโปของ npm (npm Monorepo Workspace)** สำหรับใช้ในการพัฒนา บริหารจัดการ และจัดเตรียมสร้าง (Build) ชุดวิจเจตแบบถอดเสียบกำหนดเอง (Custom Mendix Pluggable Widgets) หลายตัวร่วมกัน โดยการใช้สถาปัตยกรรมโมโนรีโปแบบรวมศูนย์นี้ ช่วยให้นักพัฒนาสามารถติดตั้ง ตรวจสอบไวยากรณ์และฟอร์แมต ตรวจสอบความถูกต้อง ทดสอบ สร้าง และจัดส่ง (Deploy) วิจเจตทั้งหมดได้พร้อมกัน หรือแยกเป็นรายวิจเจตได้อย่างสะดวกรวดเร็วจากโฟลเดอร์หลัก (Root folder)
 
 ---
 
-## 📁 Repository Structure (โครงสร้างของ Repository)
+## 📁 โครงสร้างคลังเก็บรหัสต้นฉบับ (Repository Structure)
 
-The workspace is organized with a shared dependency model and isolated widget directories managed via npm workspaces:
+พื้นที่ทำงานร่วมนี้ได้รับการจัดระเบียบภายใต้โมเดลการแบ่งปันชุดซอฟต์แวร์สนับสนุนร่วมกัน (Shared Dependency Model) และแยกโฟลเดอร์ของแต่ละวิจเจตออกจากกันอย่างเป็นสัดส่วน โดยบริหารจัดการผ่านระบบพื้นที่ทำงานร่วมของ npm (npm workspaces) ดังต่อไปนี้:
 
 ```bash
 Customize-mendix-widget-pwb-antigravity/
-├── package.json                 # Root monorepo configuration, shared scripts & workspaces
-├── package-lock.json            # Unified dependency lockfile for the entire project
+├── package.json                 # ไฟล์ตั้งค่าหลักของโมโนรีโป รวมสคริปต์ส่วนกลางและพื้นที่ทำงานร่วม
+├── package-lock.json            # ไฟล์ล็อกชุดซอฟต์แวร์สนับสนุนแบบรวมศูนย์สำหรับโครงการทั้งหมด
 ├── scripts/
-│   └── rename_mpk.js            # Automated post-release versioning, renaming & deployment script
-├── pwbDatePicker/               # Widget 1: Premium Date and Range Picker (with BE/AD and Time Picker)
-│   ├── package.json             # Widget dependency settings & build scripts
-│   ├── tsconfig.json            # TypeScript configuration
-│   ├── src/                     # React & TSX sources (Components, styling, XML schema)
-│   │   ├── PwbDatePicker.xml    # Widget Properties definition for Mendix Studio Pro
-│   │   ├── PwbDatePicker.tsx    # Mendix wrapper runtime entrypoint
-│   │   ├── components/          # Inner React core logic components
-│   │   └── ui/                  # Styling files (Premium CSS design system)
-│   └── dist/                    # Compiled and bundled production packages (.mpk)
-└── pwbComboBox/                 # Widget 2: Premium Customizable Combobox Select Input
+│   └── rename_mpk.js            # สคริปต์อัตโนมัติสำหรับเปลี่ยนชื่อ จัดการเวอร์ชัน และดีพลอยไฟล์ .mpk หลังการสร้างเสร็จสิ้น
+├── pwbDatePicker/               # วิจเจตที่ 1: เครื่องมือเลือกวันที่และช่วงวันที่แบบพรีเมียม (พร้อมระบบปี พ.ศ./ค.ศ. และระบบเลือกเวลา)
+│   ├── package.json             # ไฟล์ตั้งค่าซอฟต์แวร์สนับสนุนและสคริปต์การสร้างของวิจเจตตัวนี้
+│   ├── tsconfig.json            # ไฟล์กำหนดค่าการคอมไพล์ TypeScript ของวิจเจตตัวนี้
+│   ├── src/                     # รหัสต้นฉบับหลักของ React และ TSX (ส่วนประกอบหลัก, ตกแต่งรูปลักษณ์ และ XML Schema)
+│   │   ├── PwbDatePicker.xml    # การนิยามคุณสมบัติ (Properties) ของวิจเจตสำหรับใช้ใน Mendix Studio Pro
+│   │   ├── PwbDatePicker.tsx    # จุดเชื่อมต่อรันไทม์หลักสำหรับห่อหุ้มโครงสร้าง Mendix
+│   │   ├── components/          # ส่วนประกอบย่อยของตรรกะภายใน React
+│   │   └── ui/                  # ไฟล์ตกแต่งสไตล์สกิน (ระบบการออกแบบ CSS ระดับพรีเมียม)
+│   └── dist/                    # ชุดแพ็กเกจสำเร็จรูป (.mpk) ที่ผ่านการคอมไพล์สำหรับการนำไปใช้งานจริง
+└── pwbComboBox/                 # วิจเจตที่ 2: วิจเจตกล่องเลือกแบบผสมที่ปรับแต่งได้ระดับพรีเมียม (Premium Customizable Combobox Select Input)
     ├── package.json
     ├── src/
     └── dist/
@@ -31,75 +31,75 @@ Customize-mendix-widget-pwb-antigravity/
 
 ---
 
-## 🚀 Build & Release Automation (ระบบอัตโนมัติในการ Build)
+## 🚀 ระบบจัดเตรียมและจัดส่งอัตโนมัติ (Build & Release Automation)
 
-When you execute a production build using `release` commands, the project triggers a specialized script (`scripts/rename_mpk.js`) that automates the deployment cycle:
+เมื่อคุณสั่งดำเนินการสร้างในโหมดการใช้งานจริง (Production Build) ด้วยชุดคำสั่งจัดส่ง (Release commands) ระบบจะเรียกใช้งานสคริปต์เฉพาะทาง (`scripts/rename_mpk.js`) ซึ่งทำหน้าที่ควบคุมและจัดการกระบวนการจัดส่งให้ทำงานโดยอัตโนมัติ ดังต่อไปนี้:
 
-1. **Syntax Linting**: Runs Prettier and ESLint to format and inspect all code files.
-2. **Standard MPK Creation**: Compiles the source files into a standard `.mpk` package inside `/dist/`.
-3. **Timestamp Versioning**: Generates a versioned and timestamped package (e.g. `pwb.PwbDatePicker_1.0.5_20260529_101213.mpk`).
-4. **Target Mendix App Sweeping**:
-   - Locates the Mendix app directory specified in the config (`config.projectPath`).
-   - Automatically **deletes older versioned files** for the same widget in the Mendix `widgets/` folder.
-   - *This prevents "Duplicate Widget ID" compile errors and keeps Mendix Studio Pro neat.*
-5. **Instant Deploy**: Copies the fresh timestamped `.mpk` directly into the Mendix app's `widgets/` directory for immediate use.
+1. **การตรวจสอบรูปแบบและโครงสร้างรหัสต้นฉบับ (Syntax Linting)**: รันโปรแกรม Prettier และ ESLint เพื่อจัดเรียงหน้าตาโครงสร้างและตรวจหาสิ่งผิดปกติทางหลักไวยากรณ์ในไฟล์รหัสต้นฉบับทั้งหมด
+2. **การสร้างไฟล์ MPK มาตรฐาน (Standard MPK Creation)**: คอมไพล์ไฟล์รหัสต้นฉบับทั้งหมดให้อยู่ในรูปแพ็กเกจไฟล์ตระกูล `.mpk` มาตรฐานในโฟลเดอร์ `/dist/`
+3. **การระบุเวอร์ชันด้วยการบันทึกเวลา (Timestamp Versioning)**: ทำการเปลี่ยนชื่อและกำกับเวลากำเนิดไฟล์ลงในแพ็กเกจอย่างละเอียดเพื่อความชัดเจน (ตัวอย่างเช่น `pwb.PwbDatePicker_1.0.5_20260529_101213.mpk`)
+4. **การล้างทำความสะอาดไฟล์ที่ซ้ำซ้อนในแอปพลิเคชัน Mendix (Target Mendix App Sweeping)**:
+   - ค้นหาตำแหน่งโฟลเดอร์ปลายทางของโครงการแอปพลิเคชัน Mendix ตามที่ได้ระบุไว้ในค่าคอนฟิก (`config.projectPath`)
+   - ดำเนินการ**ลบไฟล์แพ็กเกจวิจเจตตัวเดียวกันที่เป็นเวอร์ชันเก่าทั้งหมด**ในโฟลเดอร์ `widgets/` ของโครงการ Mendix นั้นโดยอัตโนมัติ
+   - *กระบวนการนี้ช่วยป้องกันข้อผิดพลาดการคอมไพล์ในเรื่อง "ไอดีวิจเจตซ้ำซ้อน" (Duplicate Widget ID) และช่วยรักษาความเป็นระเบียบเรียบร้อยภายในโปรแกรม Mendix Studio Pro*
+5. **การจัดส่งทันที (Instant Deploy)**: คัดลอกไฟล์แพ็กเกจ `.mpk` ใหม่ล่าสุดที่ระบุเวอร์ชันเวลาเรียบร้อยแล้วไปวางลงในโฟลเดอร์ `widgets/` ของโครงการแอปพลิเคชัน Mendix โดยตรงเพื่อเปิดใช้งานทันที
 
 ---
 
-## 💻 Convenience Commands (คู่มือคำสั่งใช้งาน)
+## 💻 คู่มือชุดคำสั่งสั่งการใช้งาน (Convenience Commands)
 
-You can run commands from the **Root Workspace Folder** (recommended) or navigate into **specific widget folders**.
+คุณสามารถสั่งการทำงานผ่านชุดคำสั่งเหล่านี้ได้จาก **โฟลเดอร์นอกสุดของพื้นที่ทำงานหลัก (Root Workspace Folder)** (แนวทางที่แนะนำที่สุด) หรือจะเปลี่ยนตำแหน่งไดเรกทอรี (`cd`) เข้าไปรันสคริปต์ใน**โฟลเดอร์ของแต่ละวิจเจตเป็นการเฉพาะ**ก็ได้เช่นกัน
 
-### 1. Root Level Commands (เรียกใช้งานจาก Folder หลัก)
+### 1. ชุดคำสั่งสั่งการระดับโฟลเดอร์หลัก (เรียกใช้งานจาก Folder นอกสุด)
 
-These commands utilize npm workspaces to orchestrate scripts across the monorepo:
+ชุดคำสั่งสั่งการเหล่านี้ทำหน้าที่ควบคุมระบบ npm workspaces เพื่อประสานงานสคริปต์บิวด์ของทุกวิจเจตพร้อมๆ กันจากส่วนกลาง:
 
-#### Installation & Setup
-- **Install all dependencies**:
+#### การติดตั้งและจัดเตรียมระบบ
+- **ติดตั้งชุดซอฟต์แวร์สนับสนุนทั้งหมด**:
   ```bash
   npm run install:all
   ```
-  *Installs node modules for the root workspace and all widgets in one step.*
+  *ทำหน้าที่ติดตั้งโมดูล Node.js สำหรับโฟลเดอร์โครงสร้างหลักรวมถึงชุดวิจเจตย่อยทั้งหมดในขั้นตอนเดียว*
 
-#### Linting & Formatting
-- **Check code styles for all widgets**:
+#### การตรวจสอบฟอร์แมตโครงสร้างรหัส
+- **ตรวจสอบความถูกต้องและรูปแบบของโค้ดสำหรับทุกวิจเจต**:
   ```bash
   npm run lint:all
   ```
-- **Fix code styles automatically for all widgets**:
+- **ปรับแต่งแก้ไขฟอร์แมตโครงสร้างโค้ดโดยอัตโนมัติสำหรับทุกวิจเจต**:
   ```bash
   npm run lint:fix:all
   ```
 
-#### Multi-Widget Compilations
-- **Build all widgets (Development mode)**:
+#### การสั่งสร้างและบิวด์ทุกวิจเจตพร้อมกัน
+- **สร้างและบิวด์ทุกวิจเจต (ในโหมดการพัฒนา - Development mode)**:
   ```bash
   npm run build:all
   ```
-- **Release and Deploy all widgets (Production mode with Mendix auto-copy)**:
+- **จัดเตรียม คัดลอก และดีพลอยทุกวิจเจตพร้อมกัน (ในโหมดพร้อมใช้งานจริง พร้อมคัดลอกลงโฟลเดอร์ Mendix อัตโนมัติ)**:
   ```bash
   npm run release:all
   ```
 
-#### Single Widget Quick Commands
-- **Build / Release `pwbDatePicker`**:
+#### ชุดคำสั่งทางลัดควบคุมวิจเจตรายตัว
+- **สร้างชิ้นงาน / จัดส่งดีพลอยวิจเจต `pwbDatePicker`**:
   ```bash
   npm run build:pwbDatePicker
   npm run release:pwbDatePicker
   ```
-- **Build / Release `pwbComboBox`**:
+- **สร้างชิ้นงาน / จัดส่งดีพลอยวิจเจต `pwbComboBox`**:
   ```bash
   npm run build:pwbComboBox
   npm run release:pwbComboBox
   ```
 
-#### Automatic Version Bumping & Releasing
-- **Bump PATCH version (e.g. 1.0.5 -> 1.0.6) & Release**:
+#### การอัปเดตเวอร์ชันและจัดส่งอัตโนมัติ (Bumping Version & Releasing)
+- **อัปเดตระดับการแก้ไขจุดบกพร่อง (PATCH version เช่น 1.0.5 -> 1.0.6) พร้อมจัดส่ง**:
   ```bash
   npm run bump:patch:pwbDatePicker
   npm run bump:patch:pwbComboBox
   ```
-- **Bump MINOR version (e.g. 1.0.5 -> 1.1.0) & Release**:
+- **อัปเดตระดับการเพิ่มความสามารถย่อย (MINOR version เช่น 1.0.5 -> 1.1.0) พร้อมจัดส่ง**:
   ```bash
   npm run bump:minor:pwbDatePicker
   npm run bump:minor:pwbComboBox
@@ -107,54 +107,54 @@ These commands utilize npm workspaces to orchestrate scripts across the monorepo
 
 ---
 
-### 2. Widget Level Commands (เรียกใช้งานในโฟลเดอร์ของ Widget)
+### 2. ชุดคำสั่งสั่งการระดับวิจเจตย่อย (เรียกใช้งานในเฉพาะโฟลเดอร์ของวิจเจตนั้น)
 
-If you are developing a specific widget, you can `cd` into its directory to run dedicated watchers:
+หากคุณกำลังปรับแต่งและพัฒนาวิจเจตเฉพาะชิ้นเป็นการเฉพาะ คุณสามารถสลับตำแหน่งไดเรกทอรี (`cd`) เข้าไปในโฟลเดอร์ย่อยเพื่อเปิดระบบเฝ้าดูการเปลี่ยนแปลงแบบเรียลไทม์ (Watchers) ได้ดังนี้:
 
 ```bash
 cd pwbDatePicker
-# OR
+# หรือ
 cd pwbComboBox
 ```
 
-- **Run Dev Watcher**:
+- **เปิดระบบเฝ้าดูและคอมไพล์โค้ดตามเวลาจริง (Run Dev Watcher)**:
   ```bash
   npm run dev
   ```
-  *Compiles the code and watches for live changes. Excellent for real-time Mendix testing.*
-- **Build (Fast Check)**:
+  *จะทำหน้าที่คอมไพล์โค้ดพร้อมเฝ้าดูการเปลี่ยนแปลงรหัสต้นฉบับอย่างใกล้ชิด เหมาะอย่างยิ่งสำหรับการพัฒนาและทดสอบร่วมกับแอปพลิเคชัน Mendix แบบเรียลไทม์*
+- **ตรวจสอบการคอมไพล์บิวด์ด่วน (Build - Fast Check)**:
   ```bash
   npm run build
   ```
-- **Build Production & Auto-deploy to Mendix**:
+- **สร้างชิ้นงานโหมดใช้งานจริงและดีพลอยเข้า Mendix ทันที**:
   ```bash
   npm run release
   ```
 
 ---
 
-## 💻 Mendix Version Compatibility (การรองรับเวอร์ชัน Mendix Studio Pro)
+## 💻 การรองรับรุ่นเวอร์ชันโปรแกรม Mendix Studio Pro (Mendix Version Compatibility)
 
-เพื่อช่วยให้นักพัฒนาและผู้ใช้ออกแบบสามารถนำชุด Widget ไปประยุกต์ใช้งานได้อย่างราบรื่น ตารางด้านล่างนี้ระบุการรองรับของเวอร์ชัน Mendix Studio Pro สำหรับชุดโมดูลทั้งหมดใน Monorepo:
+เพื่อช่วยให้นักพัฒนาและผู้ออกแบบระบบสามารถนำชุดวิจเจตทั้งหมดไปประยุกต์ใช้งานบนแพลตฟอร์ม Mendix ได้อย่างราบรื่น ตารางด้านล่างนี้แสดงผลการรองรับของรุ่นเวอร์ชัน Mendix Studio Pro สำหรับวิจเจตทั้งหมดภายในโมโนรีโปนี้:
 
-| Mendix Studio Pro Version | Compatibility Status | Notes |
+| รุ่นเวอร์ชัน Mendix Studio Pro | สถานะการรองรับ (Compatibility) | รายละเอียดข้อมูลเพิ่มเติม |
 | :--- | :---: | :--- |
-| **Mendix 10.12+ (LTS) & 10.20+ (Latest)** | ✅ **Fully Supported** | รองรับการทำงานได้สมบูรณ์แบบ 100% ทั้งฝั่ง Client module (V8 Engine) และ React 18+ runtime |
-| **Mendix 10.0.0 – 10.11.0** | ✅ **Fully Supported** | รองรับอย่างเต็มรูปแบบด้วยสถาปัตยกรรม React และ Web API ยุคใหม่ |
-| **Mendix 9.18.0 – 9.24.x (LTS)** | ✅ **Supported** | รองรับเป็นเวอร์ชันขั้นต่ำที่สุดแนะนำสำหรับการเริ่มใช้งาน (เนื่องจากใช้ React 18 hooks) |
-| **Mendix 9.0.5 – 9.17.x** | ⚠️ **Conditional** | สามารถใช้งานได้ แต่อาจต้องตรวจสอบการทำงานของ React hooks และ Datasource props บางประการ |
-| **Mendix 8.x และต่ำกว่า** | ❌ **Not Supported** | ไม่รองรับเนื่องจากโมเดล Client Widget ในเวอร์ชันนี้ใช้ Dojo framework เป็นหลัก ไม่ใช่ React Pluggable |
+| **Mendix 10.12+ (รุ่น LTS) และ 10.20+ (รุ่นล่าสุดในปัจจุบัน)** | ✅ **รองรับอย่างสมบูรณ์แบบ** | ทำงานร่วมกันได้สมบูรณ์แบบ 100% ทั้งฝั่ง Client module (กลไก V8 Engine) และ React 18+ runtime |
+| **Mendix 10.0.0 – 10.11.0** | ✅ **รองรับอย่างสมบูรณ์แบบ** | ทำงานร่วมกันได้ราบรื่นผ่านระบบการพัฒนา API ยุคใหม่และโครงสร้าง React |
+| **Mendix 9.18.0 – 9.24.x (รุ่น LTS)** | ✅ **รองรับ (แนะนำขั้นต่ำ)** | เป็นรุ่นเวอร์ชันขั้นต่ำที่สุดที่แนะนำสำหรับการเริ่มใช้งาน (เนื่องจากใช้โครงสร้าง React 18 Hooks) |
+| **Mendix 9.0.5 – 9.17.x** | ⚠️ **มีเงื่อนไขเพิ่มเติม** | สามารถทำงานได้ แต่อาจต้องตรวจสอบและปรับแต่งพฤติกรรมของ React Hooks และ Datasource API บางส่วน |
+| **Mendix 8.x และต่ำกว่า** | ❌ **ไม่รองรับการใช้งาน** | ไม่รองรับเนื่องจากโมเดล Client Widget ในเวอร์ชันนี้พัฒนาขึ้นบน Dojo framework เป็นหลัก ซึ่งต่างกับ React Pluggable |
 
 > [!TIP]
-> **คำแนะนำสำหรับการใช้งานจริง:**
-> แนะนำเป็นอย่างยิ่งให้ใช้ Mendix Studio Pro เวอร์ชัน **9.18.0 LTS เป็นอย่างน้อย** และเพื่อประสิทธิภาพและความสมบูรณ์แบบสูงสุด แนะนำให้เลือกใช้เวอร์ชัน **10.12.0 LTS หรือ 10.20+ (เวอร์ชันล่าสุดในตลาดปัจจุบัน)** ซึ่งตัวเก็บข้อมูล Nanoflow, Client V8 engine และ React runtime ได้รับการปรับแต่งมาให้ทำงานร่วมกับ Pointer Events และ Mobile touch physics ได้ลื่นไหลที่สุด
+> **คำแนะนำเพื่อคุณภาพการแสดงผลสูงสุด:**
+> ขอแนะนำให้นักพัฒนาเลือกใช้โปรแกรม Mendix Studio Pro เวอร์ชัน **9.18.0 LTS เป็นอย่างน้อย** และเพื่อประสิทธิภาพสูงสุดพร้อมประสบการณ์การใช้งานที่ราบรื่นไร้รอยต่อ แนะนำให้ใช้รุ่นเวอร์ชัน **10.12.0 LTS หรือ 10.20+ ขึ้นไป** ซึ่งระบบจัดเก็บข้อมูลรันไทม์ Nanoflow, กลไก Client V8 และกลไก React ได้รับการพัฒนาปรับปรุงให้ตอบสนองต่อระบบลากวางผ่าน Pointer Events และฟิสิกส์ระบบสัมผัสบนมือถือได้ลื่นไหลเป็นธรรมชาติที่สุด
 
 ---
 
-## 📝 Key Developer Guidelines (แนวทางปฏิบัติสำหรับผู้พัฒนา)
+## 📝 แนวทางปฏิบัติที่สำคัญสำหรับผู้พัฒนา (Key Developer Guidelines)
 
 > [!NOTE]
-> Always run `npm run lint:fix:all` before pushing code or releasing packages. Mendix prerelease checks will reject any build containing Prettier format warnings.
+> ขอความร่วมมือในการรันคำสั่งจัดระเบียบฟอร์แมตและตรวจสอบโครงสร้างโค้ดอยู่เสมอด้วยชุดคำสั่ง `npm run lint:fix:all` ทุกครั้งก่อนที่จะทำการผลักรหัสต้นฉบับขึ้นคลังระบบ (Push code) หรือทำการสร้างแพ็กเกจจัดส่ง ทั้งนี้เพราะระบบประเมินตรวจสอบเบื้องต้นของ Mendix จะทำการปฏิเสธไฟล์แพ็กเกจใดๆ ก็ตามที่มีคำเตือนความไม่สอดคล้องของรูปแบบการฟอร์แมตโค้ด (Prettier formatting warnings)
 
 > [!IMPORTANT]
-> To link the monorepo to a different Mendix app project, open `pwbDatePicker/package.json` (or `pwbComboBox/package.json`) and update the `"config.projectPath"` value to point relatively or absolutely to your target Mendix project folder.
+> ในการปรับแก้การเชื่อมโยงโครงสร้าง Monorepo ไปยังแอปพลิเคชัน Mendix โครงการอื่นที่ต่างไปจากเดิม ให้คุณเปิดเข้าไปแก้ไขไฟล์ `package.json` ของวิจเจตที่ต้องการ (เช่นใน `pwbDatePicker/package.json` หรือ `pwbComboBox/package.json`) และกำหนดค่าโฟลเดอร์เป้าหมายปลายทางตรงหัวข้อ `"config.projectPath"` ให้ระบุตรงไปยังตำแหน่งโฟลเดอร์ของแอปพลิเคชัน Mendix ดังกล่าว (ทั้งแบบสัมพัทธ์หรือแบบสัมบูรณ์) เพื่อการเชื่อมโยงระบบอย่างสมบูรณ์แบบ

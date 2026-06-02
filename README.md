@@ -133,6 +133,24 @@ cd pwbComboBox
 
 ---
 
+## 💻 Mendix Version Compatibility (การรองรับเวอร์ชัน Mendix Studio Pro)
+
+เพื่อช่วยให้นักพัฒนาและผู้ใช้ออกแบบสามารถนำชุด Widget ไปประยุกต์ใช้งานได้อย่างราบรื่น ตารางด้านล่างนี้ระบุการรองรับของเวอร์ชัน Mendix Studio Pro สำหรับชุดโมดูลทั้งหมดใน Monorepo:
+
+| Mendix Studio Pro Version | Compatibility Status | Notes |
+| :--- | :---: | :--- |
+| **Mendix 10.12+ (LTS) & 10.20+ (Latest)** | ✅ **Fully Supported** | รองรับการทำงานได้สมบูรณ์แบบ 100% ทั้งฝั่ง Client module (V8 Engine) และ React 18+ runtime |
+| **Mendix 10.0.0 – 10.11.0** | ✅ **Fully Supported** | รองรับอย่างเต็มรูปแบบด้วยสถาปัตยกรรม React และ Web API ยุคใหม่ |
+| **Mendix 9.18.0 – 9.24.x (LTS)** | ✅ **Supported** | รองรับเป็นเวอร์ชันขั้นต่ำที่สุดแนะนำสำหรับการเริ่มใช้งาน (เนื่องจากใช้ React 18 hooks) |
+| **Mendix 9.0.5 – 9.17.x** | ⚠️ **Conditional** | สามารถใช้งานได้ แต่อาจต้องตรวจสอบการทำงานของ React hooks และ Datasource props บางประการ |
+| **Mendix 8.x และต่ำกว่า** | ❌ **Not Supported** | ไม่รองรับเนื่องจากโมเดล Client Widget ในเวอร์ชันนี้ใช้ Dojo framework เป็นหลัก ไม่ใช่ React Pluggable |
+
+> [!TIP]
+> **คำแนะนำสำหรับการใช้งานจริง:**
+> แนะนำเป็นอย่างยิ่งให้ใช้ Mendix Studio Pro เวอร์ชัน **9.18.0 LTS เป็นอย่างน้อย** และเพื่อประสิทธิภาพและความสมบูรณ์แบบสูงสุด แนะนำให้เลือกใช้เวอร์ชัน **10.12.0 LTS หรือ 10.20+ (เวอร์ชันล่าสุดในตลาดปัจจุบัน)** ซึ่งตัวเก็บข้อมูล Nanoflow, Client V8 engine และ React runtime ได้รับการปรับแต่งมาให้ทำงานร่วมกับ Pointer Events และ Mobile touch physics ได้ลื่นไหลที่สุด
+
+---
+
 ## 📝 Key Developer Guidelines (แนวทางปฏิบัติสำหรับผู้พัฒนา)
 
 > [!NOTE]

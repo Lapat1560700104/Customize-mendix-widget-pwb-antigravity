@@ -44,6 +44,10 @@
 | `dragHandleDisplay` | Drag Handle Position | Enumeration | No | `left` | การแสดงผลปุ่มลาก: `left` = แสดงปุ่มลากจับด้านซ้ายของแต่ละการ์ด · `hide` = ซ่อนปุ่มลากจับทั้งหมด |
 | `accentColor` | Accent Color (Hex) | String | No | `#3b82f6` | สีหลักสำหรับเน้นกรอบแอกทีฟขณะลาก เส้นบอกทิศการวาง และเอฟเฟกต์ไฟเรืองแสงรอบตัวการ์ด |
 | `borderRadius` | Border Radius | String | No | `16px` | ความโค้งมนมุมขอบของแถวไอเทมและการ์ดวางทับ (เช่น `8px`, `16px`, `0px`) |
+| `themePreset` | Theme Preset | Enumeration | No | `default_rounded` | พรีเซ็ตสไตล์การแสดงผล: `default_rounded` (กลมมนมาตรฐาน), `modern_glass` (กระจกฝ้าพรีเมียม), `minimalist_flat` (แบนราบมินิมอล), `neo_brutalist` (กรอบหนาแนวอินดี้) |
+| `darkModeBehavior` | Dark Mode Behavior | Enumeration | No | `auto` | การเลือกใช้งานธีมมืด: `auto` (ตรวจจับอัตโนมัติ), `light` (บังคับธีมสว่าง), `dark` (บังคับธีมมืด) |
+| `itemPadding` | Card Padding | String | No | `12px 16px` | กำหนดขนาดระยะห่างด้านในการ์ดไอเทมแต่ละชิ้น (เช่น `12px 16px`, `16px`, `20px`) |
+| `itemGap` | Card Spacing Gap | String | No | `12px` | กำหนดระยะห่างช่องไฟว่างระหว่างการ์ดแต่ละใบ (เช่น `12px`, `8px`, `24px`) |
 
 ---
 
@@ -58,6 +62,16 @@ Widget ได้เปิดเผยตัวแปร CSS Custom Properties (V
     --accent-color: #3b82f6;    /* สีธีมหลักที่ส่งมาจากคุณสมบัติ Mendix */
     --border-radius: 16px;      /* ความโค้งมนขอบการ์ดของแต่ละแถว */
     --accent-glow: rgba(...);   /* แสงเรืองรองขณะลากการ์ดมาทับ (คำนวณอัตโนมัติจากสีหลัก) */
+    
+    /* Design Spacing */
+    --pwb-item-padding: 12px 16px; /* ขนาด Padding ภายในการ์ดแต่ละใบ */
+    --pwb-item-gap: 12px;          /* ขนาดช่องว่าง Gap ระหว่างแต่ละการ์ด */
+    
+    /* Design Tokens Bridging to Mendix Atlas UI */
+    --pwb-bg-main: var(--mx-bg-color-main);  /* สีพื้นหลังตัวการ์ดหลัก */
+    --pwb-bg-hover: var(--mx-bg-color-secondary); /* สีพื้นหลังเมื่อเมาส์โฮเวอร์การ์ด */
+    --pwb-border-color: var(--mx-border-color); /* สีเส้นขอบตัวการ์ด */
+    --pwb-text-primary: var(--mx-text-color-primary); /* สีตัวอักษรของเนื้อหาหลัก */
 }
 ```
 

@@ -19,7 +19,11 @@ export function PwbCustomizeContainerDataView({
     dragGroup,
     columnValue,
     itemColumnAttribute,
-    saveDelay
+    saveDelay,
+    themePreset,
+    darkModeBehavior,
+    itemPadding,
+    itemGap
 }: PwbCustomizeContainerDataViewContainerProps): ReactElement {
     // 1. Sanitize Aesthetics Configuration
     const colorRegex =
@@ -31,6 +35,16 @@ export function PwbCustomizeContainerDataView({
         const trimmed = borderRadius.trim();
         safeBorderRadius = /^\d+$/.test(trimmed) ? `${trimmed}px` : trimmed;
     }
+
+    const sanitizeSpacing = (val: string, fallback: string): string => {
+        if (!val) {
+            return fallback;
+        }
+        const trimmed = val.trim();
+        return /^\d+$/.test(trimmed) ? `${trimmed}px` : trimmed;
+    };
+    const safeItemPadding = sanitizeSpacing(itemPadding, "12px 16px");
+    const safeItemGap = sanitizeSpacing(itemGap, "12px");
 
     // 2. Handle Loading & Empty States Elegantly
     const isLoading = itemsSource.status === "loading";
@@ -181,6 +195,10 @@ export function PwbCustomizeContainerDataView({
                         columnValue={columnValue}
                         onDropExternal={handleDropExternal}
                         onRemoveItemExternal={handleRemoveItemExternal}
+                        themePreset={themePreset}
+                        darkModeBehavior={darkModeBehavior}
+                        itemPadding={safeItemPadding}
+                        itemGap={safeItemGap}
                     />
                     <div className="pwb-empty-state-content-overlay">
                         <svg
@@ -214,6 +232,10 @@ export function PwbCustomizeContainerDataView({
                     columnValue={columnValue}
                     onDropExternal={handleDropExternal}
                     onRemoveItemExternal={handleRemoveItemExternal}
+                    themePreset={themePreset}
+                    darkModeBehavior={darkModeBehavior}
+                    itemPadding={safeItemPadding}
+                    itemGap={safeItemGap}
                 />
             )}
         </div>

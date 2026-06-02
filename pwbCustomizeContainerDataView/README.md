@@ -20,6 +20,13 @@
    - บันทึกลำดับ GUIDs ที่จัดเรียงใหม่กลับไปยัง String Attribute ในรูปแบบ comma-separated
    - รองรับ On Sort Action (Microflow / Nanoflow) ที่จะถูกเรียกโดยอัตโนมัติเมื่อการลากวางเสร็จสิ้น
 
+4. **🎨 ระบบสไตล์และธีมสำเร็จรูปพรีเมียม (Premium Style & Theme Presets)**
+   - **Glassmorphism (ความโปร่งแสงพรีเมียม):** ขอบใสและเบลอพื้นหลังอย่างนุ่มนวล
+   - **Minimalist Flat (มินิมอลคลาสสิก):** ลบขอบและเงาเหลือเพียงเส้นแบ่งขอบล่างบางเบา
+   - **Neo-Brutalist (คอนทราสต์จัดจ้าน):** เส้นขอบหนาสามมิติและเงาเบลอแบบออฟเซ็ตสีดำ/สีเน้น
+   - **Adaptive Dark Mode:** ปรับเปลี่ยนชุดสีของวิจเจตตามระบบ Dark Mode ของบราวเซอร์หรือคลาส Mendix IDE อัตโนมัติ
+   - **Custom Spacing Controls:** กำหนดระยะห่าง Padding และ Gap ระหว่างการ์ดได้โดยตรงผ่าน Property Panel
+
 ---
 
 ## 📁 โครงสร้างไฟล์ (File Structure)
@@ -86,6 +93,10 @@ _คำสั่งนี้จะ build JavaScript bundle, package ทุกอ
 | `dragHandleDisplay` | Enumeration | No | `left` | การแสดงผลปุ่ม Drag Handle: `left` (แสดงทางซ้าย) หรือ `hide` (ซ่อนปุ่ม) |
 | `accentColor` | String | No | `#3b82f6` | สีไฮไลต์และ Drop Indicator Glow (เช่น `#3b82f6`, `#10b981`) |
 | `borderRadius` | String | No | `16px` | ความโค้งมนขอบการ์ด (เช่น `8px`, `16px`, `0px`) |
+| `themePreset` | Enumeration | No | `default_rounded` | พรีเซ็ตสไตล์: `default_rounded` (กลมมนมาตรฐาน), `modern_glass` (กระจกฝ้า), `minimalist_flat` (แบนราบมินิมอล), `neo_brutalist` (กรอบหนาแนวอินดี้) |
+| `darkModeBehavior` | Enumeration | No | `auto` | การตรวจจับ Dark Mode: `auto` (อัตโนมัติ), `light` (บังคับธีมสว่าง), `dark` (บังคับธีมมืด) |
+| `itemPadding` | String | No | `12px 16px` | ระยะขอบด้านในของการ์ดแต่ละใบ (เช่น `12px 16px`, `16px`) |
+| `itemGap` | String | No | `12px` | ระยะห่างช่องว่างระหว่างการ์ด (เช่น `12px`, `8px`, `20px`) |
 
 ---
 

@@ -19,6 +19,10 @@ export interface DragContainerProps {
     columnValue?: string;
     onDropExternal?: (draggedItemId: string, sourceContainerId: string, targetIndex: number) => void;
     onRemoveItemExternal?: (itemId: string) => void;
+    themePreset: "default_rounded" | "modern_glass" | "minimalist_flat" | "neo_brutalist";
+    darkModeBehavior: "auto" | "light" | "dark";
+    itemPadding?: string;
+    itemGap?: string;
 }
 
 interface DragRegistry {
@@ -49,11 +53,16 @@ export function DragContainer({
     dragGroup,
     columnValue,
     onDropExternal,
-    onRemoveItemExternal
+    onRemoveItemExternal,
+    themePreset,
+    darkModeBehavior,
+    itemPadding,
+    itemGap
 }: DragContainerProps): ReactElement {
     const [orderedItems, setOrderedItems] = useState<DragItem[]>([]);
     const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+    const [wobblingItemId, setWobblingItemId] = useState<string | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Sync state when items source updates from Mendix
@@ -333,48 +342,66 @@ export function DragContainer({
 
             if (dragInitiated) {
                 const registry = window.__pwbDragRegistry;
-                if (registry && lastTargetContainer) {
-                    const targetContainerId = lastTargetContainer.getAttribute("data-container-id");
+                if (registry) {
+                    let orderChanged = false;
 
-                    // Resolve exact drop coordinate details
-                    const pointEl = document.elementFromPoint(upEvent.clientX, upEvent.clientY) as HTMLElement | null;
-                    let finalIndex = 0;
-                    if (pointEl) {
-                        const hoverContainer = pointEl.closest(".pwb-drag-container") as HTMLElement | null;
-                        const hoverCard = pointEl.closest(".pwb-draggable-row-item") as HTMLElement | null;
-                        if (hoverContainer) {
-                            if (hoverCard) {
-                                const idxAttr = hoverCard.getAttribute("data-index");
-                                if (idxAttr !== null) {
-                                    finalIndex = parseInt(idxAttr, 10);
+                    if (lastTargetContainer) {
+                        const targetContainerId = lastTargetContainer.getAttribute("data-container-id");
+
+                        // Resolve exact drop coordinate details
+                        const pointEl = document.elementFromPoint(
+                            upEvent.clientX,
+                            upEvent.clientY
+                        ) as HTMLElement | null;
+                        let finalIndex = 0;
+                        if (pointEl) {
+                            const hoverContainer = pointEl.closest(".pwb-drag-container") as HTMLElement | null;
+                            const hoverCard = pointEl.closest(".pwb-draggable-row-item") as HTMLElement | null;
+                            if (hoverContainer) {
+                                if (hoverCard) {
+                                    const idxAttr = hoverCard.getAttribute("data-index");
+                                    if (idxAttr !== null) {
+                                        finalIndex = parseInt(idxAttr, 10);
+                                    }
+                                } else {
+                                    const countAttr = hoverContainer.getAttribute("data-items-count");
+                                    if (countAttr !== null) {
+                                        finalIndex = parseInt(countAttr, 10);
+                                    }
                                 }
-                            } else {
-                                const countAttr = hoverContainer.getAttribute("data-items-count");
-                                if (countAttr !== null) {
-                                    finalIndex = parseInt(countAttr, 10);
+                            }
+                        }
+
+                        if (targetContainerId === containerId) {
+                            // Drop in SAME Container:
+                            // Since orderedItems visual positions are already updated in real-time in Phase 1,
+                            // we compare final visual order with the starting order to trigger Mendix sync exactly once.
+                            orderChanged = currentOrderIds.some((id, idx) => id !== originalOrderIds[idx]);
+                            if (orderChanged) {
+                                onOrderChange(currentOrderIds);
+                            }
+                        } else {
+                            // Drop in EXTERNAL Container: Trigger Mendix Kanban drop persistence
+                            const targetDragGroup = lastTargetContainer.getAttribute("data-drag-group") || undefined;
+                            const targetEnableKanban =
+                                lastTargetContainer.getAttribute("data-enable-kanban") === "true";
+
+                            if (
+                                targetEnableKanban &&
+                                (!targetDragGroup || targetDragGroup === registry.sourceDragGroup)
+                            ) {
+                                if (onDropExternal) {
+                                    onDropExternal(registry.itemId, registry.sourceContainerId, finalIndex);
+                                    orderChanged = true;
                                 }
                             }
                         }
                     }
 
-                    if (targetContainerId === containerId) {
-                        // Drop in SAME Container:
-                        // Since orderedItems visual positions are already updated in real-time in Phase 1,
-                        // we compare final visual order with the starting order to trigger Mendix sync exactly once.
-                        const orderChanged = currentOrderIds.some((id, idx) => id !== originalOrderIds[idx]);
-                        if (orderChanged) {
-                            onOrderChange(currentOrderIds);
-                        }
-                    } else {
-                        // Drop in EXTERNAL Container: Trigger Mendix Kanban drop persistence
-                        const targetDragGroup = lastTargetContainer.getAttribute("data-drag-group") || undefined;
-                        const targetEnableKanban = lastTargetContainer.getAttribute("data-enable-kanban") === "true";
-
-                        if (targetEnableKanban && (!targetDragGroup || targetDragGroup === registry.sourceDragGroup)) {
-                            if (onDropExternal) {
-                                onDropExternal(registry.itemId, registry.sourceContainerId, finalIndex);
-                            }
-                        }
+                    if (!orderChanged) {
+                        // Drop canceled or dropped in same slot: trigger wobble spring shake
+                        setWobblingItemId(registry.itemId);
+                        setTimeout(() => setWobblingItemId(null), 400);
                     }
                 }
             }
@@ -389,6 +416,14 @@ export function DragContainer({
         document.addEventListener("pointercancel", onPointerUp);
     };
 
+    const themeClass = `pwb-preset-${themePreset}`;
+    const modeClass =
+        darkModeBehavior === "dark"
+            ? "pwb-dark-mode-force"
+            : darkModeBehavior === "light"
+            ? "pwb-light-mode-force"
+            : "";
+
     return (
         <div
             ref={containerRef}
@@ -396,14 +431,16 @@ export function DragContainer({
             data-drag-group={dragGroup}
             data-enable-kanban={String(enableKanban)}
             data-items-count={orderedItems.length}
-            className={`pwb-drag-container pwb-direction-${layoutDirection} ${
+            className={`pwb-drag-container pwb-direction-${layoutDirection} ${themeClass} ${modeClass} ${
                 orderedItems.length === 0 ? "pwb-empty-container-dropzone" : ""
             }`}
             style={
                 {
                     "--accent-color": accentColor,
                     "--border-radius": borderRadius,
-                    "--accent-glow": `color-mix(in srgb, ${accentColor} 15%, transparent)`
+                    "--accent-glow": `color-mix(in srgb, ${accentColor} 15%, transparent)`,
+                    "--pwb-item-padding": itemPadding,
+                    "--pwb-item-gap": itemGap
                 } as any
             }
         >
@@ -418,7 +455,7 @@ export function DragContainer({
                         onPointerDown={e => handlePointerDown(e, idx)}
                         className={`pwb-draggable-row-item ${isDragging ? "pwb-dragging" : ""} ${
                             isDragOver ? "pwb-drag-over" : ""
-                        }`}
+                        } ${wobblingItemId === item.id ? "pwb-wobble-shake" : ""}`}
                         style={{
                             borderRadius: `calc(${borderRadius} * 0.5)`
                         }}

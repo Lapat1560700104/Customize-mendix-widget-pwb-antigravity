@@ -10,6 +10,10 @@ export type LayoutDirectionEnum = "vertical" | "horizontal";
 
 export type DragHandleDisplayEnum = "left" | "hide";
 
+export type ThemePresetEnum = "default_rounded" | "modern_glass" | "minimalist_flat" | "neo_brutalist";
+
+export type DarkModeBehaviorEnum = "auto" | "light" | "dark";
+
 export interface PwbCustomizeContainerDataViewContainerProps {
     name: string;
     class: string;
@@ -23,6 +27,10 @@ export interface PwbCustomizeContainerDataViewContainerProps {
     dragHandleDisplay: DragHandleDisplayEnum;
     accentColor: string;
     borderRadius: string;
+    themePreset: ThemePresetEnum;
+    darkModeBehavior: DarkModeBehaviorEnum;
+    itemPadding: string;
+    itemGap: string;
     enableKanban: boolean;
     dragGroup: string;
     columnValue: string;
@@ -49,6 +57,10 @@ export interface PwbCustomizeContainerDataViewPreviewProps {
     dragHandleDisplay: DragHandleDisplayEnum;
     accentColor: string;
     borderRadius: string;
+    themePreset: ThemePresetEnum;
+    darkModeBehavior: DarkModeBehaviorEnum;
+    itemPadding: string;
+    itemGap: string;
     enableKanban: boolean;
     dragGroup: string;
     columnValue: string;

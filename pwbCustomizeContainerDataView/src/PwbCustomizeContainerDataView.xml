@@ -60,6 +60,33 @@
                 <caption>Border Radius</caption>
                 <description>Corner roundness of item rows and drop overlays. Specify standard CSS units (e.g., 16px, 8px, 0px).</description>
             </property>
+            <property key="themePreset" type="enumeration" defaultValue="default_rounded">
+                <caption>Theme Preset</caption>
+                <description>Choose a visual aesthetic theme preset for the card container layout.</description>
+                <enumerationValues>
+                    <enumerationValue key="default_rounded">Default Modern Rounded</enumerationValue>
+                    <enumerationValue key="modern_glass">Premium Glassmorphism</enumerationValue>
+                    <enumerationValue key="minimalist_flat">Minimalist Flat</enumerationValue>
+                    <enumerationValue key="neo_brutalist">Neo-Brutalist High Contrast</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="darkModeBehavior" type="enumeration" defaultValue="auto">
+                <caption>Dark Mode Behavior</caption>
+                <description>Configure how the widget transitions to dark mode themes.</description>
+                <enumerationValues>
+                    <enumerationValue key="auto">Auto (System + Mendix Dark Class)</enumerationValue>
+                    <enumerationValue key="light">Force Light Theme</enumerationValue>
+                    <enumerationValue key="dark">Force Dark Theme</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="itemPadding" type="string" required="false" defaultValue="12px 16px">
+                <caption>Card Padding</caption>
+                <description>Custom padding spacing inside each list row card (e.g. '12px 16px', '16px').</description>
+            </property>
+            <property key="itemGap" type="string" required="false" defaultValue="12px">
+                <caption>Card Spacing Gap</caption>
+                <description>Gap spacing between card rows inside the container (e.g. '12px', '8px', '20px').</description>
+            </property>
         </propertyGroup>
 
         <propertyGroup caption="Kanban Settings">

@@ -66,14 +66,43 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
     const rowContainerStyle: CSSProperties = {
         display: "flex",
         flexDirection: isHorizontal ? "row" : "column",
-        gap: "8px",
+        gap: props.itemGap || "12px",
         width: "100%"
     };
+
+    // Calculate dynamic preset overrides for high-fidelity designer preview
+    let presetRowStyle: CSSProperties = {};
+    if (props.themePreset === "modern_glass") {
+        presetRowStyle = {
+            backgroundColor: "rgba(255, 255, 255, 0.45)",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
+            border: `1px solid ${colors.handleColor}40`,
+            boxShadow: "0 8px 24px 0 rgba(0, 0, 0, 0.02)"
+        };
+    } else if (props.themePreset === "minimalist_flat") {
+        presetRowStyle = {
+            backgroundColor: "transparent",
+            border: "none",
+            borderBottom: `1px solid ${colors.rowBorder}`,
+            borderRadius: "0px",
+            boxShadow: "none",
+            paddingLeft: "4px",
+            paddingRight: "4px"
+        };
+    } else if (props.themePreset === "neo_brutalist") {
+        presetRowStyle = {
+            backgroundColor: colors.rowBg,
+            border: "3px solid #000000",
+            boxShadow: "5px 5px 0px 0px #000000",
+            borderRadius: "4px"
+        };
+    }
 
     const rowStyle: CSSProperties = {
         display: "flex",
         alignItems: "stretch",
-        padding: "10px 14px",
+        padding: props.itemPadding || "12px 16px",
         borderRadius: `calc(${borderRadius} * 0.5)`,
         border: `1px solid ${colors.rowBorder}`,
         backgroundColor: colors.rowBg,
@@ -81,10 +110,11 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
         minWidth: isHorizontal ? "180px" : undefined,
         gap: "0",
         position: "relative",
-        overflow: "hidden"
+        overflow: "hidden",
+        ...presetRowStyle
     };
 
-    // Subtle accent left bar on each row
+    // Subtle accent left bar on each row (hidden in Brutalist or Flat mode for consistency)
     const accentBarStyle: CSSProperties = {
         position: "absolute",
         left: 0,
@@ -92,7 +122,7 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
         bottom: 0,
         width: "3px",
         backgroundColor: accentColor,
-        opacity: 0.35,
+        opacity: props.themePreset === "neo_brutalist" || props.themePreset === "minimalist_flat" ? 0 : 0.35,
         borderRadius: "2px 0 0 2px"
     };
 
@@ -109,6 +139,14 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
 
     const dirIcon = isHorizontal ? "↔" : "↕";
     const dirLabel = isHorizontal ? "Horizontal Grid" : "Vertical List";
+    const presetLabelMap: Record<string, string> = {
+        default_rounded: "Default Rounded",
+        modern_glass: "Glassmorphism",
+        minimalist_flat: "Minimalist Flat",
+        neo_brutalist: "Neo-Brutalist"
+    };
+    const presetLabel = presetLabelMap[props.themePreset] || "Default Rounded";
+
     const sourceLabel = props.itemsSource
         ? typeof props.itemsSource === "object" && "caption" in props.itemsSource
             ? String((props.itemsSource as { caption: string }).caption)
@@ -122,7 +160,7 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
             {/* ── Header ── */}
             <div style={headerStyle}>
                 <span style={{ color: "#fff", fontSize: "11px", fontWeight: 700, letterSpacing: "0.3px" }}>
-                    ⠿ PWB Container DataView &nbsp;·&nbsp; {dirIcon} {dirLabel}
+                    ⠿ PWB Container &nbsp;·&nbsp; {dirIcon} {dirLabel} ({presetLabel})
                 </span>
                 <span
                     style={{

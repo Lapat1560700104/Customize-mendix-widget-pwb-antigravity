@@ -7,13 +7,22 @@
 
 .pwb-drag-container {
     display: flex;
-    gap: 12px;
+    gap: var(--pwb-item-gap, 12px);
     width: 100%;
     box-sizing: border-box;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --accent-color: #3b82f6;
     --border-radius: 16px;
     --accent-glow: rgba(59, 130, 246, 0.15);
+    
+    /* Design Tokens bridging to Atlas UI CSS Variables */
+    --pwb-bg-main: var(--mx-bg-color-main, #ffffff);
+    --pwb-bg-hover: var(--mx-bg-color-secondary, #f8fafc);
+    --pwb-border-color: var(--mx-border-color, #e2e8f0);
+    --pwb-text-primary: var(--mx-text-color-primary, #1e293b);
+    --pwb-text-secondary: var(--mx-text-color-secondary, #64748b);
+    --pwb-shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+
     --slate-50: #f8fafc;
     --slate-100: #f1f5f9;
     --slate-200: #e2e8f0;
@@ -23,10 +32,42 @@
     --slate-600: #475569;
     --slate-700: #334155;
     --slate-800: #1e293b;
-    --shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+    
     padding: 6px;
     min-height: 50px;
     transition: background-color 0.2s ease;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   🌗 High-Fidelity Dark Mode Selector Matrix
+*/
+@media (prefers-color-scheme: dark) {
+    .pwb-drag-container:not(.pwb-light-mode-force) {
+        --pwb-bg-main: var(--mx-bg-color-main, #1e293b);
+        --pwb-bg-hover: var(--mx-bg-color-secondary, #334155);
+        --pwb-border-color: var(--mx-border-color, #475569);
+        --pwb-text-primary: var(--mx-text-color-primary, #f8fafc);
+        --pwb-text-secondary: var(--mx-text-color-secondary, #94a3b8);
+        --slate-50: #0f172a;
+        --slate-100: #1e293b;
+        --slate-200: #334155;
+        --slate-300: #475569;
+        --pwb-shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+    }
+}
+
+:is(.theme-dark, .dark, .mx-dark) .pwb-drag-container:not(.pwb-light-mode-force),
+.pwb-drag-container.pwb-dark-mode-force {
+    --pwb-bg-main: var(--mx-bg-color-main, #1e293b);
+    --pwb-bg-hover: var(--mx-bg-color-secondary, #334155);
+    --pwb-border-color: var(--mx-border-color, #475569);
+    --pwb-text-primary: var(--mx-text-color-primary, #f8fafc);
+    --pwb-text-secondary: var(--mx-text-color-secondary, #94a3b8);
+    --slate-50: #0f172a;
+    --slate-100: #1e293b;
+    --slate-200: #334155;
+    --slate-300: #475569;
+    --pwb-shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
 }
 
 .pwb-drag-container * {
@@ -54,18 +95,19 @@
 .pwb-draggable-row-item {
     display: flex;
     align-items: center;
-    background: #ffffff;
-    border: 1px solid var(--slate-200);
-    padding: 12px 16px;
-    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.2s, box-shadow 0.2s;
+    background: var(--pwb-bg-main);
+    border: 1px solid var(--pwb-border-color);
+    padding: var(--pwb-item-padding, 12px 16px);
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.2s, box-shadow 0.2s, background-color 0.2s, color 0.2s;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.015);
     position: relative;
     user-select: none;
+    color: var(--pwb-text-primary);
 }
 
 .pwb-draggable-row-item:hover {
     border-color: var(--slate-300);
-    box-shadow: var(--shadow-premium);
+    box-shadow: var(--pwb-shadow-premium);
 }
 
 /* Active dragging state physics (Lower opacity + lift shadow) */
@@ -107,11 +149,11 @@
 }
 
 .pwb-draggable-row-item:hover .pwb-drag-handle {
-    color: var(--slate-700);
+    color: var(--pwb-text-primary);
 }
 
 .pwb-drag-handle:hover {
-    background: var(--slate-100);
+    background: var(--pwb-bg-hover);
 }
 
 .pwb-drag-handle:active {
@@ -122,6 +164,66 @@
 .pwb-draggable-item-content {
     flex-grow: 1;
     min-width: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   ✨ Preset Visual Style Themes
+*/
+
+/* --- 1. Premium Glassmorphism --- */
+.pwb-preset-modern_glass .pwb-draggable-row-item {
+    background: color-mix(in srgb, var(--pwb-bg-main) 65%, transparent) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    border: 1px solid color-mix(in srgb, var(--pwb-text-primary) 12%, transparent) !important;
+    box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.03) !important;
+}
+.pwb-preset-modern_glass .pwb-draggable-row-item:hover {
+    background: color-mix(in srgb, var(--pwb-bg-main) 80%, transparent) !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 12px 30px 0 color-mix(in srgb, var(--accent-color) 8%, transparent) !important;
+}
+
+/* --- 2. Minimalist Flat --- */
+.pwb-preset-minimalist_flat .pwb-draggable-row-item {
+    background: transparent !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--pwb-border-color) !important;
+    border-radius: 0px !important;
+    box-shadow: none !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+}
+.pwb-preset-minimalist_flat .pwb-draggable-row-item:hover {
+    background: var(--pwb-bg-hover) !important;
+    border-bottom-color: var(--accent-color) !important;
+}
+
+/* --- 3. Neo-Brutalist High Contrast --- */
+.pwb-preset-neo_brutalist .pwb-draggable-row-item {
+    background: var(--pwb-bg-main) !important;
+    border: 3px solid #000000 !important;
+    box-shadow: 5px 5px 0px 0px #000000 !important;
+    border-radius: 4px !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s !important;
+}
+.pwb-preset-neo_brutalist .pwb-draggable-row-item:hover {
+    transform: translate(-3px, -3px) !important;
+    box-shadow: 8px 8px 0px 0px #000000 !important;
+    border-color: #000000 !important;
+}
+/* In Dark Mode, Brutalist shadow turns into the accent color for stunning dark contrast */
+:is(.theme-dark, .dark, .mx-dark) .pwb-preset-neo_brutalist .pwb-draggable-row-item,
+.pwb-drag-container.pwb-dark-mode-force.pwb-preset-neo_brutalist .pwb-draggable-row-item {
+    border-color: #ffffff !important;
+    box-shadow: 5px 5px 0px 0px var(--accent-color) !important;
+}
+:is(.theme-dark, .dark, .mx-dark) .pwb-preset-neo_brutalist .pwb-draggable-row-item:hover,
+.pwb-drag-container.pwb-dark-mode-force.pwb-preset-neo_brutalist .pwb-draggable-row-item:hover {
+    border-color: #ffffff !important;
+    box-shadow: 8px 8px 0px 0px var(--accent-color) !important;
 }
 
 /* Premium Loading State */
@@ -259,4 +361,18 @@
 /* Ensure smooth pointer transitions */
 .pwb-draggable-row-item {
     touch-action: pan-y; /* Allows vertical scrolling normally unless grabbing drag handle */
+}
+
+/* Tactile Wobble Spring Shake Keyframes */
+@keyframes pwb-wobble {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-6px) rotate(-1.5deg); }
+    30% { transform: translateX(5px) rotate(1deg); }
+    45% { transform: translateX(-4px) rotate(-1deg); }
+    60% { transform: translateX(3px) rotate(0.5deg); }
+    75% { transform: translateX(-1px) rotate(-0.5deg); }
+}
+
+.pwb-wobble-shake {
+    animation: pwb-wobble 0.4s ease-in-out !important;
 }

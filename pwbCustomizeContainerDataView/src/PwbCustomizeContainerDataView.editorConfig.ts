@@ -246,6 +246,14 @@ export function getPreview(
     // ── Direction label in header ──
     const directionLabel = isHorizontal ? "Horizontal Grid →" : "Vertical List ↓";
 
+    const presetLabelMap: Record<string, string> = {
+        default_rounded: "Default Rounded",
+        modern_glass: "Glassmorphism",
+        minimalist_flat: "Minimalist Flat",
+        neo_brutalist: "Neo-Brutalist"
+    };
+    const presetLabel = presetLabelMap[values.themePreset] || "Default Rounded";
+
     // ── Header bar: widget identity + current config summary ──
     const headerBar: RowLayoutProps = {
         type: "RowLayout",
@@ -256,7 +264,7 @@ export function getPreview(
         children: [
             {
                 type: "Text",
-                content: `⠿ PWB Container DataView  ·  ${directionLabel}`,
+                content: `⠿ PWB Container  ·  ${directionLabel}  ·  Theme: ${presetLabel}`,
                 fontSize: 10,
                 fontColor: "#ffffff",
                 bold: true

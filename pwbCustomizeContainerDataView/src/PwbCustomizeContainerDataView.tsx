@@ -87,7 +87,7 @@ export function PwbCustomizeContainerDataView({
             clearTimeout(debounceTimeoutRef.current);
         }
 
-        const runSave = () => {
+        const runSave = (): void => {
             if (sortedAttribute && !sortedAttribute.readOnly) {
                 const serialized = newOrderIds.join(",");
                 sortedAttribute.setValue(serialized);
@@ -114,7 +114,10 @@ export function PwbCustomizeContainerDataView({
     const handleRemoveItemExternal = (itemId: string): void => {
         if (sortedAttribute && !sortedAttribute.readOnly) {
             const currentIds = sortedAttribute.value
-                ? sortedAttribute.value.split(",").map(id => id.trim()).filter(Boolean)
+                ? sortedAttribute.value
+                      .split(",")
+                      .map(id => id.trim())
+                      .filter(Boolean)
                 : [];
             const nextIds = currentIds.filter(id => id !== itemId);
             saveOrderWithDebounce(nextIds);
@@ -123,7 +126,9 @@ export function PwbCustomizeContainerDataView({
 
     const handleDropExternal = (draggedItemId: string, _sourceContainerId: string, targetIndex: number): void => {
         const registry = window.__pwbDragRegistry;
-        if (!registry) return;
+        if (!registry) {
+            return;
+        }
 
         // A. Remove from source container Mendix sorting state
         if (registry.onRemoveItem) {
@@ -142,7 +147,10 @@ export function PwbCustomizeContainerDataView({
         // C. Insert into target container Mendix sorting state
         if (sortedAttribute && !sortedAttribute.readOnly) {
             const currentIds = sortedAttribute.value
-                ? sortedAttribute.value.split(",").map(id => id.trim()).filter(Boolean)
+                ? sortedAttribute.value
+                      .split(",")
+                      .map(id => id.trim())
+                      .filter(Boolean)
                 : [];
             const nextIds = currentIds.filter(id => id !== draggedItemId);
             nextIds.splice(targetIndex, 0, draggedItemId);

@@ -103,6 +103,7 @@
     border-radius: 4px;
     transition: all 0.2s;
     flex-shrink: 0;
+    touch-action: none; /* Prevents default scroll gestures on mobile during drag initiation */
 }
 
 .pwb-draggable-row-item:hover .pwb-drag-handle {
@@ -228,4 +229,34 @@
     .pwb-drag-container.pwb-direction-horizontal {
         flex-direction: column;
     }
+}
+
+/* Premium Pointer Drag Ghost Card Style */
+.pwb-pointer-drag-ghost {
+    position: fixed !important;
+    pointer-events: none !important;
+    z-index: 999999 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 2px solid var(--accent-color, #3b82f6) !important;
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.16), 0 10px 15px -5px rgba(0, 0, 0, 0.08) !important;
+    transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease !important;
+    transform: scale(1.03) rotate(1.5deg) !important;
+    box-sizing: border-box !important;
+    padding: 12px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Touch active styles for layout elements and selection blocking */
+.pwb-drag-active-body {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    overscroll-behavior-y: contain !important; /* Disables mobile pull-down refresh while dragging */
+}
+
+/* Ensure smooth pointer transitions */
+.pwb-draggable-row-item {
+    touch-action: pan-y; /* Allows vertical scrolling normally unless grabbing drag handle */
 }

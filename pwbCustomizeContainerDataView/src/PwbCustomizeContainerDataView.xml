@@ -10,35 +10,35 @@
         <propertyGroup caption="Data Source">
             <property key="itemsSource" type="datasource" isList="true" required="true">
                 <caption>Items Source</caption>
-                <description>Dynamic list of child items to display and sort inside the container</description>
+                <description>Dynamic list of child items to display and sort inside the container. Each item receives its own row.</description>
             </property>
         </propertyGroup>
 
         <propertyGroup caption="Custom Content">
             <property key="customItemContent" type="widgets" required="true" dataSource="itemsSource">
                 <caption>Custom Option Content</caption>
-                <description>Render custom Mendix widgets for each list item</description>
+                <description>Render custom Mendix widgets for each list item. You can place Cards, Buttons, or input widgets here.</description>
             </property>
         </propertyGroup>
 
         <propertyGroup caption="Sorting Persistence">
             <property key="sortedAttribute" type="attribute" required="true">
                 <caption>Sorted IDs Attribute</caption>
-                <description>Attribute on the parent context entity (e.g. String type) to store the comma-separated sorted IDs of the items.</description>
+                <description>String Attribute on the parent context entity to store the comma-separated sorted IDs of the items (e.g. 'task_1,task_2,task_3').</description>
                 <attributeTypes>
                     <attributeType name="String"/>
                 </attributeTypes>
             </property>
             <property key="onSortAction" type="action" required="false">
                 <caption>On Sort Complete Action</caption>
-                <description>Microflow or nanoflow triggered immediately when drag-and-drop sorting completes</description>
+                <description>Microflow or nanoflow triggered immediately when drag-and-drop sorting completes, useful for committing order changes to the server.</description>
             </property>
         </propertyGroup>
 
         <propertyGroup caption="Aesthetics">
             <property key="layoutDirection" type="enumeration" defaultValue="vertical">
                 <caption>Layout Direction</caption>
-                <description>Select list orientation layout format</description>
+                <description>Select list orientation layout format. Vertical displays a column; Horizontal wraps items in a responsive grid row.</description>
                 <enumerationValues>
                     <enumerationValue key="vertical">Vertical List Column</enumerationValue>
                     <enumerationValue key="horizontal">Horizontal Grid Row</enumerationValue>
@@ -46,7 +46,7 @@
             </property>
             <property key="dragHandleDisplay" type="enumeration" defaultValue="left">
                 <caption>Drag Handle Position</caption>
-                <description>Choose whether to show the drag handle icon on the left, or hide it entirely.</description>
+                <description>Choose whether to show the drag handle icon on the left, or hide it entirely (dragging the whole card).</description>
                 <enumerationValues>
                     <enumerationValue key="left">Drag Handle on Left</enumerationValue>
                     <enumerationValue key="hide">Hide Drag Handle</enumerationValue>
@@ -54,30 +54,30 @@
             </property>
             <property key="accentColor" type="string" required="false" defaultValue="#3b82f6">
                 <caption>Accent Color (Hex)</caption>
-                <description>Theme color for active drag outlines, markers, and glows (e.g., #3b82f6)</description>
+                <description>Theme color for active drag outlines, markers, and glows. Supports CSS Hex (e.g., #3b82f6), RGB, or standard HTML color names.</description>
             </property>
             <property key="borderRadius" type="string" required="false" defaultValue="16px">
                 <caption>Border Radius</caption>
-                <description>Corner roundness of item rows and drop overlays (e.g., 16px, 8px, 0px)</description>
+                <description>Corner roundness of item rows and drop overlays. Specify standard CSS units (e.g., 16px, 8px, 0px).</description>
             </property>
         </propertyGroup>
 
         <propertyGroup caption="Kanban Settings">
             <property key="enableKanban" type="boolean" defaultValue="true">
                 <caption>Enable Kanban Support</caption>
-                <description>Turn on to allow dragging items across different widget instances (Kanban Column Mode)</description>
+                <description>Turn on to allow dragging items across different widget instances (Kanban Column Mode). Dynamically reveals Kanban settings when enabled.</description>
             </property>
             <property key="dragGroup" type="string" required="false">
                 <caption>Drag Group Name</caption>
-                <description>Match with other containers to allow dragging cards between them (e.g., 'project-kanban')</description>
+                <description>Match with other container instances to allow dragging cards between them (e.g. 'project-kanban'). Both source and target must match.</description>
             </property>
             <property key="columnValue" type="string" required="false">
                 <caption>Column Value</caption>
-                <description>The value corresponding to this column/status (e.g., 'ToDo', 'InProgress')</description>
+                <description>The string value corresponding to this column status (e.g. 'ToDo', 'InProgress'). Used to update item category on card drop.</description>
             </property>
             <property key="itemColumnAttribute" type="attribute" required="false" dataSource="itemsSource">
                 <caption>Item Column Attribute</caption>
-                <description>The string or enumeration attribute on the item entity to update when card is dropped in this column</description>
+                <description>The string or enumeration attribute on the item entity to update when card is dropped in this column.</description>
                 <attributeTypes>
                     <attributeType name="String"/>
                     <attributeType name="Enum"/>
@@ -88,7 +88,7 @@
         <propertyGroup caption="Performance Settings">
             <property key="saveDelay" type="integer" required="false" defaultValue="0">
                 <caption>Save Delay (ms)</caption>
-                <description>Debounce saving to Mendix attribute and triggering actions. Set to 0 for instant saving.</description>
+                <description>Debounce saving to Mendix attribute and triggering actions in milliseconds. Reduces database saves during dragging (e.g. 300ms).</description>
             </property>
         </propertyGroup>
     </properties>

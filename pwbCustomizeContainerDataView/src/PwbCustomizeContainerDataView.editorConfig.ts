@@ -100,9 +100,27 @@ export type PreviewProps =
     | DatasourceProps;
 
 export function getProperties(
-    _values: PwbCustomizeContainerDataViewPreviewProps,
+    values: PwbCustomizeContainerDataViewPreviewProps,
     defaultProperties: Properties /* , target: Platform*/
 ): Properties {
+    if (!values.enableKanban) {
+        const kanbanPropsToHide = ["dragGroup", "columnValue", "itemColumnAttribute"];
+
+        const filterProperties = (groups: PropertyGroup[]): PropertyGroup[] => {
+            return groups.map(group => {
+                const newGroup = { ...group };
+                if (group.properties) {
+                    newGroup.properties = group.properties.filter(prop => !kanbanPropsToHide.includes(prop.key));
+                }
+                if (group.propertyGroups) {
+                    newGroup.propertyGroups = filterProperties(group.propertyGroups);
+                }
+                return newGroup;
+            });
+        };
+
+        return filterProperties(defaultProperties);
+    }
     return defaultProperties;
 }
 
@@ -127,6 +145,33 @@ export function check(values: PwbCustomizeContainerDataViewPreviewProps): Proble
             property: "accentColor",
             severity: "warning",
             message: "Please enter a valid CSS hex, rgb, or color name."
+        });
+    }
+
+    if (values.enableKanban) {
+        if (!values.dragGroup || values.dragGroup.trim() === "") {
+            errors.push({
+                property: "dragGroup",
+                severity: "error",
+                message:
+                    "When Kanban mode is active, a Drag Group Name is required to bind drag interactions between columns."
+            });
+        }
+        if (!values.itemColumnAttribute) {
+            errors.push({
+                property: "itemColumnAttribute",
+                severity: "error",
+                message:
+                    "An Item Column Attribute is required to persist status changes when moving cards across Kanban columns."
+            });
+        }
+    }
+
+    if (values.saveDelay !== undefined && values.saveDelay !== null && values.saveDelay < 0) {
+        errors.push({
+            property: "saveDelay",
+            severity: "error",
+            message: "Save Delay must be a positive integer in milliseconds (use 0 for immediate sync)."
         });
     }
 

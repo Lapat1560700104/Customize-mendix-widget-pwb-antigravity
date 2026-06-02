@@ -35,7 +35,7 @@ export interface PwbCustomizeContainerDataViewContainerProps {
     dragGroup: string;
     columnValue: string;
     itemColumnAttribute?: ListAttributeValue<string>;
-    saveDelay?: number;
+    saveDelay: number;
 }
 
 export interface PwbCustomizeContainerDataViewPreviewProps {

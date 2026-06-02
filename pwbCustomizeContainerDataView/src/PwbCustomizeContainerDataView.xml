@@ -113,7 +113,7 @@
         </propertyGroup>
 
         <propertyGroup caption="Performance Settings">
-            <property key="saveDelay" type="integer" required="false" defaultValue="0">
+            <property key="saveDelay" type="integer" required="true" defaultValue="0">
                 <caption>Save Delay (ms)</caption>
                 <description>Debounce saving to Mendix attribute and triggering actions in milliseconds. Reduces database saves during dragging (e.g. 300ms).</description>
             </property>

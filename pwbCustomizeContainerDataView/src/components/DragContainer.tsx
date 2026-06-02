@@ -141,6 +141,19 @@ export function DragContainer({
         let ghostEl: HTMLDivElement | null = null;
         let lastTargetContainer: HTMLElement | null = null;
 
+        // Tracks original and current order states directly in closure for 100% async state safety
+        const originalOrderIds = orderedItems.map(item => item.id);
+        let currentOrderIds = [...originalOrderIds];
+        let draggingIndexState = index;
+
+        // Prevent default touch gestures (elastic scroll, pull refresh) on mobile
+        const preventDefaultTouch = (touchEvent: TouchEvent): void => {
+            if (dragInitiated) {
+                touchEvent.preventDefault();
+            }
+        };
+        document.addEventListener("touchmove", preventDefaultTouch, { passive: false });
+
         // Mount current item parameters to the global dragging registry
         window.__pwbDragRegistry = {
             itemId: orderedItems[index].id,
@@ -162,7 +175,7 @@ export function DragContainer({
             // Trigger dragging threshold to prevent micro-drags during clicks
             if (!dragInitiated && Math.sqrt(deltaX * deltaX + deltaY * deltaY) > 5) {
                 dragInitiated = true;
-                setDraggingIndex(index);
+                setDraggingIndex(draggingIndexState);
                 document.body.classList.add("pwb-drag-active-body");
 
                 // Android support gentle haptic feedback
@@ -178,6 +191,9 @@ export function DragContainer({
                 ghostEl.style.setProperty("--accent-color", accentColor);
                 ghostEl.style.setProperty("--border-radius", borderRadius);
 
+                // Initial scale pop for iOS tactile representation
+                ghostEl.style.transform = "scale(0.97) rotate(0deg)";
+
                 // Clone only the visible inner custom content for flawless look
                 const contentWrapper = cardEl.querySelector(".pwb-draggable-item-content");
                 if (contentWrapper) {
@@ -187,6 +203,13 @@ export function DragContainer({
                 }
 
                 document.body.appendChild(ghostEl);
+
+                // Trigger spring animation transition using requestAnimationFrame
+                requestAnimationFrame(() => {
+                    if (ghostEl) {
+                        ghostEl.style.transform = ""; // Let CSS class transform transition kick in!
+                    }
+                });
             }
 
             if (dragInitiated && ghostEl) {
@@ -194,15 +217,24 @@ export function DragContainer({
                 ghostEl.style.left = `${moveEvent.clientX - offsetX}px`;
                 ghostEl.style.top = `${moveEvent.clientY - offsetY}px`;
 
-                // Premium Mobile Auto-Scrolling Engine
-                const scrollSpeed = 10;
-                const scrollThreshold = 70;
+                // Premium Dynamic Mobile Auto-Scrolling Engine (Closer to edge = faster scroll)
+                const scrollThreshold = 75;
                 const viewHeight = window.innerHeight;
 
                 if (moveEvent.clientY < scrollThreshold) {
-                    window.scrollBy(0, -scrollSpeed);
+                    const distanceToEdge = Math.max(0, moveEvent.clientY);
+                    const dynamicSpeed = Math.max(
+                        1,
+                        Math.min(25, Math.round((scrollThreshold - distanceToEdge) * 0.4))
+                    );
+                    window.scrollBy(0, -dynamicSpeed);
                 } else if (moveEvent.clientY > viewHeight - scrollThreshold) {
-                    window.scrollBy(0, scrollSpeed);
+                    const distanceToEdge = Math.max(0, viewHeight - moveEvent.clientY);
+                    const dynamicSpeed = Math.max(
+                        1,
+                        Math.min(25, Math.round((scrollThreshold - distanceToEdge) * 0.4))
+                    );
+                    window.scrollBy(0, dynamicSpeed);
                 }
 
                 // Detect what elements sit directly under user finger coordinates
@@ -240,16 +272,33 @@ export function DragContainer({
                         }
                     }
 
-                    // Dispatch custom cross-container event
-                    hoverContainer.dispatchEvent(
-                        new CustomEvent("pwb-drag-over-container", {
-                            detail: {
-                                itemId: orderedItems[index].id,
-                                hoverIndex: targetIdx,
-                                sourceContainerId: containerId
-                            }
-                        })
-                    );
+                    // A. Same Container Dropzone: Transient Real-time Shifting!
+                    if (hoverContainer === containerRef.current) {
+                        if (hoverCard && targetIdx !== draggingIndexState) {
+                            // Swap array element positions in local React visual state immediately
+                            setOrderedItems(prevItems => {
+                                const nextItems = [...prevItems];
+                                const [movedItem] = nextItems.splice(draggingIndexState, 1);
+                                nextItems.splice(targetIdx, 0, movedItem);
+                                currentOrderIds = nextItems.map(item => item.id);
+                                return nextItems;
+                            });
+
+                            setDraggingIndex(targetIdx);
+                            draggingIndexState = targetIdx; // Update closure variable to keep track!
+                        }
+                    } else {
+                        // B. External Container Dropzone: Dispatch custom cross-container hover event
+                        hoverContainer.dispatchEvent(
+                            new CustomEvent("pwb-drag-over-container", {
+                                detail: {
+                                    itemId: orderedItems[index].id,
+                                    hoverIndex: targetIdx,
+                                    sourceContainerId: containerId
+                                }
+                            })
+                        );
+                    }
                 }
             }
         };
@@ -269,6 +318,7 @@ export function DragContainer({
             document.removeEventListener("pointermove", onPointerMove);
             document.removeEventListener("pointerup", onPointerUp);
             document.removeEventListener("pointercancel", onPointerUp);
+            document.removeEventListener("touchmove", preventDefaultTouch);
 
             document.body.classList.remove("pwb-drag-active-body");
 
@@ -308,14 +358,12 @@ export function DragContainer({
                     }
 
                     if (targetContainerId === containerId) {
-                        // Drop in SAME Container: Reorder list
-                        if (index !== finalIndex) {
-                            const nextItems = [...orderedItems];
-                            const [movedItem] = nextItems.splice(index, 1);
-                            nextItems.splice(finalIndex, 0, movedItem);
-
-                            setOrderedItems(nextItems);
-                            onOrderChange(nextItems.map(item => item.id));
+                        // Drop in SAME Container:
+                        // Since orderedItems visual positions are already updated in real-time in Phase 1,
+                        // we compare final visual order with the starting order to trigger Mendix sync exactly once.
+                        const orderChanged = currentOrderIds.some((id, idx) => id !== originalOrderIds[idx]);
+                        if (orderChanged) {
+                            onOrderChange(currentOrderIds);
                         }
                     } else {
                         // Drop in EXTERNAL Container: Trigger Mendix Kanban drop persistence

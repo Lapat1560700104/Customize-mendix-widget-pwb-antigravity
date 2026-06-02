@@ -6,6 +6,7 @@ export interface DragItem {
 }
 
 export interface DragContainerProps {
+    containerId: string;
     items: DragItem[];
     renderItem: (rawObject: any) => ReactElement;
     onOrderChange: (newOrderIds: string[]) => void;
@@ -13,16 +14,42 @@ export interface DragContainerProps {
     borderRadius: string;
     layoutDirection: "vertical" | "horizontal";
     dragHandleDisplay: "left" | "hide";
+    enableKanban?: boolean;
+    dragGroup?: string;
+    columnValue?: string;
+    onDropExternal?: (draggedItemId: string, sourceContainerId: string, targetIndex: number) => void;
+    onRemoveItemExternal?: (itemId: string) => void;
+}
+
+interface DragRegistry {
+    itemId: string;
+    draggedItem: any;
+    sourceDragGroup?: string;
+    sourceContainerId: string;
+    sourceColumnValue?: string;
+    onRemoveItem?: (itemId: string) => void;
+}
+
+declare global {
+    interface Window {
+        __pwbDragRegistry?: DragRegistry;
+    }
 }
 
 export function DragContainer({
+    containerId,
     items,
     renderItem,
     onOrderChange,
     accentColor,
     borderRadius,
     layoutDirection,
-    dragHandleDisplay
+    dragHandleDisplay,
+    enableKanban = true,
+    dragGroup,
+    columnValue,
+    onDropExternal,
+    onRemoveItemExternal
 }: DragContainerProps): ReactElement {
     const [orderedItems, setOrderedItems] = useState<DragItem[]>([]);
     const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
@@ -35,8 +62,18 @@ export function DragContainer({
 
     const handleDragStart = (e: DragEvent, index: number): void => {
         setDraggingIndex(index);
+        
+        // Write to global registry for cross-container dragging (only expose cross-container if enableKanban is true on source)
+        window.__pwbDragRegistry = {
+            itemId: orderedItems[index].id,
+            draggedItem: orderedItems[index].rawObject,
+            sourceDragGroup: enableKanban ? dragGroup : undefined,
+            sourceContainerId: containerId,
+            sourceColumnValue: columnValue,
+            onRemoveItem: enableKanban ? onRemoveItemExternal : undefined
+        };
+
         e.dataTransfer.effectAllowed = "move";
-        // Create an empty drag image for custom visual feel (optional, fallback is standard)
         try {
             const img = new Image();
             img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
@@ -48,7 +85,20 @@ export function DragContainer({
 
     const handleDragOver = (e: DragEvent, index: number): void => {
         e.preventDefault();
-        if (draggingIndex !== null && draggingIndex !== index) {
+        e.stopPropagation();
+
+        const registry = window.__pwbDragRegistry;
+        if (!registry) return;
+
+        if (registry.sourceContainerId === containerId) {
+            // Same container reorder
+            if (draggingIndex !== null && draggingIndex !== index) {
+                setDragOverIndex(index);
+            }
+        } else {
+            // External item hover: only allow if enableKanban is true on target
+            if (!enableKanban) return;
+            if (dragGroup && registry.sourceDragGroup !== dragGroup) return;
             setDragOverIndex(index);
         }
     };
@@ -56,25 +106,104 @@ export function DragContainer({
     const handleDragEnd = (): void => {
         setDraggingIndex(null);
         setDragOverIndex(null);
+        window.__pwbDragRegistry = undefined;
     };
 
-    const handleDrop = (index: number): void => {
-        if (draggingIndex !== null && draggingIndex !== index) {
-            const nextItems = [...orderedItems];
-            const [movedItem] = nextItems.splice(draggingIndex, 1);
-            nextItems.splice(index, 0, movedItem);
+    const handleDrop = (e: DragEvent, index: number): void => {
+        e.preventDefault();
+        e.stopPropagation();
 
-            setOrderedItems(nextItems);
-            // Callback to sync new order with parent
-            onOrderChange(nextItems.map(item => item.id));
+        const registry = window.__pwbDragRegistry;
+        if (!registry) return;
+
+        if (registry.sourceContainerId === containerId) {
+            // Same container drop
+            if (draggingIndex !== null && draggingIndex !== index) {
+                const nextItems = [...orderedItems];
+                const [movedItem] = nextItems.splice(draggingIndex, 1);
+                nextItems.splice(index, 0, movedItem);
+
+                setOrderedItems(nextItems);
+                onOrderChange(nextItems.map(item => item.id));
+            }
+        } else {
+            // Drop from external container: only allow if enableKanban is true on target
+            if (!enableKanban) return;
+            if (dragGroup && registry.sourceDragGroup !== dragGroup) return;
+
+            if (onDropExternal) {
+                onDropExternal(registry.itemId, registry.sourceContainerId, index);
+            }
         }
+        
         setDraggingIndex(null);
         setDragOverIndex(null);
+        window.__pwbDragRegistry = undefined;
+    };
+
+    const handleContainerDragOver = (e: DragEvent): void => {
+        const registry = window.__pwbDragRegistry;
+        if (!registry) return;
+
+        if (registry.sourceContainerId !== containerId) {
+            // Empty container hover from external: only allow if enableKanban is true on target
+            if (!enableKanban) return;
+            if (dragGroup && registry.sourceDragGroup !== dragGroup) return;
+        }
+        
+        e.preventDefault();
+        
+        // If container is empty, set drag over index to 0 so we show a drop target glow
+        if (orderedItems.length === 0) {
+            setDragOverIndex(0);
+        }
+    };
+
+    const handleContainerDrop = (e: DragEvent): void => {
+        e.preventDefault();
+        
+        const registry = window.__pwbDragRegistry;
+        if (!registry) return;
+
+        if (registry.sourceContainerId !== containerId) {
+            // Empty container drop from external: only allow if enableKanban is true on target
+            if (!enableKanban) return;
+            if (dragGroup && registry.sourceDragGroup !== dragGroup) return;
+        }
+
+        // If list is empty or we drop on container background below all items
+        if (dragOverIndex === null || orderedItems.length === 0) {
+            const targetIndex = orderedItems.length;
+            if (registry.sourceContainerId === containerId) {
+                // Same container: append to end
+                if (draggingIndex !== null && draggingIndex !== targetIndex - 1) {
+                    const nextItems = [...orderedItems];
+                    const [movedItem] = nextItems.splice(draggingIndex, 1);
+                    nextItems.push(movedItem);
+
+                    setOrderedItems(nextItems);
+                    onOrderChange(nextItems.map(item => item.id));
+                }
+            } else {
+                // External container: append to end
+                if (onDropExternal) {
+                    onDropExternal(registry.itemId, registry.sourceContainerId, targetIndex);
+                }
+            }
+        }
+
+        setDraggingIndex(null);
+        setDragOverIndex(null);
+        window.__pwbDragRegistry = undefined;
     };
 
     return (
         <div
-            className={`pwb-drag-container pwb-direction-${layoutDirection}`}
+            className={`pwb-drag-container pwb-direction-${layoutDirection} ${
+                orderedItems.length === 0 ? "pwb-empty-container-dropzone" : ""
+            }`}
+            onDragOver={handleContainerDragOver}
+            onDrop={handleContainerDrop}
             style={
                 {
                     "--accent-color": accentColor,
@@ -94,7 +223,7 @@ export function DragContainer({
                         onDragStart={e => handleDragStart(e, idx)}
                         onDragOver={e => handleDragOver(e, idx)}
                         onDragEnd={handleDragEnd}
-                        onDrop={() => handleDrop(idx)}
+                        onDrop={e => handleDrop(e, idx)}
                         className={`pwb-draggable-row-item ${isDragging ? "pwb-dragging" : ""} ${
                             isDragOver ? "pwb-drag-over" : ""
                         }`}

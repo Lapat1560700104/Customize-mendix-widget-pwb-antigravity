@@ -61,5 +61,35 @@
                 <description>Corner roundness of item rows and drop overlays (e.g., 16px, 8px, 0px)</description>
             </property>
         </propertyGroup>
+
+        <propertyGroup caption="Kanban Settings">
+            <property key="enableKanban" type="boolean" defaultValue="true">
+                <caption>Enable Kanban Support</caption>
+                <description>Turn on to allow dragging items across different widget instances (Kanban Column Mode)</description>
+            </property>
+            <property key="dragGroup" type="string" required="false">
+                <caption>Drag Group Name</caption>
+                <description>Match with other containers to allow dragging cards between them (e.g., 'project-kanban')</description>
+            </property>
+            <property key="columnValue" type="string" required="false">
+                <caption>Column Value</caption>
+                <description>The value corresponding to this column/status (e.g., 'ToDo', 'InProgress')</description>
+            </property>
+            <property key="itemColumnAttribute" type="attribute" required="false" dataSource="itemsSource">
+                <caption>Item Column Attribute</caption>
+                <description>The string or enumeration attribute on the item entity to update when card is dropped in this column</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                    <attributeType name="Enum"/>
+                </attributeTypes>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Performance Settings">
+            <property key="saveDelay" type="integer" required="false" defaultValue="0">
+                <caption>Save Delay (ms)</caption>
+                <description>Debounce saving to Mendix attribute and triggering actions. Set to 0 for instant saving.</description>
+            </property>
+        </propertyGroup>
     </properties>
 </widget>

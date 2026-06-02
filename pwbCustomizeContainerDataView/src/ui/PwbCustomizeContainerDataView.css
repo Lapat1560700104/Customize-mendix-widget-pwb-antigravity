@@ -25,6 +25,8 @@
     --slate-800: #1e293b;
     --shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
     padding: 6px;
+    min-height: 50px;
+    transition: background-color 0.2s ease;
 }
 
 .pwb-drag-container * {
@@ -39,6 +41,13 @@
 .pwb-drag-container.pwb-direction-horizontal {
     flex-direction: row;
     flex-wrap: wrap;
+}
+
+/* Empty container dropzone style (when empty list but inside dragGroup) */
+.pwb-drag-container.pwb-empty-container-dropzone {
+    min-height: 200px;
+    background: transparent;
+    border-radius: var(--border-radius);
 }
 
 /* Draggable item card */
@@ -69,19 +78,17 @@
     z-index: 100;
 }
 
-/* Insertion indicator glow when dragging item over others */
+/* Zero-layout-shift Insertion Indicator via top/left box-shadow offsets */
 .pwb-drag-container.pwb-direction-vertical .pwb-draggable-row-item.pwb-drag-over {
-    border-top: 3.5px solid var(--accent-color);
-    box-shadow: 0 0 15px var(--accent-glow);
-    padding-top: 9.5px; /* Adjust padding to avoid height jumping */
+    box-shadow: 0 -4px 0 0 var(--accent-color), 0 8px 20px var(--accent-glow);
     background: var(--slate-50);
+    transform: translateY(2px);
 }
 
 .pwb-drag-container.pwb-direction-horizontal .pwb-draggable-row-item.pwb-drag-over {
-    border-left: 3.5px solid var(--accent-color);
-    box-shadow: 0 0 15px var(--accent-glow);
-    padding-left: 12.5px;
+    box-shadow: -4px 0 0 0 var(--accent-color), 8px 0 20px var(--accent-glow);
     background: var(--slate-50);
+    transform: translateX(2px);
 }
 
 /* Drag handle on the left */
@@ -143,18 +150,46 @@
     }
 }
 
-/* Premium Illustrated Empty State */
-.pwb-empty-state {
+/* Premium Illustrated Empty State with Absolute Overlays */
+.pwb-empty-state-container {
+    position: relative;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    box-sizing: border-box;
+}
+
+/* The actual drag receiver is stretched fully above the empty text overlay */
+.pwb-empty-state-container .pwb-drag-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    padding: 12px;
+}
+
+.pwb-empty-state-content-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 48px 24px;
-    background: #f8fafc;
-    border: 2px dashed #cbd5e1;
     text-align: center;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     color: #475569;
+    z-index: 1;
+    pointer-events: none; /* Allows mouse drags to pass through and register on the DragContainer */
+    padding: 24px;
 }
 
 .pwb-empty-icon {

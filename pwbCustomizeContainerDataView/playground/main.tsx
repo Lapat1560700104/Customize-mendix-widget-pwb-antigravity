@@ -1,6 +1,6 @@
 import { createRoot } from "react-dom/client";
-import { useState, useCallback, ReactNode } from "react";
-import { DragContainer, DragItem } from "../src/components/DragContainer";
+import { useState, useCallback, ReactNode, useRef, useEffect } from "react";
+import { PwbCustomizeContainerDataView } from "../src/PwbCustomizeContainerDataView";
 import "../src/ui/PwbCustomizeContainerDataView.css";
 
 // ─── Simulated data items ────────────────────────────────────────────────────
@@ -11,14 +11,15 @@ interface TaskItem {
     category: string;
     assignee: string;
     progress: number;
+    status: "todo" | "in_progress" | "done";
 }
 
 const INITIAL_TASKS: TaskItem[] = [
-    { id: "task-1", title: "ออกแบบ UI หน้าหลัก", priority: "high", category: "Design", assignee: "สมชาย", progress: 85 },
-    { id: "task-2", title: "พัฒนา API Backend", priority: "high", category: "Development", assignee: "สมหญิง", progress: 60 },
-    { id: "task-3", title: "เขียน Unit Tests", priority: "medium", category: "QA", assignee: "สมศักดิ์", progress: 40 },
-    { id: "task-4", title: "Deploy สู่ Production", priority: "low", category: "DevOps", assignee: "สมใจ", progress: 10 },
-    { id: "task-5", title: "ทำเอกสาร API", priority: "medium", category: "Documentation", assignee: "สมพร", progress: 70 },
+    { id: "task-1", title: "ออกแบบ UI หน้าหลัก", priority: "high", category: "Design", assignee: "สมชาย", progress: 85, status: "todo" },
+    { id: "task-2", title: "พัฒนา API Backend", priority: "high", category: "Development", assignee: "สมหญิง", progress: 60, status: "in_progress" },
+    { id: "task-3", title: "เขียน Unit Tests", priority: "medium", category: "QA", assignee: "สมศักดิ์", progress: 40, status: "todo" },
+    { id: "task-4", title: "Deploy สู่ Production", priority: "low", category: "DevOps", assignee: "สมใจ", progress: 10, status: "done" },
+    { id: "task-5", title: "ทำเอกสาร API", priority: "medium", category: "Documentation", assignee: "สมพร", progress: 70, status: "in_progress" },
 ];
 
 const PRIORITY_CONFIG = {
@@ -47,9 +48,9 @@ function CardStyleA({ task, accentColor }: { task: TaskItem; accentColor: string
             gap: "8px",
         }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <span style={{ fontWeight: 700, fontSize: "15px", color: "#1e293b" }}>{task.title}</span>
+                <span style={{ fontWeight: 700, fontSize: "14px", color: "#f1f5f9" }}>{task.title}</span>
                 <span style={{
-                    fontSize: "11px", fontWeight: 600, padding: "2px 8px", borderRadius: "12px",
+                    fontSize: "10px", fontWeight: 600, padding: "2px 6px", borderRadius: "12px",
                     background: prio.bg, color: prio.color, whiteSpace: "nowrap", marginLeft: "8px"
                 }}>{prio.badge} {prio.label}</span>
             </div>
@@ -58,11 +59,11 @@ function CardStyleA({ task, accentColor }: { task: TaskItem; accentColor: string
                     fontSize: "11px", padding: "2px 8px", borderRadius: "8px", fontWeight: 600,
                     background: `${catColor}18`, color: catColor
                 }}>{task.category}</span>
-                <span style={{ fontSize: "12px", color: "#64748b" }}>👤 {task.assignee}</span>
+                <span style={{ fontSize: "12px", color: "#94a3b8" }}>👤 {task.assignee}</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <div style={{
-                    flex: 1, height: "6px", borderRadius: "3px", background: "#e2e8f0", overflow: "hidden"
+                    flex: 1, height: "6px", borderRadius: "3px", background: "#334155", overflow: "hidden"
                 }}>
                     <div style={{
                         height: "100%", borderRadius: "3px",
@@ -71,7 +72,7 @@ function CardStyleA({ task, accentColor }: { task: TaskItem; accentColor: string
                         transition: "width 0.4s ease"
                     }} />
                 </div>
-                <span style={{ fontSize: "12px", fontWeight: 700, color: accentColor, minWidth: "36px" }}>
+                <span style={{ fontSize: "11px", fontWeight: 700, color: accentColor, minWidth: "30px" }}>
                     {task.progress}%
                 </span>
             </div>
@@ -84,11 +85,11 @@ function CardStyleB({ task }: { task: TaskItem }): ReactNode {
     return (
         <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "12px" }}>
             <div style={{
-                width: "42px", height: "42px", borderRadius: "12px", flexShrink: 0,
+                width: "36px", height: "36px", borderRadius: "10px", flexShrink: 0,
                 background: `linear-gradient(135deg, ${catColor}30, ${catColor}15)`,
                 border: `1.5px solid ${catColor}40`,
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "18px"
+                fontSize: "16px"
             }}>
                 {task.category === "Design" ? "🎨" :
                  task.category === "Development" ? "💻" :
@@ -96,28 +97,14 @@ function CardStyleB({ task }: { task: TaskItem }): ReactNode {
                  task.category === "DevOps" ? "🚀" : "📝"}
             </div>
             <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, fontSize: "14px", color: "#1e293b", marginBottom: "2px" }}>{task.title}</div>
-                <div style={{ fontSize: "12px", color: "#64748b" }}>{task.assignee} · {task.progress}% เสร็จแล้ว</div>
-            </div>
-            <div style={{
-                width: "40px", height: "40px", borderRadius: "50%",
-                background: `conic-gradient(${catColor} ${task.progress * 3.6}deg, #e2e8f0 0deg)`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                flexShrink: 0, position: "relative"
-            }}>
-                <div style={{
-                    width: "28px", height: "28px", borderRadius: "50%",
-                    background: "white", display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: "9px", fontWeight: 700, color: catColor
-                }}>
-                    {task.progress}%
-                </div>
+                <div style={{ fontWeight: 700, fontSize: "13px", color: "#f1f5f9", marginBottom: "2px" }}>{task.title}</div>
+                <div style={{ fontSize: "11px", color: "#94a3b8" }}>{task.assignee} · {task.progress}%</div>
             </div>
         </div>
     );
 }
 
-// ─── Toggle Switch ────────────────────────────────────────────────────────────
+// ─── Layout UI Helpers ────────────────────────────────────────────────────────
 function Toggle({ value, onChange, label }: { value: boolean; onChange: (v: boolean) => void; label: string }) {
     return (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "4px 0" }}>
@@ -142,7 +129,6 @@ function Toggle({ value, onChange, label }: { value: boolean; onChange: (v: bool
     );
 }
 
-// ─── Slider ───────────────────────────────────────────────────────────────────
 function Slider({ value, min, max, onChange, label, unit = "" }: {
     value: number; min: number; max: number;
     onChange: (v: number) => void; label: string; unit?: string;
@@ -161,7 +147,6 @@ function Slider({ value, min, max, onChange, label, unit = "" }: {
     );
 }
 
-// ─── Section Header ───────────────────────────────────────────────────────────
 function Section({ title, children }: { title: string; children: ReactNode }) {
     return (
         <div style={{ marginBottom: "20px" }}>
@@ -175,7 +160,6 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
     );
 }
 
-// ─── Color Picker Row ─────────────────────────────────────────────────────────
 function ColorPicker({ value, onChange, label, presets }: {
     value: string; onChange: (v: string) => void;
     label: string; presets: string[];
@@ -207,96 +191,204 @@ function ColorPicker({ value, onChange, label, presets }: {
     );
 }
 
-// ─── Sorted Order Log Panel ───────────────────────────────────────────────────
-function SortLog({ logs }: { logs: string[] }) {
-    return (
-        <div style={{
-            background: "#0f172a", borderRadius: "10px", padding: "12px",
-            maxHeight: "160px", overflowY: "auto", fontFamily: "monospace"
-        }}>
-            {logs.length === 0 ? (
-                <div style={{ color: "#475569", fontSize: "12px" }}>ลากสลับแถวเพื่อดู Sort Log ที่นี่...</div>
-            ) : logs.map((log, i) => (
-                <div key={i} style={{ color: i === 0 ? "#22c55e" : "#475569", fontSize: "11px", marginBottom: "4px" }}>
-                    {i === 0 ? "▶ " : "  "}{log}
-                </div>
-            ))}
-        </div>
-    );
-}
-
-// ─── Main Playground App ──────────────────────────────────────────────────────
+// ─── Main App Component ──────────────────────────────────────────────────────
 function App() {
-    // Properties
+    // Styling Options
     const [accentColor, setAccentColor] = useState("#3b82f6");
     const [borderRadiusPx, setBorderRadiusPx] = useState(16);
     const [layoutDirection, setLayoutDirection] = useState<"vertical" | "horizontal">("vertical");
     const [cardStyle, setCardStyle] = useState<"progress" | "icon">("progress");
-    const [showHandleLabel, setShowHandleLabel] = useState(false);
+    const [dragHandleDisplay, setDragHandleDisplay] = useState<"left" | "hide">("left");
+    
+    // Performance Options
+    const [saveDelay, setSaveDelay] = useState<number>(300);
+    const [enableKanban, setEnableKanban] = useState<boolean>(true);
 
-    // State
+    // Mendix Simulated DB / Global Task state
     const [tasks, setTasks] = useState<TaskItem[]>(INITIAL_TASKS);
-    const [sortLog, setSortLog] = useState<string[]>([]);
-    const [sortedAttribute, setSortedAttribute] = useState<string>("");
+    
+    // Mendix Simulated Attributes (Serialized order of each column)
+    const [todoOrderIds, setTodoOrderIds] = useState<string>("task-1,task-3");
+    const [inProgressOrderIds, setInProgressOrderIds] = useState<string>("task-2,task-5");
+    const [doneOrderIds, setDoneOrderIds] = useState<string>("task-4");
 
-    // Convert to DragItems
-    const dragItems: DragItem[] = tasks.map(t => ({ id: t.id, rawObject: t }));
-
-    const handleOrderChange = useCallback((newIds: string[]) => {
-        const reordered = newIds.map(id => tasks.find(t => t.id === id)!).filter(Boolean);
-        setTasks(reordered);
-        const csv = newIds.join(",");
-        setSortedAttribute(csv);
-        setSortLog(prev => [
-            `[${new Date().toLocaleTimeString()}] → ${csv}`,
-            ...prev.slice(0, 9)
-        ]);
-    }, [tasks]);
-
-    const resetOrder = () => {
-        setTasks(INITIAL_TASKS);
-        setSortedAttribute("");
-        setSortLog([]);
+    // Event Logs Panel
+    const [logs, setLogs] = useState<string[]>([]);
+    const addLog = (msg: string) => {
+        setLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev.slice(0, 19)]);
     };
 
-    const renderItem = useCallback((rawObject: TaskItem) => {
-        if (cardStyle === "progress") {
-            return <CardStyleA task={rawObject} accentColor={accentColor} />;
-        }
-        return <CardStyleB task={rawObject} />;
-    }, [cardStyle, accentColor]);
+    // Resets order and status
+    const handleReset = () => {
+        setTasks(INITIAL_TASKS);
+        setTodoOrderIds("task-1,task-3");
+        setInProgressOrderIds("task-2,task-5");
+        setDoneOrderIds("task-4");
+        setLogs([]);
+        addLog("Database reset to defaults.");
+    };
 
-    const borderRadius = `${borderRadiusPx}px`;
+    // Helper: Gets simulated props for a column status
+    const getColumnProps = (status: "todo" | "in_progress" | "done") => {
+        // Filter tasks that have this status in DB
+        const statusItems = tasks.filter(t => t.status === status);
+
+        // Simulated Mendix ListValue
+        const itemsSource = {
+            status: "available" as const,
+            items: statusItems.map(t => ({
+                id: t.id,
+                ...t
+            }))
+        };
+
+        // Determine which order attribute to bind
+        let sortedValue = "";
+        let setSortedValue: (val: string) => void = () => {};
+
+        if (status === "todo") {
+            sortedValue = todoOrderIds;
+            setSortedValue = (val) => {
+                setTodoOrderIds(val);
+                addLog(`💾 [Debounced Sync - TODO] → Value: "${val}"`);
+            };
+        } else if (status === "in_progress") {
+            sortedValue = inProgressOrderIds;
+            setSortedValue = (val) => {
+                setInProgressOrderIds(val);
+                addLog(`💾 [Debounced Sync - PROGRESS] → Value: "${val}"`);
+            };
+        } else {
+            sortedValue = doneOrderIds;
+            setSortedValue = (val) => {
+                setDoneOrderIds(val);
+                addLog(`💾 [Debounced Sync - DONE] → Value: "${val}"`);
+            };
+        }
+
+        // Simulated Mendix EditableValue
+        const sortedAttribute = {
+            value: sortedValue,
+            readOnly: false,
+            setValue: (val: string) => {
+                setSortedValue(val);
+            }
+        };
+
+        // Simulated Mendix ListAttributeValue for item status update
+        const itemColumnAttribute = {
+            get: (itemObj: any) => ({
+                readOnly: false,
+                setValue: (newStatus: "todo" | "in_progress" | "done") => {
+                    addLog(`🔄 [Item Status Shift] → Item "${itemObj.id}" status set to "${newStatus}"`);
+                    // Update main DB state
+                    setTasks(prev => prev.map(t => t.id === itemObj.id ? { ...t, status: newStatus } : t));
+                }
+            })
+        };
+
+        // Action simulator
+        const onSortAction = {
+            canExecute: true,
+            isExecuting: false,
+            execute: () => {
+                addLog(`⚡ [Action Triggered] → onSortAction executed for "${status}" column!`);
+            }
+        };
+
+        // Custom Mendix Content renderer simulator
+        const customItemContent = {
+            get: (itemObj: any) => {
+                const task = tasks.find(t => t.id === itemObj.id)!;
+                return cardStyle === "progress" 
+                    ? <CardStyleA task={task} accentColor={accentColor} /> 
+                    : <CardStyleB task={task} />;
+            }
+        };
+
+        return {
+            name: `simulated-column-${status}`,
+            class: `pwb-column-${status}`,
+            itemsSource: itemsSource as any,
+            customItemContent: customItemContent as any,
+            sortedAttribute: sortedAttribute as any,
+            onSortAction: onSortAction as any,
+            layoutDirection,
+            dragHandleDisplay,
+            accentColor,
+            borderRadius: `${borderRadiusPx}px`,
+            enableKanban,
+            dragGroup: "kanban-playground",
+            columnValue: status,
+            itemColumnAttribute: itemColumnAttribute as any,
+            saveDelay
+        };
+    };
 
     return (
         <div style={{
             display: "flex", minHeight: "100vh", width: "100%",
+            background: "#0b0f19",
+            color: "#f1f5f9",
             fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif"
         }}>
-
-            {/* ── LEFT: Properties Panel ──────────────────────────────── */}
+            
+            {/* ── LEFT: Properties Control Panel ─────────────────────── */}
             <div style={{
-                width: "300px", minHeight: "100vh", flexShrink: 0,
+                width: "320px", minHeight: "100vh", flexShrink: 0,
                 background: "rgba(15,23,42,0.95)",
                 borderRight: "1px solid rgba(255,255,255,0.06)",
                 display: "flex", flexDirection: "column",
-                backdropFilter: "blur(12px)"
+                backdropFilter: "blur(12px)",
+                zIndex: 10
             }}>
-                {/* Header */}
                 <div style={{ padding: "20px 20px 14px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                    <div style={{ fontSize: "11px", color: "#3b82f6", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", marginBottom: "4px" }}>
-                        🧩 PWB Container Widget
+                    <div style={{ fontSize: "10px", color: "#3b82f6", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", marginBottom: "4px" }}>
+                        🧩 Pluggable Widget Upgrade
                     </div>
                     <div style={{ fontSize: "16px", fontWeight: 800, color: "#f1f5f9" }}>
-                        Developer Playground
+                        Kanban & Perf Playground
                     </div>
                     <div style={{ fontSize: "12px", color: "#64748b", marginTop: "2px" }}>
-                        Drag & Drop Reordering · DataView Container
+                        pwbCustomizeContainerDataView v1.1.0
                     </div>
                 </div>
 
-                {/* Properties */}
                 <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
+                    
+                    <Section title="Performance Settings">
+                        <Slider
+                            label="Save Debounce Delay"
+                            value={saveDelay}
+                            min={0} max={2000}
+                            onChange={setSaveDelay}
+                            unit="ms"
+                        />
+                        <div style={{ fontSize: "11px", color: "#475569", marginTop: "4px", lineHeight: "1.4" }}>
+                            ⏰ หน่วงเวลาบันทึกและส่ง Action กลับ Mendix ช่วยลด Database workload
+                        </div>
+                    </Section>
+
+                    <Section title="Kanban Core Attributes">
+                        <Toggle
+                            label="Enable Kanban Support"
+                            value={enableKanban}
+                            onChange={(v) => {
+                                setEnableKanban(v);
+                                addLog(`🎛️ [Kanban Toggle] → ${v ? "Enabled" : "Disabled"} cross-column dragging`);
+                            }}
+                        />
+                        <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px", borderTop: "1px solid rgba(255,255,255,0.04)", paddingTop: "8px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
+                                <span style={{ color: "#94a3b8" }}>Drag Group:</span>
+                                <span style={{ color: "#3b82f6", fontWeight: 700 }}>kanban-playground</span>
+                            </div>
+                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
+                                <span style={{ color: "#94a3b8" }}>Column Attribute:</span>
+                                <span style={{ color: "#10b981", fontWeight: 700 }}>status (Enum/String)</span>
+                            </div>
+                        </div>
+                    </Section>
 
                     <Section title="Layout Direction">
                         <div style={{ display: "flex", gap: "8px" }}>
@@ -319,7 +411,7 @@ function App() {
                         <div style={{ display: "flex", gap: "8px" }}>
                             {([
                                 { key: "progress", label: "📊 Progress Bar" },
-                                { key: "icon",     label: "🎯 Icon Circle" }
+                                { key: "icon",     label: "🎯 Icon Badge" }
                             ] as const).map(s => (
                                 <button key={s.key} onClick={() => setCardStyle(s.key)} style={{
                                     flex: 1, padding: "8px", borderRadius: "8px", cursor: "pointer",
@@ -345,140 +437,167 @@ function App() {
                         <Slider
                             label="Border Radius"
                             value={borderRadiusPx}
-                            min={0} max={32}
+                            min={0} max={24}
                             onChange={setBorderRadiusPx}
                             unit="px"
                         />
+                        <Toggle
+                            label="Show Drag Handles (⠿)"
+                            value={dragHandleDisplay === "left"}
+                            onChange={v => setDragHandleDisplay(v ? "left" : "hide")}
+                        />
                     </Section>
 
-                    <Section title="Options">
-                        <Toggle value={showHandleLabel} onChange={setShowHandleLabel} label="Show Drag Handle Tooltip" />
-                    </Section>
-
-                    {/* Sorted Attribute Simulation */}
-                    <Section title="Sorted Attribute (Mendix String)">
-                        <div style={{
-                            background: "#0f172a", borderRadius: "8px", padding: "10px",
-                            fontSize: "11px", color: "#22c55e", fontFamily: "monospace",
-                            wordBreak: "break-all", minHeight: "40px", lineHeight: "1.6"
-                        }}>
-                            {sortedAttribute || <span style={{ color: "#334155" }}>— ยังไม่ได้ลากสลับ —</span>}
-                        </div>
-                        <div style={{ fontSize: "11px", color: "#475569", marginTop: "4px" }}>
-                            💾 ค่าที่จะบันทึกลงใน sortedAttribute ของ Mendix
-                        </div>
-                    </Section>
-
-                    <Section title="Sort Event Log (onSortAction)">
-                        <SortLog logs={sortLog} />
-                    </Section>
-
-                    {/* Reset Button */}
-                    <button onClick={resetOrder} style={{
+                    <button onClick={handleReset} style={{
                         width: "100%", padding: "10px", marginTop: "8px",
-                        background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)",
+                        background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)",
                         borderRadius: "10px", color: "#f87171", fontSize: "13px",
                         fontWeight: 600, cursor: "pointer", transition: "all 0.2s"
                     }}
-                        onMouseEnter={e => (e.currentTarget.style.background = "rgba(239,68,68,0.2)")}
-                        onMouseLeave={e => (e.currentTarget.style.background = "rgba(239,68,68,0.12)")}
+                        onMouseEnter={e => (e.currentTarget.style.background = "rgba(239,68,68,0.18)")}
+                        onMouseLeave={e => (e.currentTarget.style.background = "rgba(239,68,68,0.1)")}
                     >
-                        🔄 รีเซ็ตลำดับกลับต้นฉบับ
+                        🔄 รีเซ็ตกระดาน & ฐานข้อมูล
                     </button>
-                </div>
-
-                {/* Footer */}
-                <div style={{
-                    padding: "12px 20px", borderTop: "1px solid rgba(255,255,255,0.05)",
-                    fontSize: "11px", color: "#334155", textAlign: "center"
-                }}>
-                    pwbCustomizeContainerDataView v1.0.0 · PWB 2026
                 </div>
             </div>
 
-            {/* ── RIGHT: Live Canvas ──────────────────────────────────── */}
+            {/* ── RIGHT: Live Canvas ─────────────────────────────────── */}
             <div style={{
                 flex: 1, display: "flex", flexDirection: "column",
-                background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-                padding: "32px", overflowY: "auto"
+                padding: "24px 32px", overflowY: "auto", height: "100vh"
             }}>
-                {/* Canvas Header */}
-                <div style={{ marginBottom: "24px" }}>
+                {/* Header */}
+                <div style={{ marginBottom: "20px" }}>
                     <div style={{
                         display: "inline-flex", alignItems: "center", gap: "8px",
-                        background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.25)",
-                        borderRadius: "8px", padding: "6px 12px", marginBottom: "12px"
+                        background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.25)",
+                        borderRadius: "8px", padding: "6px 12px", marginBottom: "10px"
                     }}>
-                        <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22c55e",
-                            boxShadow: "0 0 6px #22c55e", animation: "pulse 2s infinite" }} />
-                        <span style={{ color: "#93c5fd", fontSize: "12px", fontWeight: 600 }}>Live Preview</span>
+                        <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981",
+                            boxShadow: "0 0 6px #10b981", animation: "pulse 2s infinite" }} />
+                        <span style={{ color: "#a7f3d0", fontSize: "12px", fontWeight: 600 }}>Playground Mode - 3 Columns Kanban Board Simulation</span>
                     </div>
-                    <h1 style={{ margin: "0 0 6px", fontSize: "22px", fontWeight: 800, color: "#f1f5f9" }}>
-                        PWB Customize Container DataView
+                    <h1 style={{ margin: "0 0 4px", fontSize: "22px", fontWeight: 800 }}>
+                        PWB Customize Container DataView (Kanban Engine)
                     </h1>
-                    <p style={{ margin: 0, color: "#64748b", fontSize: "14px" }}>
-                        ลากแถวรายการด้านซ้าย (⠿) เพื่อสลับลำดับ · ปรับ Properties ทางซ้ายได้ทันที
+                    <p style={{ margin: 0, color: "#64748b", fontSize: "13px" }}>
+                        ทดลองลากการ์ดสลับระหว่าง **คอลัมน์แนวตั้ง** หรือ **กล่องแนวนอน** และสังเกตการหน่วงเวลาบันทึก (Debounce Delay) เพื่อยืนยันความไหลลื่นและประสิทธิภาพ
                     </p>
                 </div>
 
-                {/* Widget Canvas Area */}
+                {/* THE 3-COLUMN KANBAN BOARD CONTAINER */}
                 <div style={{
-                    background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    borderRadius: "20px", padding: "24px",
-                    backdropFilter: "blur(8px)"
+                    display: "flex",
+                    gap: "20px",
+                    flex: 1,
+                    minHeight: "450px",
+                    marginBottom: "20px"
                 }}>
-                    {/* Mendix-like property annotation bar */}
+                    {/* TODO Column */}
                     <div style={{
-                        display: "flex", gap: "16px", marginBottom: "16px",
-                        padding: "8px 12px", background: "rgba(59,130,246,0.06)",
-                        borderRadius: "10px", border: "1px solid rgba(59,130,246,0.1)",
-                        flexWrap: "wrap"
+                        flex: 1,
+                        background: "rgba(255,255,255,0.02)",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                        borderRadius: "16px",
+                        padding: "16px",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "12px"
                     }}>
-                        {[
-                            { label: "layoutDirection", value: layoutDirection },
-                            { label: "accentColor", value: accentColor },
-                            { label: "borderRadius", value: borderRadius },
-                            { label: "itemsSource.count", value: `${tasks.length} items` },
-                        ].map(p => (
-                            <div key={p.label} style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                                <span style={{ fontSize: "11px", color: "#475569", fontFamily: "monospace" }}>{p.label}:</span>
-                                <code style={{ fontSize: "11px", color: "#60a5fa", background: "rgba(96,165,250,0.1)",
-                                    padding: "1px 6px", borderRadius: "4px" }}>{p.value}</code>
-                            </div>
-                        ))}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>🔴 TO DO</h3>
+                            <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "10px", background: "rgba(239,68,68,0.15)", color: "#f87171" }}>
+                                {tasks.filter(t => t.status === "todo").length}
+                            </span>
+                        </div>
+                        <div style={{ flex: 1, overflowY: "auto" }}>
+                            <PwbCustomizeContainerDataView {...getColumnProps("todo")} />
+                        </div>
                     </div>
 
-                    {/* THE WIDGET — DragContainer rendered live */}
-                    <DragContainer
-                        items={dragItems}
-                        renderItem={rawObject => renderItem(rawObject as TaskItem)}
-                        onOrderChange={handleOrderChange}
-                        accentColor={accentColor}
-                        borderRadius={borderRadius}
-                        layoutDirection={layoutDirection}
-                    />
+                    {/* IN PROGRESS Column */}
+                    <div style={{
+                        flex: 1,
+                        background: "rgba(255,255,255,0.02)",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                        borderRadius: "16px",
+                        padding: "16px",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "12px"
+                    }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>🟡 IN PROGRESS</h3>
+                            <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "10px", background: "rgba(245,158,11,0.15)", color: "#fbbf24" }}>
+                                {tasks.filter(t => t.status === "in_progress").length}
+                            </span>
+                        </div>
+                        <div style={{ flex: 1, overflowY: "auto" }}>
+                            <PwbCustomizeContainerDataView {...getColumnProps("in_progress")} />
+                        </div>
+                    </div>
+
+                    {/* DONE Column */}
+                    <div style={{
+                        flex: 1,
+                        background: "rgba(255,255,255,0.02)",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                        borderRadius: "16px",
+                        padding: "16px",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "12px"
+                    }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>🟢 DONE</h3>
+                            <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "10px", background: "rgba(34,197,94,0.15)", color: "#34d399" }}>
+                                {tasks.filter(t => t.status === "done").length}
+                            </span>
+                        </div>
+                        <div style={{ flex: 1, overflowY: "auto" }}>
+                            <PwbCustomizeContainerDataView {...getColumnProps("done")} />
+                        </div>
+                    </div>
                 </div>
 
-                {/* Info Cards Row */}
-                <div style={{ display: "flex", gap: "16px", marginTop: "24px", flexWrap: "wrap" }}>
-                    {[
-                        { icon: "🧩", title: "Nested Widgets", desc: "รับ Widget ของ Mendix ใดๆ เข้ามาแสดงผลในแต่ละแถวได้อิสระ" },
-                        { icon: "🎯", title: "Drag & Drop Sort", desc: "ลากสลับลำดับลื่นไหล HTML5 Native · Vertical / Horizontal" },
-                        { icon: "💾", title: "Mendix Attribute Sync", desc: "บันทึก GUIDs ที่เรียงลำดับใหม่กลับสู่ String Attribute โดยอัตโนมัติ" },
-                        { icon: "⚡", title: "onSortAction", desc: "เรียก Microflow / Nanoflow ทุกครั้งที่ลากวางเสร็จสมบูรณ์" },
-                    ].map(card => (
-                        <div key={card.title} style={{
-                            flex: "1 1 180px",
-                            background: "rgba(255,255,255,0.03)",
-                            border: "1px solid rgba(255,255,255,0.06)",
-                            borderRadius: "14px", padding: "16px"
-                        }}>
-                            <div style={{ fontSize: "24px", marginBottom: "8px" }}>{card.icon}</div>
-                            <div style={{ fontSize: "14px", fontWeight: 700, color: "#f1f5f9", marginBottom: "4px" }}>{card.title}</div>
-                            <div style={{ fontSize: "12px", color: "#64748b", lineHeight: "1.5" }}>{card.desc}</div>
-                        </div>
-                    ))}
+                {/* LOGS PANEL */}
+                <div style={{
+                    background: "#080c14",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    borderRadius: "12px",
+                    padding: "12px 16px",
+                    height: "150px",
+                    display: "flex",
+                    flexDirection: "column",
+                    boxSizing: "border-box"
+                }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                        <span style={{ fontSize: "11px", fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: "1px" }}>
+                            📋 Real-time Event & Performance Logs
+                        </span>
+                        <span style={{ fontSize: "10px", color: saveDelay > 0 ? "#60a5fa" : "#94a3b8" }}>
+                            {saveDelay > 0 ? `Debounce Delay active: ${saveDelay}ms` : "Synchronous Saving"}
+                        </span>
+                    </div>
+                    <div style={{
+                        flex: 1,
+                        overflowY: "auto",
+                        fontFamily: "monospace",
+                        fontSize: "11px",
+                        lineHeight: "1.6",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "4px"
+                    }}>
+                        {logs.length === 0 ? (
+                            <span style={{ color: "#334155" }}>— ลากวางหรือขยับตำแหน่งการ์ดเพื่อจับตาดูระบบประมวลผล —</span>
+                        ) : logs.map((log, i) => (
+                            <span key={i} style={{ color: i === 0 ? "#22c55e" : "#475569" }}>
+                                {i === 0 ? "▶ " : "  "}{log}
+                            </span>
+                        ))}
+                    </div>
                 </div>
             </div>
 
@@ -499,7 +618,6 @@ function App() {
     );
 }
 
-// ─── Bootstrap ────────────────────────────────────────────────────────────────
 const container = document.getElementById("root")!;
 const root = createRoot(container);
 root.render(<App />);

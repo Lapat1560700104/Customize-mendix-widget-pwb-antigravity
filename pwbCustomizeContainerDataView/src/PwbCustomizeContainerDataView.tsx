@@ -1,4 +1,4 @@
-import { ReactElement, useMemo } from "react";
+import { ReactElement, useMemo, useRef, useEffect } from "react";
 import { DragContainer, DragItem } from "./components/DragContainer";
 import { PwbCustomizeContainerDataViewContainerProps } from "../typings/PwbCustomizeContainerDataViewProps";
 import "./ui/PwbCustomizeContainerDataView.css";
@@ -13,7 +13,13 @@ export function PwbCustomizeContainerDataView({
     layoutDirection,
     dragHandleDisplay,
     accentColor,
-    borderRadius
+    borderRadius,
+    name: containerId,
+    enableKanban,
+    dragGroup,
+    columnValue,
+    itemColumnAttribute,
+    saveDelay
 }: PwbCustomizeContainerDataViewContainerProps): ReactElement {
     // 1. Sanitize Aesthetics Configuration
     const colorRegex =
@@ -65,16 +71,82 @@ export function PwbCustomizeContainerDataView({
         return rawList;
     }, [itemsSource.items, sortedAttribute]);
 
-    // 4. Update order callback
-    const handleOrderChange = (newOrderIds: string[]): void => {
-        if (sortedAttribute && !sortedAttribute.readOnly) {
-            const serialized = newOrderIds.join(",");
-            sortedAttribute.setValue(serialized);
+    // 4. Performance Debouncing logic for Mendix Persistence
+    const debounceTimeoutRef = useRef<any>(null);
 
-            // Execute Mendix nanoflow/microflow action
-            if (onSortAction && onSortAction.canExecute && !onSortAction.isExecuting) {
-                onSortAction.execute();
+    useEffect(() => {
+        return () => {
+            if (debounceTimeoutRef.current) {
+                clearTimeout(debounceTimeoutRef.current);
             }
+        };
+    }, []);
+
+    const saveOrderWithDebounce = (newOrderIds: string[]): void => {
+        if (debounceTimeoutRef.current) {
+            clearTimeout(debounceTimeoutRef.current);
+        }
+
+        const runSave = () => {
+            if (sortedAttribute && !sortedAttribute.readOnly) {
+                const serialized = newOrderIds.join(",");
+                sortedAttribute.setValue(serialized);
+
+                // Execute Mendix nanoflow/microflow action
+                if (onSortAction && onSortAction.canExecute && !onSortAction.isExecuting) {
+                    onSortAction.execute();
+                }
+            }
+        };
+
+        if (saveDelay && saveDelay > 0) {
+            debounceTimeoutRef.current = setTimeout(runSave, saveDelay);
+        } else {
+            runSave();
+        }
+    };
+
+    // 5. Drag callbacks
+    const handleOrderChange = (newOrderIds: string[]): void => {
+        saveOrderWithDebounce(newOrderIds);
+    };
+
+    const handleRemoveItemExternal = (itemId: string): void => {
+        if (sortedAttribute && !sortedAttribute.readOnly) {
+            const currentIds = sortedAttribute.value
+                ? sortedAttribute.value.split(",").map(id => id.trim()).filter(Boolean)
+                : [];
+            const nextIds = currentIds.filter(id => id !== itemId);
+            saveOrderWithDebounce(nextIds);
+        }
+    };
+
+    const handleDropExternal = (draggedItemId: string, _sourceContainerId: string, targetIndex: number): void => {
+        const registry = window.__pwbDragRegistry;
+        if (!registry) return;
+
+        // A. Remove from source container Mendix sorting state
+        if (registry.onRemoveItem) {
+            registry.onRemoveItem(draggedItemId);
+        }
+
+        // B. Update the Column status/category of the dragged item
+        if (itemColumnAttribute && columnValue !== undefined) {
+            const itemObj = registry.draggedItem;
+            const attr = itemColumnAttribute.get(itemObj);
+            if (attr && !attr.readOnly) {
+                attr.setValue(columnValue);
+            }
+        }
+
+        // C. Insert into target container Mendix sorting state
+        if (sortedAttribute && !sortedAttribute.readOnly) {
+            const currentIds = sortedAttribute.value
+                ? sortedAttribute.value.split(",").map(id => id.trim()).filter(Boolean)
+                : [];
+            const nextIds = currentIds.filter(id => id !== draggedItemId);
+            nextIds.splice(targetIndex, 0, draggedItemId);
+            saveOrderWithDebounce(nextIds);
         }
     };
 
@@ -86,24 +158,42 @@ export function PwbCustomizeContainerDataView({
                     <span>Loading options...</span>
                 </div>
             ) : !hasItems ? (
-                <div className="pwb-empty-state" style={{ borderRadius: safeBorderRadius }}>
-                    <svg
-                        viewBox="0 0 24 24"
-                        width="48"
-                        height="48"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        className="pwb-empty-icon"
-                    >
-                        <rect x="3" y="3" width="18" height="18" rx="2" strokeDasharray="4 4" />
-                        <path d="M8 12h8M12 8v8" strokeLinecap="round" />
-                    </svg>
-                    <div className="pwb-empty-title">No items inside container</div>
-                    <div className="pwb-empty-subtitle">Drop some widgets here in Studio Pro to start building.</div>
+                <div className="pwb-empty-state-container" style={{ borderRadius: safeBorderRadius }}>
+                    <DragContainer
+                        containerId={containerId}
+                        items={[]}
+                        renderItem={() => <div />}
+                        onOrderChange={handleOrderChange}
+                        accentColor={safeAccentColor}
+                        borderRadius={safeBorderRadius}
+                        layoutDirection={layoutDirection}
+                        dragHandleDisplay={dragHandleDisplay}
+                        enableKanban={enableKanban}
+                        dragGroup={dragGroup}
+                        columnValue={columnValue}
+                        onDropExternal={handleDropExternal}
+                        onRemoveItemExternal={handleRemoveItemExternal}
+                    />
+                    <div className="pwb-empty-state-content-overlay">
+                        <svg
+                            viewBox="0 0 24 24"
+                            width="48"
+                            height="48"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            className="pwb-empty-icon"
+                        >
+                            <rect x="3" y="3" width="18" height="18" rx="2" strokeDasharray="4 4" />
+                            <path d="M8 12h8M12 8v8" strokeLinecap="round" />
+                        </svg>
+                        <div className="pwb-empty-title">No items inside container</div>
+                        <div className="pwb-empty-subtitle">Drop some widgets here or drag cards into this column.</div>
+                    </div>
                 </div>
             ) : (
                 <DragContainer
+                    containerId={containerId}
                     items={dragItems}
                     renderItem={rawObject => customItemContent.get(rawObject) as ReactElement}
                     onOrderChange={handleOrderChange}
@@ -111,6 +201,11 @@ export function PwbCustomizeContainerDataView({
                     borderRadius={safeBorderRadius}
                     layoutDirection={layoutDirection}
                     dragHandleDisplay={dragHandleDisplay}
+                    enableKanban={enableKanban}
+                    dragGroup={dragGroup}
+                    columnValue={columnValue}
+                    onDropExternal={handleDropExternal}
+                    onRemoveItemExternal={handleRemoveItemExternal}
                 />
             )}
         </div>

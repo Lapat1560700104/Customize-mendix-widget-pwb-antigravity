@@ -97,6 +97,11 @@ _คำสั่งนี้จะ build JavaScript bundle, package ทุกอ
 | `darkModeBehavior` | Enumeration | No | `auto` | การตรวจจับ Dark Mode: `auto` (อัตโนมัติ), `light` (บังคับธีมสว่าง), `dark` (บังคับธีมมืด) |
 | `itemPadding` | String | No | `12px 16px` | ระยะขอบด้านในของการ์ดแต่ละใบ (เช่น `12px 16px`, `16px`) |
 | `itemGap` | String | No | `12px` | ระยะห่างช่องว่างระหว่างการ์ด (เช่น `12px`, `8px`, `20px`) |
+| `enableKanban` | Boolean | No | `true` | เปิดใช้งานโหมดคัมบัง (ลากย้ายการ์ดข้ามระหว่างหลายวิจเจตที่มีกลุ่มเดียวกันได้) |
+| `dragGroup` | String | No | — | ชื่อกลุ่มลากวาง สำหรับจัดกลุ่มกระดานที่ลากข้ามหากันได้ (ต้องตั้งชื่อตรงกันทั้งสองฝั่ง เช่น 'kanban-board') |
+| `columnValue` | String | No | — | ค่าสถานะ/ประเภทประจำคอลัมน์นี้ สำหรับนำไปอัปเดตลงในการ์ดที่ย้ายเข้ามา (เช่น 'ToDo', 'Done') |
+| `itemColumnAttribute` | Attribute (String/Enum) | No | — | แอททริบิวต์บน Entity การ์ดที่จะถูกเขียนค่า `columnValue` ทับลงไปเมื่อมีการย้ายการ์ด |
+| `saveDelay` | Integer | ✅ Yes | `0` | ดีเลย์ในหน่วยมิลลิวินาทีก่อนบันทึกและรัน action เพื่อลดการเซฟถี่เกินไปในบราวเซอร์ (ต้องระบุเป็นตัวเลข >= 0) |
 
 ---
 

@@ -49,6 +49,21 @@
 | `itemPadding` | Card Padding | String | No | `12px 16px` | กำหนดขนาดระยะห่างด้านในการ์ดไอเทมแต่ละชิ้น (เช่น `12px 16px`, `16px`, `20px`) |
 | `itemGap` | Card Spacing Gap | String | No | `12px` | กำหนดระยะห่างช่องไฟว่างระหว่างการ์ดแต่ละใบ (เช่น `12px`, `8px`, `24px`) |
 
+### 5. การตั้งค่ากระดานคัมบัง (Kanban Settings)
+
+| Property Key | Caption | Type | Required | Default | Description |
+| :--- | :--- | :--- | :---: | :--- | :--- |
+| `enableKanban` | Enable Kanban Support | Boolean | No | `true` | เปิดใช้งานโหมด Kanban ลากข้ามตู้คอนเทนเนอร์ (หากเป็น `false` จะล็อกให้ลากเฉพาะภายในตัวเอง) |
+| `dragGroup` | Drag Group Name | String | No | — | ชื่อกลุ่มลากวาง สำหรับจับคู่วิจเจตคอลัมน์ต่างๆ ให้ลากข้ามหากันได้ (เช่น 'board-1') |
+| `columnValue` | Column Value | String | No | — | ค่าสถานะข้อความประจำคอลัมน์นี้ สำหรับอัปเดตลงในการ์ดที่ย้ายเข้ามา (เช่น 'Done', 'ToDo') |
+| `itemColumnAttribute` | Item Column Attribute | Attribute | No | — | String หรือ Enum Attribute บนไอเทมการ์ดที่จะถูกเขียนสถานะใหม่ทับลงไปเมื่อย้ายคอลัมน์สำเร็จ |
+
+### 6. การตั้งค่าประสิทธิภาพ (Performance Settings)
+
+| Property Key | Caption | Type | Required | Default | Description |
+| :--- | :--- | :--- | :---: | :--- | :--- |
+| `saveDelay` | Save Delay (ms) | Integer | ✅ | `0` | ค่าหน่วยมิลลิวินาทีสำหรับการหน่วงเซฟ (Debounce) เพื่อลดภาระการเขียนบันทึกเข้าเซิร์ฟเวอร์แบบถี่ๆ (ต้องมีค่า >= 0) |
+
 ---
 
 ## 🎨 โครงสร้างการแต่งสไตล์ด้วย CSS (CSS Styling Architecture)

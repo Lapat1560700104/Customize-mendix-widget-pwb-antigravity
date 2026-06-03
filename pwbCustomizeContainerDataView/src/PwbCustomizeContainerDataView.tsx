@@ -1,10 +1,11 @@
 import { ReactElement, useMemo, useRef, useEffect, useState, CSSProperties } from "react";
 import { DragContainer, DragItem } from "./components/DragContainer";
 import { PwbCustomizeContainerDataViewContainerProps } from "../typings/PwbCustomizeContainerDataViewProps";
+import { GUID } from "mendix";
 import "./ui/PwbCustomizeContainerDataView.css";
 
 interface ActiveTransition {
-    itemId: string;
+    itemId: GUID;
     sourceContainerId: string;
     targetContainerId: string;
     targetColumnValue: string;
@@ -78,7 +79,7 @@ export function PwbCustomizeContainerDataView({
     const [transitionTrigger, setTransitionTrigger] = useState(0);
 
     useEffect(() => {
-        const handleTransition = () => {
+        const handleTransition = (): void => {
             setTransitionTrigger(prev => prev + 1);
         };
         window.addEventListener("pwb-transition-start", handleTransition);
@@ -94,6 +95,9 @@ export function PwbCustomizeContainerDataView({
     // We sort them based on the initial or current value of `sortedAttribute` if it's set,
     // to preserve Mendix side sorting order when the widget loads.
     const dragItems: DragItem[] = useMemo(() => {
+        if (transitionTrigger) {
+            // Read to satisfy dependency check
+        }
         let rawList = itemsSource.items
             ? itemsSource.items.map(item => ({
                   id: item.id,
@@ -135,7 +139,11 @@ export function PwbCustomizeContainerDataView({
 
                 // If this is the target container and there is an active transition,
                 // override sorting to place the optimistic item exactly at targetIndex
-                if (transition && containerId === transition.targetContainerId && Date.now() - transition.timestamp < 1200) {
+                if (
+                    transition &&
+                    containerId === transition.targetContainerId &&
+                    Date.now() - transition.timestamp < 1200
+                ) {
                     const nextList = rawList.filter(item => item.id !== transition.itemId);
                     const movingItem = rawList.find(item => item.id === transition.itemId);
                     if (movingItem) {
@@ -171,7 +179,7 @@ export function PwbCustomizeContainerDataView({
         };
     }, []);
 
-    const saveOrderWithDebounce = (newOrderIds: string[]): void => {
+    const saveOrderWithDebounce = (newOrderIds: Array<GUID | string>): void => {
         if (debounceTimeoutRef.current) {
             clearTimeout(debounceTimeoutRef.current);
         }
@@ -196,11 +204,11 @@ export function PwbCustomizeContainerDataView({
     };
 
     // 5. Drag callbacks
-    const handleOrderChange = (newOrderIds: string[]): void => {
+    const handleOrderChange = (newOrderIds: GUID[]): void => {
         saveOrderWithDebounce(newOrderIds);
     };
 
-    const handleRemoveItemExternal = (itemId: string): void => {
+    const handleRemoveItemExternal = (itemId: GUID): void => {
         if (sortedAttribute && !sortedAttribute.readOnly) {
             const currentIds = sortedAttribute.value
                 ? sortedAttribute.value
@@ -208,12 +216,12 @@ export function PwbCustomizeContainerDataView({
                       .map(id => id.trim())
                       .filter(Boolean)
                 : [];
-            const nextIds = currentIds.filter(id => id !== itemId);
+            const nextIds = currentIds.filter(id => id !== (itemId as any));
             saveOrderWithDebounce(nextIds);
         }
     };
 
-    const handleDropExternal = (draggedItemId: string, _sourceContainerId: string, targetIndex: number): void => {
+    const handleDropExternal = (draggedItemId: GUID, _sourceContainerId: string, targetIndex: number): void => {
         const registry = window.__pwbDragRegistry;
         if (!registry) {
             return;
@@ -261,13 +269,13 @@ export function PwbCustomizeContainerDataView({
                       .map(id => id.trim())
                       .filter(Boolean)
                 : [];
-            const nextIds = currentIds.filter(id => id !== draggedItemId);
-            nextIds.splice(targetIndex, 0, draggedItemId);
+            const nextIds = currentIds.filter(id => id !== (draggedItemId as any));
+            nextIds.splice(targetIndex, 0, draggedItemId as any);
             saveOrderWithDebounce(nextIds);
         }
     };
 
-    const renderInnerContent = () => (
+    const renderInnerContent = (): ReactElement => (
         <>
             {enableLaneTitle && (
                 <div className="pwb-lane-title-section">
@@ -355,11 +363,7 @@ export function PwbCustomizeContainerDataView({
                 <div className={`pwb-customize-container-dataview-wrapper ${laneClass || ""}`}>
                     {renderInnerContent()}
                 </div>
-                {outerFooterContent && (
-                    <div className="pwb-outer-footer-section">
-                        {outerFooterContent}
-                    </div>
-                )}
+                {outerFooterContent && <div className="pwb-outer-footer-section">{outerFooterContent}</div>}
             </div>
         );
     }

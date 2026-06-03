@@ -1,8 +1,8 @@
-import { ReactElement, useState, useEffect, useRef, PointerEvent as ReactPointerEvent } from "react";
-import { ObjectItem } from "mendix";
+import { ReactElement, useState, useEffect, useRef, KeyboardEvent, PointerEvent as ReactPointerEvent } from "react";
+import { ObjectItem, GUID } from "mendix";
 
 export interface DragItem {
-    id: string;
+    id: GUID;
     rawObject: ObjectItem;
 }
 
@@ -10,7 +10,7 @@ export interface DragContainerProps {
     containerId: string;
     items: DragItem[];
     renderItem: (rawObject: ObjectItem) => ReactElement;
-    onOrderChange: (newOrderIds: string[]) => void;
+    onOrderChange: (newOrderIds: GUID[]) => void;
     accentColor: string;
     borderRadius: string;
     layoutDirection: "vertical" | "horizontal";
@@ -18,8 +18,8 @@ export interface DragContainerProps {
     enableKanban?: boolean;
     dragGroup?: string;
     columnValue?: string;
-    onDropExternal?: (draggedItemId: string, sourceContainerId: string, targetIndex: number) => void;
-    onRemoveItemExternal?: (itemId: string) => void;
+    onDropExternal?: (draggedItemId: GUID, sourceContainerId: string, targetIndex: number) => void;
+    onRemoveItemExternal?: (itemId: GUID) => void;
     themePreset: "default_rounded" | "modern_glass" | "minimalist_flat" | "neo_brutalist";
     darkModeBehavior: "auto" | "light" | "dark";
     itemPadding?: string;
@@ -27,12 +27,12 @@ export interface DragContainerProps {
 }
 
 interface DragRegistry {
-    itemId: string;
+    itemId: GUID;
     draggedItem: ObjectItem;
     sourceDragGroup?: string;
     sourceContainerId: string;
     sourceColumnValue?: string;
-    onRemoveItem?: (itemId: string) => void;
+    onRemoveItem?: (itemId: GUID) => void;
 }
 
 declare global {
@@ -78,13 +78,13 @@ export function DragContainer({
     const [orderedItems, setOrderedItems] = useState<DragItem[]>([]);
     const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-    const [wobblingItemId, setWobblingItemId] = useState<string | null>(null);
-    const [keyboardGrabbedId, setKeyboardGrabbedId] = useState<string | null>(null);
+    const [wobblingItemId, setWobblingItemId] = useState<GUID | null>(null);
+    const [keyboardGrabbedId, setKeyboardGrabbedId] = useState<GUID | null>(null);
     const [originalItemsBeforeKeyboardDrag, setOriginalItemsBeforeKeyboardDrag] = useState<DragItem[]>([]);
     const [announcement, setAnnouncement] = useState("");
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, index: number) => {
+    const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>, index: number): void => {
         const item = orderedItems[index];
         const isGrabbed = keyboardGrabbedId === item.id;
         const itemTitle = e.currentTarget.innerText.split("\n")[0] || `Item ${index + 1}`;
@@ -109,7 +109,9 @@ export function DragContainer({
                 // Grab the item
                 setKeyboardGrabbedId(item.id);
                 setOriginalItemsBeforeKeyboardDrag([...orderedItems]);
-                setAnnouncement(`Grabbed ${itemTitle}. Use Up or Down Arrow keys to reorder. Press Space or Enter to drop, or Escape to cancel.`);
+                setAnnouncement(
+                    `Grabbed ${itemTitle}. Use Up or Down Arrow keys to reorder. Press Space or Enter to drop, or Escape to cancel.`
+                );
             }
         } else if (e.key === "Escape") {
             if (isGrabbed) {
@@ -132,7 +134,9 @@ export function DragContainer({
                     setOrderedItems(nextItems);
                     setAnnouncement(`Moved ${itemTitle} to position ${index + 2} of ${orderedItems.length}.`);
                     setTimeout(() => {
-                        const nextEl = containerRef.current?.querySelector(`[data-index="${index + 1}"]`) as HTMLElement;
+                        const nextEl = containerRef.current?.querySelector(
+                            `[data-index="${index + 1}"]`
+                        ) as HTMLElement;
                         nextEl?.focus();
                     }, 0);
                 }
@@ -148,7 +152,9 @@ export function DragContainer({
                     setOrderedItems(nextItems);
                     setAnnouncement(`Moved ${itemTitle} to position ${index} of ${orderedItems.length}.`);
                     setTimeout(() => {
-                        const prevEl = containerRef.current?.querySelector(`[data-index="${index - 1}"]`) as HTMLElement;
+                        const prevEl = containerRef.current?.querySelector(
+                            `[data-index="${index - 1}"]`
+                        ) as HTMLElement;
                         prevEl?.focus();
                     }, 0);
                 }
@@ -610,7 +616,9 @@ export function DragContainer({
                         onKeyDown={e => handleKeyDown(e, idx)}
                         className={`pwb-draggable-row-item ${isDragging ? "pwb-dragging" : ""} ${
                             isDragOver ? "pwb-drag-over" : ""
-                        } ${isGrabbed ? "pwb-keyboard-grabbed" : ""} ${wobblingItemId === item.id ? "pwb-wobble-shake" : ""}`}
+                        } ${isGrabbed ? "pwb-keyboard-grabbed" : ""} ${
+                            wobblingItemId === item.id ? "pwb-wobble-shake" : ""
+                        }`}
                         style={{
                             borderRadius: `calc(${borderRadius} * 0.5)`
                         }}

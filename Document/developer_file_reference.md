@@ -1,137 +1,176 @@
-# คู่มืออ้างอิงโครงสร้างไฟล์และหน้าที่รับผิดชอบสำหรับผู้พัฒนา Pluggable Widget
+# คู่มืออ้างอิงโครงสร้างไฟล์และหน้าที่รับผิดชอบสำหรับผู้พัฒนา (Developer File Reference Guide)
 
-เอกสารฉบับนี้จัดทำขึ้นเพื่อเป็น **คัมภีร์โครงสร้างไฟล์ (Developer File Reference Guide)** สำหรับนักพัฒนาที่ต้องเข้ามารับช่วงต่อเพื่อบำรุงรักษา ปรับปรุง หรือพัฒนาฟีเจอร์เพิ่มเติมในโปรเจกต์ Custom Pluggable Widget นี้ เอกสารนี้จะอธิบายถึงบทบาท หน้าที่รับผิดชอบหลัก และแนวทางการแก้ไขของแต่ละไฟล์อย่างชัดเจน เพื่อให้การพัฒนาเป็นระบบและป้องกันการแก้ไขไฟล์ที่ผิดจุด
+เอกสารฉบับนี้จัดทำขึ้นเพื่อเป็น **คัมภีร์โครงสร้างไฟล์และหน้าที่รับผิดชอบ** สำหรับนักพัฒนาที่ต้องเข้ามารับช่วงต่อเพื่อบำรุงรักษา ปรับปรุง หรือพัฒนาฟีเจอร์เพิ่มเติมในโครงการหลัก **Customize-mendix-widget-pwb-antigravity** ซึ่งเป็นระบบ Monorepo ที่บรรจุ Custom Pluggable Widgets ทั้งหมด 3 ตัว ได้แก่:
+1. **pwbComboBox** (วิดเจ็ตกล่องตัวเลือก autocomplete)
+2. **pwbCustomizeContainerDataView** (วิดเจ็ตตู้คอนเทนเนอร์ drag-and-drop)
+3. **pwbDatePicker** (วิดเจ็ตเครื่องมือเลือกวันที่)
 
 ---
 
-## 🎨 สถาปัตยกรรมของตัวระบบ (Architecture Overview)
+## 🎨 สถาปัตยกรรมทางวิศวกรรมของวิดเจ็ต (Architecture Overview)
 
-สถาปัตยกรรมของ Widget ชุดนี้ถูกออกแบบภายใต้หลักการ **Separation of Concerns (การแยกสัดส่วนความรับผิดชอบ)** แบ่งออกเป็น 4 ชั้นหลัก:
+โครงสร้างของ Pluggable Widget แต่ละตัวในโครงการนี้ถูกออกแบบภายใต้หลักการ **Separation of Concerns (การแยกส่วนหน้าที่ความรับผิดชอบ)** โดยแบ่งส่วนประกอบออกเป็น 6 ชั้นหลัก:
 
 ```mermaid
 graph TD
-    Mendix["Mendix Studio Pro"] <-->|1. Properties Config| XML["1. XML Schema Layer: <br/>PwbDatePicker.xml"]
-    XML -.->|2. Auto Typings Generator| Typings["2. TypeScript Typings Layer: <br/>typings/*.d.ts"]
-    Typings -.->|3. Type Verification| Wrapper["3. Container Wrapper Layer: <br/>PwbDatePicker.tsx"]
-    Wrapper -->|4. Unidirectional Data Flow| Present["4. React Core UI Layer: <br/>DatePicker.tsx"]
-    Present <-->|5. Style System| CSS["5. Styling Layer: <br/>PwbDatePicker.css"]
+    Mendix["Mendix Studio Pro"] <-->|1. Properties Schema| XML["1. XML Layer: <br/>&lt;WidgetName&gt;.xml"]
+    XML -.->|2. Auto Typings Generator| Typings["2. TypeScript Typings Layer: <br/>typings/&lt;WidgetName&gt;Props.d.ts"]
+    Typings -.->|3. Static Type Verification| Wrapper["3. Container Wrapper Layer: <br/>&lt;WidgetName&gt;.tsx"]
+    Wrapper -->|4. React State & Props| Present["4. React Core UI Layer: <br/>ComboBox.tsx / DragContainer.tsx / DatePicker.tsx"]
+    Present <-->|5. Style System| CSS["5. Styling Layer: <br/>&lt;WidgetName&gt;.css"]
     Present <-->|6. Automation Deploy| Auto["6. Automation Layer: <br/>rename_mpk.js"]
 ```
 
 ---
 
-## 📁 รายละเอียดและหน้าที่รับผิดชอบรายไฟล์ (File-by-File Reference)
+## 📂 โครงสร้างเวิร์กสเปซ Monorepo (Workspace Directory Tree)
 
-### 1. โฟลเดอร์หลักของโปรเจกต์ (Monorepo Root Level)
+นี่คือแผนผังแสดงโครงสร้างโฟลเดอร์ปัจจุบันที่ใช้งานจริงในโปรเจกต์:
 
-#### 📝 [package.json (Root)](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/package.json)
-
-* **บทบาท**: จัดการการเชื่อมโยง workspaces และคำสั่งลัดสำหรับภาพรวมของโปรเจกต์
-* **หน้าที่หลัก**:
-  * กำหนดขอบเขตของ workspaces ภายในโปรเจกต์ (เช่น ค้นหาโฟลเดอร์ใด ๆ ที่ขึ้นต้นด้วย `pwb*`)
-  * เก็บสคริปต์ความสะดวกระดับ Root เช่น การสั่ง Build/Release ทุกลิงก์พร้อมกัน หรือการรันสคริปต์ Bump Version (ขยับเลขเวอร์ชันอัตโนมัติ)
-* **คำแนะนำในการพัฒนา**: แก้ไขเฉพาะเมื่อต้องการเพิ่มคำสั่งลัด (convenience scripts) ระดับ Root หรือต้องการเพิ่ม/ลดโฟลเดอร์ที่เป็น workspaces
-
-#### 📝 [scripts/rename_mpk.js](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/scripts/rename_mpk.js)
-
-* **บทบาท**: สคริปต์ออโตเมชันสำหรับการทำ Packaging และ Deploy
-* **หน้าที่หลัก**:
-  * ดึงเลขเวอร์ชันปัจจุบันจาก `package.json` ของวิดเจ็ต
-  * แปลงชื่อไฟล์เป็นชื่อฟอร์แมตพิเศษที่ระบุเวอร์ชันและวันเวลา เช่น `pwb.PwbDatePicker_1.0.5_20260529_113759.mpk`
-  * ค้นหาโฟลเดอร์ widgets ของโปรเจกต์ Mendix แล้วทำความสะอาด (ลบไฟล์เก่าทิ้งทั้งหมด) ก่อนก๊อปปี้ไฟล์บิวด์ตัวใหม่เข้าไปแทนที่
-* **คำแนะนำในการพัฒนา**: แก้ไขไฟล์นี้หากคุณต้องการเปลี่ยนแปลงเป้าหมายการก๊อปปี้ หรือต้องการปรับแต่งฟอร์แมตการตั้งชื่อไฟล์บันเดิล `.mpk`
-
----
-
-### 2. โฟลเดอร์ของตัววิดเจ็ต (Widget Specific Level - `pwbDatePicker/`)
-
-#### 📝 [pwbDatePicker/package.json](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/package.json)
-
-* **บทบาท**: จัดการ dependencies และการตั้งค่าเป้าหมายการรันของวิดเจ็ต
-* **หน้าที่หลัก**:
-  * ระบุชื่อวิดเจ็ต (`widgetName`) และโฟลเดอร์ปลายทางของ Mendix (`packagePath`)
-  * กำหนด `"config.projectPath"` ซึ่งชี้พิกัดไปยังแอป Mendix ตัวหลักของคุณ เพื่อส่งไฟล์ `.mpk` ไปทำงาน
-  * จัดการคำสั่งพัฒนาย่อย เช่น `npm run dev` (ระบบเฝ้าดูการพิมพ์โค้ด) และ `npm run release`
-* **คำแนะนำในการพัฒนา**: เมื่อนำโปรเจกต์นี้ไปรันในเครื่องพัฒนาเครื่องใหม่ **คุณจะต้องแก้ไขฟิลด์ `config.projectPath` ให้ตรงตามโฟลเดอร์โปรเจกต์ Mendix บนเครื่องของคุณ**
-
-#### 📝 [pwbDatePicker/tsconfig.json](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/tsconfig.json)
-
-* **บทบาท**: กำหนดคุณสมบัติและมาตรฐานความปลอดภัยของการแปลงไฟล์ TypeScript
-* **หน้าที่หลัก**: ควบคุมประเภทความปลอดภัยของการตรวจเช็ค และสร้างประเภทไฟล์ Bundling
-* **คำแนะนำในการพัฒนา**: โดยทั่วไปไม่มีความจำเป็นต้องทำการแก้ไขไฟล์นี้ เว้นแต่ต้องการปรับแต่ง Path Aliases หรือเพิ่ม/ลดมาตรฐานความเข้มงวดของการตรวจเช็คของ Compiler
-
-#### 📝 [pwbDatePicker/typings/PwbDatePickerProps.d.ts](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/typings/PwbDatePickerProps.d.ts)
-
-* **บทบาท**: ไฟล์ประเภทตัวแปร TypeScript (TypeScript Definitions)
-* **หน้าที่หลัก**: เก็บชนิดประเภทตัวแปรของ Properties ทั้งหมดของ Mendix เพื่อส่งต่อไปให้ React
-* **คำแนะนำในการพัฒนา**: ⚠️ **ห้ามทำการแก้ไขไฟล์นี้ด้วยตนเองเด็ดขาด!** เนื่องจากไฟล์นี้จะถูกลบและสร้างขึ้นใหม่โดยอัตโนมัติผ่านคอมไพเลอร์ของ Mendix ทุกครั้งที่คุณสั่งรันโปรเจกต์
-
----
-
-### 3. โฟลเดอร์ควบคุมการทำงานหลัก (Widget Source Level - `src/`)
-
-#### 📝 [src/package.xml](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/package.xml)
-
-* **บทบาท**: แผนภาพการบรรจุหีบห่อของไฟล์ลงในแพ็กเกจ `.mpk` (Mendix Package Manifest)
-* **หน้าที่หลัก**: ระบุว่าไฟล์ปลายทางใดบ้างในแผงบิวด์ของโปรเจกต์ ที่จะต้องถูกมัดรวมเข้าไปในไฟล์ `.mpk` เพื่อนำเข้าสู่ Studio Pro
-* **คำแนะนำในการพัฒนา**: โดยปกติจะไม่มีการเปลี่ยนรูป ยกเว้นกรณีต้องการมัดรวมซอร์สทรัพยากรพิเศษแยกต่างหาก เช่น ไฟล์ฟอนต์ หรือรูปภาพพื้นหลังดิบ
-
-#### 📝 [src/PwbDatePicker.xml](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.xml)
-
-* **บทบาท**: ตัวกำหนดคุณสมบัติหน้าตั้งค่า (Property Schema Definitions)
-* **หน้าที่หลัก**:
-  * กำหนดหน้าตาการตั้งค่าคุณสมบัติ (Properties) ทั้งหมดที่จะโชว์ให้เห็นเมื่อนักพัฒนาดับเบิ้ลคลิกวิดเจ็ตใน Mendix Studio Pro
-  * กำหนดประเภทตัวแปร (เช่น string, boolean, expression, attribute) และคุณสมบัติที่ระบุค่าดีฟอลต์ (Default Value)
-* **คำแนะนำในการพัฒนา**: เมื่อใดก็ตามที่คุณต้องการ **เพิ่มฟิลด์ปุ่ม ฟิลด์กรอกข้อมูล หรือคุณสมบัติใด ๆ ในฝั่งโปรแกรม Mendix** จุดนี้คือไฟล์เดียวที่คุณต้องประกาศฟิลด์เป็นจุดแรกเสมอ
-
-#### 📝 [src/PwbDatePicker.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.tsx)
-
-* **บทบาท**: ตัวครอบแลกเปลี่ยนชั้นนอก (Container / Wrapper Component)
-* **หน้าที่หลัก**:
-  * รับค่า Properties ทั้งหมดที่ Mendix ป้อนเข้ามา
-  * ดึงสถานะพิเศษฝั่ง Mendix เช่น ตรวจสอบสถานะ Read-only ของแอตทริบิวต์
-  * ตรวจสอบความถูกต้องของการกรอกข้อมูล (Validation) และการแจ้งเตือน Error
-  * เป็นตัวกลางส่งต่อ (Bridge) ตัวแปรทั้งหมดไปให้กับคอมโพเนนต์ React หลัก
-* **คำแนะนำในการพัฒนา**: แก้ไขไฟล์นี้เมื่อต้องการเชื่อมค่า Property ตัวใหม่ที่ประกาศใน XML ส่งลงไปให้ React ใช้งาน หรือต้องการแก้ไขข้อความเงื่อนไข Validation เชิงระบบ Mendix
-
-#### 📝 [src/PwbDatePicker.editorPreview.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.editorPreview.tsx)
-
-* **บทบาท**: ตัวแสดงผลลัพธ์จำลองบนหน้าเพจออกแบบของ Mendix (Page Builder Editor Preview)
-* **หน้าที่หลัก**: แสดงโมเดลรูปจำลองเสมือนจริงของปฏิทินในแผงจัดวาง Mendix Studio Pro (ไม่ให้วิดเจ็ตแสดงกล่องข้อความเปล่า ๆ ซึ่งจะทำให้หน้ากระดาษพังและออกแบบยาก)
-* **คำแนะนำในการพัฒนา**: ปรับเปลี่ยนเล็กน้อยเมื่อต้องการให้หน้าตาพรีวิวในการจัดวาง Mendix ดูลื่นไหลหรือแสดงกรอบกล่องที่สวยงามขึ้น
-
-#### 📝 [src/PwbDatePicker.editorConfig.ts](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.editorConfig.ts)
-
-* **บทบาท**: สคริปต์ควบคุม UI พร็อพเพอร์ตี้ของฝั่ง Mendix Editor
-* **หน้าที่หลัก**: ควบคุมพฤติกรรม เช่น ซ่อน Properties ของ `StartDate` และ `EndDate` หากนักพัฒนาเลือกโหมดปฏิทินเป็น `Single Date`
-* **คำแนะนำในการพัฒนา**: แก้ไขเมื่อต้องการตั้งค่าการซ่อนหรือแสดง Properties เพื่ออำนวยความสะดวกในการกรอกข้อมูลของ Developer ฝั่ง Mendix ไม่ให้งงกับตัวเลือกที่ซับซ้อน
-
-#### 📝 [src/components/DatePicker.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/components/DatePicker.tsx)
-
-* **บทบาท**: คอมโพเนนต์ React หลักที่แท้จริง (Core Presentational Logic Component)
-* **หน้าที่หลัก**:
-  * ควบคุมตรรกะทั้งหมดของหน้าปฏิทิน (การคำนวณวัน, การเปลี่ยนเดือน, การเลือกช่วงเวลา, การสลับปี พ.ศ./ค.ศ.)
-  * จัดการและเรนเดอร์โครงสร้างปฏิทินจริงลงเบราว์เซอร์
-  * ระบบทางลัด Preset ปุ่มกด และระบบคีย์บอร์ดทั้งหมด
-* **คำแนะนำในการพัฒนา**: **นี่คือไฟล์ที่สำคัญที่สุดในการพัฒนา UX/UI ฟังก์ชันหลักทั้งหมด** ปรับแต่งแก้โค้ดที่นี่หากต้องการเปลี่ยนลอจิกการกดปุ่ม, รูปแบบตาราง, หรือการทำงานของการสลับช่วงวันที่
-
-#### 📝 [src/ui/PwbDatePicker.css](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/ui/PwbDatePicker.css)
-
-* **บทบาท**: ไฟล์จัดระเบียบสไตล์ทั้งหมด (Premium CSS Design System)
-* **หน้าที่หลัก**:
-  * กำหนดคลาส CSS ทั้งหมด และตัวแปร CSS Tokens (`--accent-color`, `--border-radius`)
-  * เรนเดอร์เอฟเฟกต์ Glassmorphism, ขอบมน และแอนิเมชันลอยต่าง ๆ ทั้งปวง
-* **คำแนะนำในการพัฒนา**: แก้ไขไฟล์นี้เมื่อต้องการเปลี่ยนเฉดสี แสงเงา ขอบมน ระยะพิกเซล แฟลชสีกะพริบ หรือแอนิเมชันเลื่อนสไลด์ต่าง ๆ เพื่อเปลี่ยนหน้าตาของตัวปฏิทิน
+```bash
+Customize-mendix-widget-pwb-antigravity/             # [Repository Root]
+├── package.json                                    # รูทสคริปต์สำหรับการจัดการ workspaces ทั้งหมด
+├── package-lock.json
+├── scripts/
+│   └── rename_mpk.js                               # สคริปต์จัดส่งไฟล์ .mpk อัตโนมัติไปยังโปรเจกต์ Mendix
+├── Document/                                       # โฟลเดอร์รวมคู่มือเอกสาร
+│   ├── dependencies_guide.md                       # คู่มืออธิบาย dependencies ทั้งหมด
+│   └── developer_file_reference.md                # เอกสารคู่มือฉบับนี้
+│
+├── pwbComboBox/                                    # [Widget ตัวที่ 1: ComboBox]
+│   ├── package.json                                # ตั้งค่าเป้าหมายการส่งไฟล์และ dependencies
+│   ├── tsconfig.json                               # คอนฟิกการแปลงไฟล์ TypeScript
+│   ├── typings/
+│   │   └── PwbComboBoxProps.d.ts                   # ไฟล์ type-definition ของคุณสมบัติ (Auto-generated)
+│   └── src/
+│       ├── package.xml                             # รายการทรัพยากรสำหรับแพ็คเกจ .mpk
+│       ├── PwbComboBox.xml                         # XML กำหนดอินเทอร์เฟซฝั่ง Mendix
+│       ├── PwbComboBox.tsx                         # Wrapper รับค่าจาก Mendix เพื่อส่งลง React
+│       ├── PwbComboBox.editorPreview.tsx           # หน้าตาพรีวิวเวลาจัดเลย์เอาต์ใน Studio Pro
+│       ├── PwbComboBox.editorConfig.ts             # โค้ดควบคุมการซ่อน/แสดงฟิลด์บน Mendix properties
+│       ├── components/
+│       │   └── ComboBox.tsx                        # คอมโพเนนต์ React UI หลักของ ComboBox
+│       └── ui/
+│           └── PwbComboBox.css                     # สไตล์ชีทควบคุมการตกแต่ง ComboBox
+│
+├── pwbCustomizeContainerDataView/                  # [Widget ตัวที่ 2: Customize DataView Container]
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── typings/
+│   │   └── PwbCustomizeContainerDataViewProps.d.ts
+│   └── src/
+│       ├── package.xml
+│       ├── PwbCustomizeContainerDataView.xml
+│       ├── PwbCustomizeContainerDataView.tsx
+│       ├── PwbCustomizeContainerDataView.editorPreview.tsx
+│       ├── PwbCustomizeContainerDataView.editorConfig.ts
+│       ├── components/
+│       │   └── DragContainer.tsx                   # คอมโพเนนต์ React UI หลักของ DataView Drag-and-Drop
+│       └── ui/
+│           └── PwbCustomizeContainerDataView.css   # สไตล์ชีทควบคุมการตกแต่ง Container
+│
+└── pwbDatePicker/                                  # [Widget ตัวที่ 3: DatePicker]
+    ├── package.json
+    ├── tsconfig.json
+    ├── typings/
+    │   └── PwbDatePickerProps.d.ts
+    └── src/
+        ├── package.xml
+        ├── PwbDatePicker.xml
+        ├── PwbDatePicker.tsx
+        ├── PwbDatePicker.editorPreview.tsx
+        ├── PwbDatePicker.editorConfig.ts
+        ├── components/
+        │   └── DatePicker.tsx                      # คอมโพเนนต์ React UI หลักของ DatePicker
+        └── ui/
+            └── PwbDatePicker.css                   # สไตล์ชีทควบคุมการตกแต่ง DatePicker
+```
 
 ---
 
-## 💡 ตารางอ้างอิงรวดเร็ว: "อยากปรับเปลี่ยนตรงนี้...ต้องแก้ที่ไฟล์ไหน?"
+## 📝 หน้าที่รับผิดชอบและการแก้ไขไฟล์รายโฟลเดอร์
 
-| สิ่งที่ต้องการทำ (Goal) | ไฟล์หลักที่เกี่ยวข้อง (Core File) | ไฟล์รองที่ต้องแก้ไขตาม (Supporting File) |
-| :--- | :--- | :--- |
-| **เพิ่มช่องกรอกข้อมูล/พร็อพเพอร์ตี้ใน Mendix** | [PwbDatePicker.xml](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.xml) | [PwbDatePicker.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.tsx) และ [DatePicker.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/components/DatePicker.tsx) |
-| **ซ่อนกล่องข้อความออปชันในแผงคุณสมบัติเมื่อกดสลับตัวเลือก** | [PwbDatePicker.editorConfig.ts](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.editorConfig.ts) | - |
-| **เปลี่ยนโครงสร้างตรรกะใน React (เช่น การกดเลือกวันเกิด)** | [DatePicker.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/components/DatePicker.tsx) | - |
-| **ปรับสีไฮไลต์, สีตัวเลือก, ขอบมน, หรือภาพเคลื่อนไหว** | [PwbDatePicker.css](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/ui/PwbDatePicker.css) | - |
-| **ปรับเปลี่ยนเส้นทางการก็อปปี้ไฟล์ `.mpk` ไปแอป Mendix** | [pwbDatePicker/package.json](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/package.json) | - |
-| **เพิ่มคำแปลปุ่มกดเพื่อรองรับระบบ Batch Translate** | [PwbDatePicker.xml](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.xml) | [PwbDatePicker.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.tsx) และ [DatePicker.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/components/DatePicker.tsx) |
+### 1. โฟลเดอร์ระดับบนสุด (Monorepo Root Level)
+
+#### ⚙️ [package.json (Root)](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/package.json)
+* **หน้าที่**: ควบคุมความสัมพันธ์แบบ Monorepo Workspaces และเก็บคีย์ลัดสคริปต์บิลด์หลัก
+* **เมื่อใดที่ต้องแก้ไข**: ต้องการลงทะเบียนโฟลเดอร์ย่อยตัวใหม่ในโครงการ หรือต้องการเขียนสคริปต์สแกนตรวจสอบ/บิลด์อัตโนมัติระดับภาพรวม เช่น คำสั่งลัดบิลด์แยกรายตัว (`npm run build:pwbComboBox` เป็นต้น)
+
+#### 🚀 [scripts/rename_mpk.js](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/scripts/rename_mpk.js)
+* **หน้าที่**: รันหลังจบบิลด์ (`post-build release`) เพื่อเข้าทำความสะอาดโฟลเดอร์ปลายทางของ Mendix และย้ายพร้อมเปลี่ยนชื่อไฟล์ `.mpk` ตัวล่าสุดให้ระบุเวอร์ชันและวันเวลาการจัดทำอย่างชัดเจน
+* **เมื่อใดที่ต้องแก้ไข**: ต้องการเปลี่ยนเป้าหมายจัดเก็บไฟล์สำรอง `.mpk` หรือต้องการปรับแต่งฟอร์แมตการประทับเวลาระบุเวอร์ชัน
+
+---
+
+### 2. โฟลเดอร์ระบุคอนฟิกและเครื่องมือของแต่ละวิดเจ็ต (Widget Config Level)
+
+| ไฟล์คอนฟิกของ Widget | pwbComboBox | pwbCustomizeContainerDataView | pwbDatePicker |
+| :--- | :---: | :---: | :---: |
+| **package.json** *(กำหนดปลายทางโฟลเดอร์ของแอป Mendix บนเครื่องตนเอง)* | [ลิงก์ไฟล์](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbComboBox/package.json) | [ลิงก์ไฟล์](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbCustomizeContainerDataView/package.json) | [ลิงก์ไฟล์](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/package.json) |
+| **tsconfig.json** *(การตั้งค่า compiler ของ TypeScript)* | [ลิงก์ไฟล์](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbComboBox/tsconfig.json) | [ลิงก์ไฟล์](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbCustomizeContainerDataView/tsconfig.json) | [ลิงก์ไฟล์](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/tsconfig.json) |
+| **typings/*.d.ts** *(ไฟล์ประกาศประเภทตัวแปรฝั่ง Mendix)* | [ลิงก์ไฟล์](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbComboBox/typings/PwbComboBoxProps.d.ts) | [ลิงก์ไฟล์](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbCustomizeContainerDataView/typings/PwbCustomizeContainerDataViewProps.d.ts) | [ลิงก์ไฟล์](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/typings/PwbDatePickerProps.d.ts) |
+
+> [!WARNING]
+> ไฟล์ในโฟลเดอร์ `typings/` ถูกเจนเนอเรตขึ้นโดยอัตโนมัติจากไฟล์โครงสร้าง XML ของแต่ละวิดเจ็ต **ห้ามแก้ไขไฟล์เหล่านี้ด้วยมือเปล่าอย่างเด็ดขาด** เพราะจะถูกเขียนทับทันทีเมื่อสั่งบิลด์ใหม่
+
+---
+
+### 3. ไฟล์แหล่งข้อมูลและตรรกะเบื้องหลังภายใน `src/` (Widget Source Level)
+
+โครงสร้างไฟล์และรายละเอียดหน้าที่รับผิดชอบของวิดเจ็ตทั้ง 3 ตัว ประกอบด้วย:
+
+#### 🔹 3.1 ไฟล์อินเทอร์เฟซ XML คุณสมบัติ (`<WidgetName>.xml`)
+* **ไฟล์จริง**:
+  * pwbComboBox: [PwbComboBox.xml](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbComboBox/src/PwbComboBox.xml)
+  * pwbCustomizeContainerDataView: [PwbCustomizeContainerDataView.xml](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbCustomizeContainerDataView/src/PwbCustomizeContainerDataView.xml)
+  * pwbDatePicker: [PwbDatePicker.xml](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.xml)
+* **หน้าที่**: ประกาศโครงสร้าง Properties ทั้งหมดที่นักพัฒนาจะดับเบิ้ลคลิกเพื่อแก้ไขบนหน้าต่างตั้งค่าใน Mendix Studio Pro
+* **เมื่อใดที่ต้องแก้ไข**: ต้องการเพิ่มปุ่มกดเปิด/ปิดการทำงาน, ช่องกรอกข้อมูลสอยค่าแอตทริบิวต์ (Attributes), หรือเปิดช่องรับเงื่อนไขเหตุการณ์ของ Mendix (Events)
+
+#### 🔹 3.2 ไฟล์ตัวครอบและแลกเปลี่ยนข้อมูลระดับบน (`<WidgetName>.tsx`)
+* **ไฟล์จริง**:
+  * pwbComboBox: [PwbComboBox.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbComboBox/src/PwbComboBox.tsx)
+  * pwbCustomizeContainerDataView: [PwbCustomizeContainerDataView.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbCustomizeContainerDataView/src/PwbCustomizeContainerDataView.tsx)
+  * pwbDatePicker: [PwbDatePicker.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.tsx)
+* **หน้าที่**: รับข้อมูลดิบจาก XML Layer ของ Mendix เช็กคุณสมบัติการสิทธิ์เข้าถึง (เช่น Read-only/Editable) และช่วยทำความสะอาด/จัดรูปร่างข้อมูล (Validation & Parsing) ก่อนส่งต่อไปเป็น Props ให้กับชิ้นส่วน React UI
+* **เมื่อใดที่ต้องแก้ไข**: ต้องการเปลี่ยนตรรกะการตรวจสอบเงื่อนไขความถูกต้อง (Validation Rules) ระดับ Mendix หรือต้องการส่งค่า property ตัวใหม่ที่พึ่งประกาศใน XML ไปให้ React
+
+#### 🔹 3.3 ไฟล์คอมโพเนนต์ React UI แท้จริง (`src/components/`)
+* **ไฟล์จริง**:
+  * pwbComboBox: [ComboBox.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbComboBox/src/components/ComboBox.tsx)
+  * pwbCustomizeContainerDataView: [DragContainer.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbCustomizeContainerDataView/src/components/DragContainer.tsx)
+  * pwbDatePicker: [DatePicker.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/components/DatePicker.tsx)
+* **หน้าที่**: เป็นแกนหลักที่ทำหน้าที่คุมตรรกะการป้อนข้อมูล, สถานะการใช้งาน (Internal State Management), การคำนวณตำแหน่ง, การลากวาง และการเรนเดอร์ UI จริงลงบนหน้าเว็บเบราว์เซอร์
+* **เมื่อใดที่ต้องแก้ไข**: **นี่คือจุดหลักสำหรับแก้ไขตรรกะและโครงสร้าง UI/UX ของตัววิดเจ็ต** เช่น ต้องการเปลี่ยนลักษณะการแสดงผลเมนูดร็อปดาวน์, เปลี่ยนขั้นตอนลากเรียงลำดับใหม่ หรือลอจิกการคำนวณปฏิทิน
+
+#### 🔹 3.4 สไตล์ชีทควบคุมการตกแต่ง CSS (`src/ui/`)
+* **ไฟล์จริง**:
+  * pwbComboBox: [PwbComboBox.css](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbComboBox/src/ui/PwbComboBox.css)
+  * pwbCustomizeContainerDataView: [PwbCustomizeContainerDataView.css](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbCustomizeContainerDataView/src/ui/PwbCustomizeContainerDataView.css)
+  * pwbDatePicker: [PwbDatePicker.css](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/ui/PwbDatePicker.css)
+* **หน้าที่**: ควบคุมความสวยงามของธีม (Theme Styles), ขนาดขอบมน, เงาตกกระทบ, แอนิเมชันตอนแสดงผลหรือโฮเวอร์ และโทนสี
+* **เมื่อใดที่ต้องแก้ไข**: ต้องการเปลี่ยนรูปลักษณ์ การจัดแนวขอบ, ระยะพิกเซล (Padding/Margin), และเฉดสีเพื่อคงไว้ซึ่งความเป็นพรีเมียม UI
+
+#### 🔹 3.5 ไฟล์ควบคุมโครงสร้างและความสวยงามบนหน้าพรีวิว Mendix Studio Pro (`src/*.editorPreview.tsx` & `src/*.editorConfig.ts`)
+* **ไฟล์จริง**:
+  * pwbComboBox: [Preview](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbComboBox/src/PwbComboBox.editorPreview.tsx) / [Config](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbComboBox/src/PwbComboBox.editorConfig.ts)
+  * pwbCustomizeContainerDataView: [Preview](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbCustomizeContainerDataView/src/PwbCustomizeContainerDataView.editorPreview.tsx) / [Config](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbCustomizeContainerDataView/src/PwbCustomizeContainerDataView.editorConfig.ts)
+  * pwbDatePicker: [Preview](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.editorPreview.tsx) / [Config](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.editorConfig.ts)
+* **หน้าที่**:
+  * `editorPreview.tsx` - จำลอง UI รูปวาดของวิดเจ็ตเพื่อโชว์บนหน้ากระดานโมเดลเลอร์
+  * `editorConfig.ts` - ตรวจเช็คคุณสมบัติ หากผู้ใช้อยู่ในโหมดที่ไม่ได้ใช้ฟังก์ชันใด จะทำหน้าที่ไฮไลต์จางหรือซ่อนฟิลด์ที่สับสนในแผงคุณสมบัติ Properties ทันที
+* **เมื่อใดที่ต้องแก้ไข**: ต้องการพัฒนาความสะดวกสบายในขั้นตอนการนำไปใช้ของ Developer ฝั่ง Mendix ไม่ให้นักออกแบบสับสนกับช่องตั้งค่าที่ไม่จำเป็นในบางสเตจการบิวด์แอป
+
+---
+
+## ⚡ ตารางวิเคราะห์ด่วน: "หากต้องการปรับปรุงฟีเจอร์...ต้องไปแก้ที่ใด?"
+
+| สิ่งที่ต้องการทำ (Goal) | วิดเจ็ต | ไฟล์หลักที่เกี่ยวข้อง (Core File) | ไฟล์เชื่อมโยงที่ต้องแก้ตาม |
+| :--- | :---: | :--- | :--- |
+| **เพิ่มพร็อพเพอร์ตี้กรอกข้อมูลใน Mendix** | **ทั้งหมด** | ไฟล์ `.xml` ของวิดเจ็ตนั้นๆ | ตัวครอบ `.tsx` และ คอมโพเนนต์ใน `components/` |
+| **แก้ไขตรรกะค้นหารายการใน ComboBox** | ComboBox | [ComboBox.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbComboBox/src/components/ComboBox.tsx) | - |
+| **เปลี่ยนแอนิเมชันลากวางและการสร้างเลน Lane** | Container | [DragContainer.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbCustomizeContainerDataView/src/components/DragContainer.tsx) | - |
+| **เปลี่ยนลอจิกจำกัดขอบเขตวันที่ขั้นสูง** | DatePicker | [DatePicker.tsx](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/components/DatePicker.tsx) | - |
+| **ซ่อนช่องกรอกวันที่เริ่มต้น หากตั้งเป็น Single Date** | DatePicker | [PwbDatePicker.editorConfig.ts](file:///Users/lapat.ta/Desktop/ETC%20Project/Customize-mendix-widget-pwb-antigravity/pwbDatePicker/src/PwbDatePicker.editorConfig.ts) | - |
+| **ปรับแก้ CSS, ขนาดขอบมน, เงา หรือสี** | **ทั้งหมด** | ไฟล์ `.css` ในโฟลเดอร์ `src/ui/` | - |
+| **เปลี่ยน Path ปลายทางในการส่งไฟล์ MPK** | **ทั้งหมด** | ไฟล์ `package.json` ในโฟลเดอร์ Widget | - |

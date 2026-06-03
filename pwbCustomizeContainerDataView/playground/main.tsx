@@ -202,6 +202,10 @@ function App() {
     const [layoutDirection, setLayoutDirection] = useState<"vertical" | "horizontal">("vertical");
     const [cardStyle, setCardStyle] = useState<"progress" | "icon">("progress");
     const [dragHandleDisplay, setDragHandleDisplay] = useState<"left" | "hide">("left");
+    const [themePreset, setThemePreset] = useState<"default_rounded" | "modern_glass" | "minimalist_flat" | "neo_brutalist">("default_rounded");
+    const [darkModeBehavior, setDarkModeBehavior] = useState<"auto" | "light" | "dark">("auto");
+    const [itemPadding, setItemPadding] = useState<string>("");
+    const [itemGap, setItemGap] = useState<string>("");
 
     // Performance Options
     const [saveDelay, setSaveDelay] = useState<number>(300);
@@ -432,7 +436,11 @@ function App() {
             enableFooter,
             footerContent,
             enableMainFooter,
-            mainFooterContent
+            mainFooterContent,
+            themePreset,
+            darkModeBehavior,
+            itemPadding,
+            itemGap
         };
     };
 
@@ -582,6 +590,83 @@ function App() {
                         />
                     </Section>
 
+                    <Section title="Theme & Dark Mode">
+                        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                            <span style={{ fontSize: "13px", color: "#94a3b8" }}>Theme Preset</span>
+                            <select
+                                value={themePreset}
+                                onChange={e => setThemePreset(e.target.value as any)}
+                                style={{
+                                    width: "100%", padding: "8px", borderRadius: "8px",
+                                    background: "#0f172a", border: "1.5px solid #1e293b",
+                                    color: "#f1f5f9", fontSize: "13px", cursor: "pointer"
+                                }}
+                            >
+                                <option value="default_rounded">Default Rounded</option>
+                                <option value="modern_glass">Glassmorphism</option>
+                                <option value="minimalist_flat">Minimalist Flat</option>
+                                <option value="neo_brutalist">Neo-Brutalist</option>
+                            </select>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px" }}>
+                            <span style={{ fontSize: "13px", color: "#94a3b8" }}>Dark Mode Behavior</span>
+                            <div style={{ display: "flex", gap: "6px" }}>
+                                {(["auto", "light", "dark"] as const).map(mode => (
+                                    <button
+                                        key={mode}
+                                        onClick={() => setDarkModeBehavior(mode)}
+                                        style={{
+                                            flex: 1, padding: "6px", borderRadius: "8px", cursor: "pointer",
+                                            border: `1.5px solid ${darkModeBehavior === mode ? "#3b82f6" : "#1e293b"}`,
+                                            background: darkModeBehavior === mode ? "rgba(59,130,246,0.15)" : "#0f172a",
+                                            color: darkModeBehavior === mode ? "#3b82f6" : "#64748b",
+                                            fontSize: "12px", transition: "all 0.2s"
+                                        }}
+                                    >
+                                        {mode.toUpperCase()}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </Section>
+
+                    <Section title="Item Spacing">
+                        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                            <span style={{ fontSize: "13px", color: "#94a3b8" }}>Item Padding</span>
+                            <select
+                                value={itemPadding}
+                                onChange={e => setItemPadding(e.target.value)}
+                                style={{
+                                    width: "100%", padding: "8px", borderRadius: "8px",
+                                    background: "#0f172a", border: "1.5px solid #1e293b",
+                                    color: "#f1f5f9", fontSize: "13px", cursor: "pointer"
+                                }}
+                            >
+                                <option value="">Default (12px 16px)</option>
+                                <option value="6px 10px">Compact (6px 10px)</option>
+                                <option value="16px 20px">Coarse (16px 20px)</option>
+                                <option value="24px">Spacious (24px)</option>
+                            </select>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px" }}>
+                            <span style={{ fontSize: "13px", color: "#94a3b8" }}>Item Gap</span>
+                            <select
+                                value={itemGap}
+                                onChange={e => setItemGap(e.target.value)}
+                                style={{
+                                    width: "100%", padding: "8px", borderRadius: "8px",
+                                    background: "#0f172a", border: "1.5px solid #1e293b",
+                                    color: "#f1f5f9", fontSize: "13px", cursor: "pointer"
+                                }}
+                            >
+                                <option value="">Default (12px)</option>
+                                <option value="6px">Tight (6px)</option>
+                                <option value="16px">Spacious (16px)</option>
+                                <option value="24px">Extra Large (24px)</option>
+                            </select>
+                        </div>
+                    </Section>
+
                     <Section title="Aesthetics">
                         <ColorPicker
                             label="Accent Color"
@@ -670,7 +755,7 @@ function App() {
                                 </span>
                             </div>
                             <div style={{ flex: 1, overflowY: "auto" }}>
-                                <PwbCustomizeContainerDataView themePreset={"default_rounded"} darkModeBehavior={"auto"} itemPadding={""} itemGap={""} {...getColumnProps("todo")} />
+                                <PwbCustomizeContainerDataView {...getColumnProps("todo")} />
                             </div>
                         </div>
                     )}
@@ -694,7 +779,7 @@ function App() {
                                 </span>
                             </div>
                             <div style={{ flex: 1, overflowY: "auto" }}>
-                                <PwbCustomizeContainerDataView themePreset={"default_rounded"} darkModeBehavior={"auto"} itemPadding={""} itemGap={""} {...getColumnProps("in_progress")} />
+                                <PwbCustomizeContainerDataView {...getColumnProps("in_progress")} />
                             </div>
                         </div>
                     )}
@@ -718,7 +803,7 @@ function App() {
                                 </span>
                             </div>
                             <div style={{ flex: 1, overflowY: "auto" }}>
-                                <PwbCustomizeContainerDataView themePreset={"default_rounded"} darkModeBehavior={"auto"} itemPadding={""} itemGap={""} {...getColumnProps("done")} />
+                                <PwbCustomizeContainerDataView {...getColumnProps("done")} />
                             </div>
                         </div>
                     )}
@@ -742,7 +827,7 @@ function App() {
                                 </span>
                             </div>
                             <div style={{ flex: 1, overflowY: "auto" }}>
-                                <PwbCustomizeContainerDataView themePreset={"default_rounded"} darkModeBehavior={"auto"} itemPadding={""} itemGap={""} {...getColumnProps("archived")} />
+                                <PwbCustomizeContainerDataView {...getColumnProps("archived")} />
                             </div>
                         </div>
                     )}

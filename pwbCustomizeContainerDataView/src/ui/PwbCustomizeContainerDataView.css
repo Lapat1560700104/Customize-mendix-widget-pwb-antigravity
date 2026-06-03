@@ -459,3 +459,28 @@
     transform: scale(0.99);
 }
 
+/* Dynamic placeholder indicating the drop target slot */
+.pwb-drag-placeholder {
+    border: 2px dashed var(--accent-color, #3b82f6) !important;
+    background: color-mix(in srgb, var(--accent-color, #3b82f6) 6%, transparent) !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    animation: pwb-placeholder-fade 0.15s ease-out !important;
+}
+
+@keyframes pwb-placeholder-fade {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Constraint validation: disallowed target state */
+.pwb-drag-container.pwb-lane-denied {
+    border: 2px dashed #ef4444 !important;
+    background: rgba(239, 68, 68, 0.05) !important;
+}
+
+.pwb-drag-container.pwb-lane-denied * {
+    cursor: not-allowed !important;
+}
+
+

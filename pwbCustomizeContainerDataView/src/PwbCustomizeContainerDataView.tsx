@@ -52,7 +52,9 @@ export function PwbCustomizeContainerDataView({
     outerFooterContent,
     enableLaneTitle,
     laneTitle,
-    laneTitleContent
+    laneTitleContent,
+    allowedSourceColumns,
+    itemAllowDropExpression
 }: PwbCustomizeContainerDataViewContainerProps): ReactElement {
     // 1. Sanitize Aesthetics Configuration
     const colorRegex =
@@ -203,6 +205,25 @@ export function PwbCustomizeContainerDataView({
         }
     };
 
+    const isDropAllowed = (draggedItemRaw: any, sourceColumnValue: string): boolean => {
+        if (allowedSourceColumns && allowedSourceColumns.value) {
+            const allowedList = allowedSourceColumns.value
+                .split(",")
+                .map(s => s.trim())
+                .filter(Boolean);
+            if (allowedList.length > 0 && !allowedList.includes(sourceColumnValue)) {
+                return false;
+            }
+        }
+        if (itemAllowDropExpression && draggedItemRaw) {
+            const exprVal = itemAllowDropExpression.get(draggedItemRaw);
+            if (exprVal && exprVal.status === "available" && exprVal.value === false) {
+                return false;
+            }
+        }
+        return true;
+    };
+
     // 5. Drag callbacks
     const handleOrderChange = (newOrderIds: GUID[]): void => {
         saveOrderWithDebounce(newOrderIds);
@@ -307,6 +328,7 @@ export function PwbCustomizeContainerDataView({
                         columnValue={columnValue}
                         onDropExternal={handleDropExternal}
                         onRemoveItemExternal={handleRemoveItemExternal}
+                        isDropAllowed={isDropAllowed}
                         themePreset={themePreset}
                         darkModeBehavior={darkModeBehavior}
                         itemPadding={safeItemPadding}
@@ -344,6 +366,7 @@ export function PwbCustomizeContainerDataView({
                     columnValue={columnValue}
                     onDropExternal={handleDropExternal}
                     onRemoveItemExternal={handleRemoveItemExternal}
+                    isDropAllowed={isDropAllowed}
                     themePreset={themePreset}
                     darkModeBehavior={darkModeBehavior}
                     itemPadding={safeItemPadding}

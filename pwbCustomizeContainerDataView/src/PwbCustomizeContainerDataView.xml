@@ -165,6 +165,16 @@
                     <attributeType name="Enum"/>
                 </attributeTypes>
             </property>
+            <property key="allowedSourceColumns" type="expression" required="false">
+                <caption>Allowed Source Columns</caption>
+                <description>Expression returning a comma-separated list of column values allowed to drop into this column (e.g. 'ToDo,InProgress'). If blank, all source columns are allowed.</description>
+                <returnType type="String"/>
+            </property>
+            <property key="itemAllowDropExpression" type="expression" required="false" dataSource="itemsSource">
+                <caption>Item Drop Allowed Expression</caption>
+                <description>Boolean expression evaluated on the dragged item itself to verify if it is allowed to drop in this column (e.g. $currentObject/Priority = 'High').</description>
+                <returnType type="Boolean"/>
+            </property>
         </propertyGroup>
 
         <propertyGroup caption="Performance Settings">

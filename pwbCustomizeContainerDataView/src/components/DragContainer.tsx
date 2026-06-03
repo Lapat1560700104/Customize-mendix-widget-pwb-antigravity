@@ -20,6 +20,7 @@ export interface DragContainerProps {
     columnValue?: string;
     onDropExternal?: (draggedItemId: GUID, sourceContainerId: string, targetIndex: number) => void;
     onRemoveItemExternal?: (itemId: GUID) => void;
+    isDropAllowed?: (draggedItemRaw: ObjectItem, sourceColumnValue: string) => boolean;
     themePreset: "default_rounded" | "modern_glass" | "minimalist_flat" | "neo_brutalist";
     darkModeBehavior: "auto" | "light" | "dark";
     itemPadding?: string;
@@ -33,6 +34,7 @@ interface DragRegistry {
     sourceContainerId: string;
     sourceColumnValue?: string;
     onRemoveItem?: (itemId: GUID) => void;
+    draggedSize?: { width: number; height: number };
 }
 
 declare global {
@@ -70,6 +72,7 @@ export function DragContainer({
     columnValue,
     onDropExternal,
     onRemoveItemExternal,
+    isDropAllowed,
     themePreset,
     darkModeBehavior,
     itemPadding,
@@ -78,6 +81,7 @@ export function DragContainer({
     const [orderedItems, setOrderedItems] = useState<DragItem[]>([]);
     const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+    const [dropDenied, setDropDenied] = useState(false);
     const [wobblingItemId, setWobblingItemId] = useState<GUID | null>(null);
     const [keyboardGrabbedId, setKeyboardGrabbedId] = useState<GUID | null>(null);
     const [originalItemsBeforeKeyboardDrag, setOriginalItemsBeforeKeyboardDrag] = useState<DragItem[]>([]);
@@ -193,11 +197,23 @@ export function DragContainer({
                 return;
             }
 
+            // Custom workflow constraint check!
+            if (isDropAllowed && registry) {
+                const allowed = isDropAllowed(registry.draggedItem, registry.sourceColumnValue || "");
+                if (!allowed) {
+                    setDropDenied(true);
+                    setDragOverIndex(null);
+                    return;
+                }
+            }
+
+            setDropDenied(false);
             setDragOverIndex(hoverIndex);
         };
 
         const handleLeaveEvent = (): void => {
             setDragOverIndex(null);
+            setDropDenied(false);
         };
 
         el.addEventListener("pwb-drag-over-container", handleHoverEvent);
@@ -207,7 +223,7 @@ export function DragContainer({
             el.removeEventListener("pwb-drag-over-container", handleHoverEvent);
             el.removeEventListener("pwb-drag-leave-container", handleLeaveEvent);
         };
-    }, [containerId, dragGroup, enableKanban]);
+    }, [containerId, dragGroup, enableKanban, isDropAllowed]);
 
     const handlePointerDown = (e: ReactPointerEvent<HTMLDivElement>, index: number): void => {
         // Only trigger on left-click for mouse pointer devices
@@ -261,6 +277,10 @@ export function DragContainer({
         };
         document.addEventListener("touchmove", preventDefaultTouch, { passive: false });
 
+        if (window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate(15);
+        }
+
         // Mount current item parameters to the global dragging registry
         window.__pwbDragRegistry = {
             itemId: orderedItems[index].id,
@@ -268,7 +288,8 @@ export function DragContainer({
             sourceDragGroup: enableKanban ? dragGroup : undefined,
             sourceContainerId: containerId,
             sourceColumnValue: columnValue,
-            onRemoveItem: enableKanban ? onRemoveItemExternal : undefined
+            onRemoveItem: enableKanban ? onRemoveItemExternal : undefined,
+            draggedSize: { width: rect.width, height: rect.height }
         };
 
         const onPointerMove = (moveEvent: PointerEvent): void => {
@@ -417,6 +438,21 @@ export function DragContainer({
                 }
 
                 if (hoverContainer) {
+                    const isDenied = hoverContainer.getAttribute("data-drop-denied") === "true";
+                    if (isDenied) {
+                        document.body.style.cursor = "not-allowed";
+                        if (ghostEl) {
+                            ghostEl.style.borderColor = "#ef4444";
+                            ghostEl.style.boxShadow = "0 20px 40px -10px rgba(239, 68, 68, 0.3)";
+                        }
+                    } else {
+                        document.body.style.cursor = "grabbing";
+                        if (ghostEl) {
+                            ghostEl.style.borderColor = accentColor;
+                            ghostEl.style.boxShadow = "";
+                        }
+                    }
+
                     let targetIdx = 0;
                     if (hoverCard) {
                         const idxAttr = hoverCard.getAttribute("data-index");
@@ -466,6 +502,8 @@ export function DragContainer({
             if (upEvent.pointerId !== pointerId) {
                 return;
             }
+
+            document.body.style.cursor = "";
 
             try {
                 cardEl.releasePointerCapture(pointerId);
@@ -528,6 +566,9 @@ export function DragContainer({
                             // we compare final visual order with the starting order to trigger Mendix sync exactly once.
                             orderChanged = currentOrderIds.some((id, idx) => id !== originalOrderIds[idx]);
                             if (orderChanged) {
+                                if (window.navigator && window.navigator.vibrate) {
+                                    window.navigator.vibrate(10);
+                                }
                                 onOrderChange(currentOrderIds);
                             }
                         } else {
@@ -535,12 +576,17 @@ export function DragContainer({
                             const targetDragGroup = lastTargetContainer.getAttribute("data-drag-group") || undefined;
                             const targetEnableKanban =
                                 lastTargetContainer.getAttribute("data-enable-kanban") === "true";
+                            const isDenied = lastTargetContainer.getAttribute("data-drop-denied") === "true";
 
                             if (
                                 targetEnableKanban &&
+                                !isDenied &&
                                 (!targetDragGroup || targetDragGroup === registry.sourceDragGroup)
                             ) {
                                 if (onDropExternal) {
+                                    if (window.navigator && window.navigator.vibrate) {
+                                        window.navigator.vibrate(10);
+                                    }
                                     onDropExternal(registry.itemId, registry.sourceContainerId, finalIndex);
                                     orderChanged = true;
                                 }
@@ -582,9 +628,10 @@ export function DragContainer({
             data-drag-group={dragGroup}
             data-enable-kanban={String(enableKanban)}
             data-items-count={orderedItems.length}
+            data-drop-denied={dropDenied ? "true" : "false"}
             className={`pwb-drag-container pwb-direction-${layoutDirection} ${themeClass} ${modeClass} ${
                 orderedItems.length === 0 ? "pwb-empty-container-dropzone" : ""
-            }`}
+            } ${dropDenied ? "pwb-lane-denied" : ""}`}
             style={
                 {
                     "--accent-color": accentColor,
@@ -599,57 +646,95 @@ export function DragContainer({
                 {announcement}
             </div>
 
-            {orderedItems.map((item, idx) => {
-                const isDragging = idx === draggingIndex;
-                const isDragOver = idx === dragOverIndex;
-                const isGrabbed = item.id === keyboardGrabbedId;
+            {(() => {
+                const elements: ReactElement[] = [];
+                const registry = window.__pwbDragRegistry;
+                const showExternalPlaceholder =
+                    dragOverIndex !== null &&
+                    !dropDenied &&
+                    registry &&
+                    !orderedItems.some(it => it.id === registry.itemId);
 
-                return (
-                    <div
-                        key={item.id}
-                        data-index={idx}
-                        tabIndex={0}
-                        role="listitem"
-                        aria-grabbed={isDragging || isGrabbed}
-                        aria-roledescription="Draggable row card. Press Spacebar or Enter to grab, then use Arrow Up or Arrow Down keys to reorder. Press Escape to cancel."
-                        onPointerDown={e => handlePointerDown(e, idx)}
-                        onKeyDown={e => handleKeyDown(e, idx)}
-                        className={`pwb-draggable-row-item ${isDragging ? "pwb-dragging" : ""} ${
-                            isDragOver ? "pwb-drag-over" : ""
-                        } ${isGrabbed ? "pwb-keyboard-grabbed" : ""} ${
-                            wobblingItemId === item.id ? "pwb-wobble-shake" : ""
-                        }`}
-                        style={{
-                            borderRadius: `calc(${borderRadius} * 0.5)`
-                        }}
-                    >
-                        {/* Drag Handle Icon on the left */}
-                        {dragHandleDisplay === "left" && (
-                            <div className="pwb-drag-handle" title="Drag to reorder">
-                                <svg
-                                    viewBox="0 0 24 24"
-                                    width="16"
-                                    height="16"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2.5"
-                                    strokeLinecap="round"
-                                >
-                                    <circle cx="9" cy="5" r="1.2" fill="currentColor" />
-                                    <circle cx="9" cy="12" r="1.2" fill="currentColor" />
-                                    <circle cx="9" cy="19" r="1.2" fill="currentColor" />
-                                    <circle cx="15" cy="5" r="1.2" fill="currentColor" />
-                                    <circle cx="15" cy="12" r="1.2" fill="currentColor" />
-                                    <circle cx="15" cy="19" r="1.2" fill="currentColor" />
-                                </svg>
+                const placeholderSize = registry?.draggedSize;
+                const placeholderStyle = {
+                    width: placeholderSize ? `${placeholderSize.width}px` : "100%",
+                    height: placeholderSize ? `${placeholderSize.height}px` : "80px",
+                    borderRadius: `calc(${borderRadius} * 0.5)`
+                };
+
+                orderedItems.forEach((item, idx) => {
+                    const isDragging = idx === draggingIndex;
+                    const isDragOver = idx === dragOverIndex;
+                    const isGrabbed = item.id === keyboardGrabbedId;
+
+                    if (showExternalPlaceholder && idx === dragOverIndex) {
+                        elements.push(
+                            <div
+                                key="pwb-external-placeholder"
+                                className="pwb-drag-placeholder"
+                                style={placeholderStyle}
+                            />
+                        );
+                    }
+
+                    if (isDragging) {
+                        elements.push(<div key={item.id} className="pwb-drag-placeholder" style={placeholderStyle} />);
+                    } else {
+                        elements.push(
+                            <div
+                                key={item.id}
+                                data-index={idx}
+                                tabIndex={0}
+                                role="listitem"
+                                aria-grabbed={isGrabbed}
+                                aria-roledescription="Draggable row card. Press Spacebar or Enter to grab, then use Arrow Up or Arrow Down keys to reorder. Press Escape to cancel."
+                                onPointerDown={e => handlePointerDown(e, idx)}
+                                onKeyDown={e => handleKeyDown(e, idx)}
+                                className={`pwb-draggable-row-item ${isDragOver ? "pwb-drag-over" : ""} ${
+                                    isGrabbed ? "pwb-keyboard-grabbed" : ""
+                                } ${wobblingItemId === item.id ? "pwb-wobble-shake" : ""}`}
+                                style={{
+                                    borderRadius: `calc(${borderRadius} * 0.5)`
+                                }}
+                            >
+                                {dragHandleDisplay === "left" && (
+                                    <div className="pwb-drag-handle" title="Drag to reorder">
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            width="16"
+                                            height="16"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2.5"
+                                            strokeLinecap="round"
+                                        >
+                                            <circle cx="9" cy="5" r="1.2" fill="currentColor" />
+                                            <circle cx="9" cy="12" r="1.2" fill="currentColor" />
+                                            <circle cx="9" cy="19" r="1.2" fill="currentColor" />
+                                            <circle cx="15" cy="5" r="1.2" fill="currentColor" />
+                                            <circle cx="15" cy="12" r="1.2" fill="currentColor" />
+                                            <circle cx="15" cy="19" r="1.2" fill="currentColor" />
+                                        </svg>
+                                    </div>
+                                )}
+                                <div className="pwb-draggable-item-content">{renderItem(item.rawObject)}</div>
                             </div>
-                        )}
+                        );
+                    }
+                });
 
-                        {/* Nested custom widgets container */}
-                        <div className="pwb-draggable-item-content">{renderItem(item.rawObject)}</div>
-                    </div>
-                );
-            })}
+                if (showExternalPlaceholder && dragOverIndex >= orderedItems.length) {
+                    elements.push(
+                        <div
+                            key="pwb-external-placeholder-end"
+                            className="pwb-drag-placeholder"
+                            style={placeholderStyle}
+                        />
+                    );
+                }
+
+                return elements;
+            })()}
         </div>
     );
 }

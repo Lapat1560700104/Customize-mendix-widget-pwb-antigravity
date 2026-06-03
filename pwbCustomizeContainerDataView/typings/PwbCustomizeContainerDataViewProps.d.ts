@@ -4,7 +4,7 @@
  * @author Mendix Widgets Framework Team
  */
 import { ComponentType, CSSProperties, ReactNode } from "react";
-import { ActionValue, DynamicValue, EditableValue, ListValue, ListAttributeValue, ListWidgetValue } from "mendix";
+import { ActionValue, DynamicValue, EditableValue, ListValue, ListAttributeValue, ListExpressionValue, ListWidgetValue } from "mendix";
 
 export type LayoutDirectionEnum = "vertical" | "horizontal";
 
@@ -47,6 +47,8 @@ export interface PwbCustomizeContainerDataViewContainerProps {
     dragGroup: string;
     columnValue: string;
     itemColumnAttribute?: ListAttributeValue<string>;
+    allowedSourceColumns?: DynamicValue<string>;
+    itemAllowDropExpression?: ListExpressionValue<boolean>;
     saveDelay: number;
 }
 
@@ -89,5 +91,7 @@ export interface PwbCustomizeContainerDataViewPreviewProps {
     dragGroup: string;
     columnValue: string;
     itemColumnAttribute: string;
+    allowedSourceColumns: string;
+    itemAllowDropExpression: string;
     saveDelay: number | null;
 }

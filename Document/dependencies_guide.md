@@ -101,17 +101,17 @@
 
 ```mermaid
 flowchart TD
-    A[เริ่มกระบวนการพัฒนา] --> B{ต้องการพัฒนาส่วนใด?}
+    A["เริ่มกระบวนการพัฒนา"] --> B{"ต้องการพัฒนาส่วนใด?"}
     
-    B -->|รันและทดลอง UI บน Playground| C[npm run playground]
-    C -->|ใช้เครื่องมือ Dev| C1[vite + @vitejs/plugin-react + big.js]
+    B -->|รันและทดลอง UI บน Playground| C["npm run playground"]
+    C -->|ใช้เครื่องมือ Dev| C1["vite + @vitejs/plugin-react + big.js"]
     
-    B -->|ตรวจสอบและทดสอบคุณภาพโค้ด| D[npm run test & npm run lint]
-    D -->|ใช้เครื่องมือ Dev| D1[vitest + @mendix/pluggable-widgets-tools]
+    B -->|ตรวจสอบและทดสอบคุณภาพโค้ด| D["npm run test & npm run lint"]
+    D -->|ใช้เครื่องมือ Dev| D1["vitest + @mendix/pluggable-widgets-tools"]
     
-    B -->|รันหน้าเว็บจริง / บิลด์ .mpk| E[npm run release / build]
-    E -->|ใช้เครื่องมือ Dev| E1[@mendix/pluggable-widgets-tools]
-    E1 -->|รวมโค้ดส่งไปหน้าบราวด์เซอร์จริง| E2[classnames ใน Runtime + React 19 จาก Overrides]
+    B -->|รันหน้าเว็บจริง / บิลด์ .mpk| E["npm run release / build"]
+    E -->|ใช้เครื่องมือ Dev| E1["@mendix/pluggable-widgets-tools"]
+    E1 -->|รวมโค้ดส่งไปหน้าบราวด์เซอร์จริง| E2["classnames ใน Runtime + React 19 จาก Overrides"]
 ```
 
 ---

@@ -35,6 +35,7 @@
     
     padding: 6px;
     min-height: 50px;
+    contain: layout style;
     transition: background-color 0.2s ease;
 }
 
@@ -98,7 +99,7 @@
     background: var(--pwb-bg-main);
     border: 1px solid var(--pwb-border-color);
     padding: var(--pwb-item-padding, 12px 16px);
-    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.2s, box-shadow 0.2s, background-color 0.2s, color 0.2s;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s, box-shadow 0.2s, background-color 0.2s, color 0.2s;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.015);
     position: relative;
     user-select: none;
@@ -172,14 +173,14 @@
 
 /* --- 1. Premium Glassmorphism --- */
 .pwb-preset-modern_glass .pwb-draggable-row-item {
-    background: color-mix(in srgb, var(--pwb-bg-main) 65%, transparent) !important;
-    backdrop-filter: blur(14px) !important;
-    -webkit-backdrop-filter: blur(14px) !important;
-    border: 1px solid color-mix(in srgb, var(--pwb-text-primary) 12%, transparent) !important;
+    background: color-mix(in srgb, var(--pwb-bg-main) 72%, transparent) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid color-mix(in srgb, var(--pwb-text-primary) 10%, transparent) !important;
     box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.03) !important;
 }
 .pwb-preset-modern_glass .pwb-draggable-row-item:hover {
-    background: color-mix(in srgb, var(--pwb-bg-main) 80%, transparent) !important;
+    background: color-mix(in srgb, var(--pwb-bg-main) 84%, transparent) !important;
     border-color: var(--accent-color) !important;
     box-shadow: 0 12px 30px 0 color-mix(in srgb, var(--accent-color) 8%, transparent) !important;
 }
@@ -343,8 +344,13 @@
     -webkit-backdrop-filter: blur(10px) !important;
     border: 2px solid var(--accent-color, #3b82f6) !important;
     box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.16), 0 10px 15px -5px rgba(0, 0, 0, 0.08) !important;
-    transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease !important;
-    transform: scale(1.03) rotate(1.5deg) !important;
+    
+    /* Translation is handled dynamically via translate3d in JS.
+       Scale and rotate are transitioned individually for maximum performance and fluid tactile popup. */
+    scale: 1.03;
+    rotate: 1.5deg;
+    transition: scale 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), rotate 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease !important;
+    
     box-sizing: border-box !important;
     padding: 12px 16px !important;
     display: flex !important;
@@ -356,6 +362,11 @@
     user-select: none !important;
     -webkit-user-select: none !important;
     overscroll-behavior-y: contain !important; /* Disables mobile pull-down refresh while dragging */
+}
+
+/* Optimize compositor layer during active drag states */
+.pwb-drag-active-body .pwb-draggable-row-item {
+    will-change: transform;
 }
 
 /* Ensure smooth pointer transitions */

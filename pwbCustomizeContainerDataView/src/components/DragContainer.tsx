@@ -319,8 +319,14 @@ export function DragContainer({
                 ghostEl.style.setProperty("--accent-color", accentColor);
                 ghostEl.style.setProperty("--border-radius", borderRadius);
 
+                // Fixed baseline coords so translate3d operates purely on viewport coordinates
+                ghostEl.style.left = "0px";
+                ghostEl.style.top = "0px";
+
                 // Initial scale pop for iOS tactile representation
-                ghostEl.style.transform = "scale(0.97) rotate(0deg)";
+                ghostEl.style.transform = `translate3d(${startX - offsetX}px, ${startY - offsetY}px, 0)`;
+                ghostEl.style.scale = "0.97";
+                ghostEl.style.rotate = "0deg";
 
                 // Clone only the visible inner custom content for flawless look
                 const contentWrapper = cardEl.querySelector(".pwb-draggable-item-content");
@@ -335,15 +341,17 @@ export function DragContainer({
                 // Trigger spring animation transition using requestAnimationFrame
                 requestAnimationFrame(() => {
                     if (ghostEl) {
-                        ghostEl.style.transform = ""; // Let CSS class transform transition kick in!
+                        ghostEl.style.scale = ""; // Let CSS class scale transition kick in!
+                        ghostEl.style.rotate = ""; // Let CSS class rotate transition kick in!
                     }
                 });
             }
 
             if (dragInitiated && ghostEl) {
-                // Instantly sync coordinates with finger/mouse cursor
-                ghostEl.style.left = `${moveEvent.clientX - offsetX}px`;
-                ghostEl.style.top = `${moveEvent.clientY - offsetY}px`;
+                // Instantly sync coordinates with finger/mouse cursor using GPU-accelerated translate3d
+                ghostEl.style.transform = `translate3d(${moveEvent.clientX - offsetX}px, ${
+                    moveEvent.clientY - offsetY
+                }px, 0)`;
 
                 // Premium Dynamic Mobile Auto-Scrolling Engine for nested Scroll Containers + Window Fallback
                 const scrollThreshold = 75;

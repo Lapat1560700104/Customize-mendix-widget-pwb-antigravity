@@ -21,6 +21,33 @@
             </property>
         </propertyGroup>
 
+        <propertyGroup caption="Header &amp; Footer Settings">
+            <property key="enableHeader" type="boolean" defaultValue="false">
+                <caption>Enable Header</caption>
+                <description>Enable or disable the custom header section above the content container.</description>
+            </property>
+            <property key="headerContent" type="widgets" required="false">
+                <caption>Header Content</caption>
+                <description>Custom widgets to place in the header section above the drag-and-drop items.</description>
+            </property>
+            <property key="enableFooter" type="boolean" defaultValue="false">
+                <caption>Enable Footer</caption>
+                <description>Enable or disable the custom footer section below the content container.</description>
+            </property>
+            <property key="footerContent" type="widgets" required="false">
+                <caption>Footer Content</caption>
+                <description>Custom widgets to place in the footer section below the drag-and-drop items.</description>
+            </property>
+            <property key="enableMainFooter" type="boolean" defaultValue="false">
+                <caption>Enable Main Footer</caption>
+                <description>Enable or disable the custom main footer section at the bottom of the lane.</description>
+            </property>
+            <property key="mainFooterContent" type="widgets" required="false">
+                <caption>Main Footer Content</caption>
+                <description>Custom widgets to place in the main footer section at the bottom of the lane.</description>
+            </property>
+        </propertyGroup>
+
         <propertyGroup caption="Sorting Persistence">
             <property key="sortedAttribute" type="attribute" required="true">
                 <caption>Sorted IDs Attribute</caption>

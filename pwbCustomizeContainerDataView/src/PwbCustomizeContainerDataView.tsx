@@ -23,7 +23,13 @@ export function PwbCustomizeContainerDataView({
     themePreset,
     darkModeBehavior,
     itemPadding,
-    itemGap
+    itemGap,
+    enableHeader,
+    headerContent,
+    enableFooter,
+    footerContent,
+    enableMainFooter,
+    mainFooterContent
 }: PwbCustomizeContainerDataViewContainerProps): ReactElement {
     // 1. Sanitize Aesthetics Configuration
     const colorRegex =
@@ -174,6 +180,8 @@ export function PwbCustomizeContainerDataView({
 
     return (
         <div className={`pwb-customize-container-dataview-wrapper ${className || ""}`} style={style}>
+            {enableHeader && headerContent && <div className="pwb-section-header">{headerContent}</div>}
+
             {isLoading ? (
                 <div className="pwb-loading-state" style={{ "--accent-color": safeAccentColor } as any}>
                     <div className="pwb-spinner"></div>
@@ -238,6 +246,10 @@ export function PwbCustomizeContainerDataView({
                     itemGap={safeItemGap}
                 />
             )}
+
+            {enableFooter && footerContent && <div className="pwb-section-footer">{footerContent}</div>}
+
+            {enableMainFooter && mainFooterContent && <div className="pwb-main-footer">{mainFooterContent}</div>}
         </div>
     );
 }

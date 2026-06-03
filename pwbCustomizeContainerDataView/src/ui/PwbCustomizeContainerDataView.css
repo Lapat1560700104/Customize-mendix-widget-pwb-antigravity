@@ -376,3 +376,22 @@
 .pwb-wobble-shake {
     animation: pwb-wobble 0.4s ease-in-out !important;
 }
+
+/* Header & Footer Custom Sections */
+.pwb-section-header {
+    width: 100%;
+    margin-bottom: var(--pwb-item-gap, 12px);
+    box-sizing: border-box;
+}
+
+.pwb-section-footer {
+    width: 100%;
+    margin-top: var(--pwb-item-gap, 12px);
+    box-sizing: border-box;
+}
+
+.pwb-main-footer {
+    width: 100%;
+    margin-top: var(--pwb-item-gap, 12px);
+    box-sizing: border-box;
+}

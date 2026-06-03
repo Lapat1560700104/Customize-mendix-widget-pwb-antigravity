@@ -199,6 +199,36 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
                 </div>
             )}
 
+            {/* ── Header Section Preview ── */}
+            {props.enableHeader && props.headerContent?.renderer && (
+                <div
+                    style={{
+                        border: `1px dashed ${colors.border}`,
+                        borderRadius: `calc(${borderRadius} * 0.5)`,
+                        padding: "8px 12px",
+                        marginBottom: props.itemGap || "12px",
+                        backgroundColor: colors.rowBg,
+                        boxSizing: "border-box"
+                    }}
+                >
+                    <props.headerContent.renderer caption="Header Content — Drag widgets here">
+                        <div
+                            style={{
+                                padding: "8px 10px",
+                                background: colors.dropzoneBg,
+                                borderRadius: "6px",
+                                fontSize: "11px",
+                                color: colors.labelColor,
+                                border: `1px dashed ${colors.dropzoneBorder}`,
+                                textAlign: "center"
+                            }}
+                        >
+                            ⬇ Drop header widgets here
+                        </div>
+                    </props.headerContent.renderer>
+                </div>
+            )}
+
             {/* ── Sortable Rows ── */}
             <div style={rowContainerStyle}>
                 {/* Row 1 — shows the LIVE nested widgets via renderer */}
@@ -268,6 +298,66 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
                     </div>
                 )}
             </div>
+
+            {/* ── Footer Section Preview ── */}
+            {props.enableFooter && props.footerContent?.renderer && (
+                <div
+                    style={{
+                        border: `1px dashed ${colors.border}`,
+                        borderRadius: `calc(${borderRadius} * 0.5)`,
+                        padding: "8px 12px",
+                        marginTop: props.itemGap || "12px",
+                        backgroundColor: colors.rowBg,
+                        boxSizing: "border-box"
+                    }}
+                >
+                    <props.footerContent.renderer caption="Footer Content — Drag widgets here">
+                        <div
+                            style={{
+                                padding: "8px 10px",
+                                background: colors.dropzoneBg,
+                                borderRadius: "6px",
+                                fontSize: "11px",
+                                color: colors.labelColor,
+                                border: `1px dashed ${colors.dropzoneBorder}`,
+                                textAlign: "center"
+                            }}
+                        >
+                            ⬇ Drop footer widgets here
+                        </div>
+                    </props.footerContent.renderer>
+                </div>
+            )}
+
+            {/* ── Main Footer Section Preview ── */}
+            {props.enableMainFooter && props.mainFooterContent?.renderer && (
+                <div
+                    style={{
+                        border: `1px dashed ${colors.border}`,
+                        borderRadius: `calc(${borderRadius} * 0.5)`,
+                        padding: "8px 12px",
+                        marginTop: props.itemGap || "12px",
+                        backgroundColor: colors.rowBg,
+                        boxSizing: "border-box"
+                    }}
+                >
+                    <props.mainFooterContent.renderer caption="Main Footer Content — Drag widgets here">
+                        <div
+                            style={{
+                                padding: "8px 10px",
+                                background: colors.dropzoneBg,
+                                borderRadius: "6px",
+                                fontSize: "11px",
+                                color: colors.labelColor,
+                                border: `1px dashed ${colors.dropzoneBorder}`,
+                                textAlign: "center"
+                            }}
+                        >
+                            ⬇ Drop main footer widgets here
+                        </div>
+                    </props.mainFooterContent.renderer>
+                </div>
+            )}
 
             {/* ── onSortAction indicator ── */}
             {!isStructure && props.onSortAction && (

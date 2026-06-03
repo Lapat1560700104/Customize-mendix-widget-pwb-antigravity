@@ -103,14 +103,26 @@ export function getProperties(
     values: PwbCustomizeContainerDataViewPreviewProps,
     defaultProperties: Properties /* , target: Platform*/
 ): Properties {
+    const propsToHide: string[] = [];
     if (!values.enableKanban) {
-        const kanbanPropsToHide = ["dragGroup", "columnValue", "itemColumnAttribute"];
+        propsToHide.push("dragGroup", "columnValue", "itemColumnAttribute");
+    }
+    if (!values.enableHeader) {
+        propsToHide.push("headerContent");
+    }
+    if (!values.enableFooter) {
+        propsToHide.push("footerContent");
+    }
+    if (!values.enableMainFooter) {
+        propsToHide.push("mainFooterContent");
+    }
 
+    if (propsToHide.length > 0) {
         const filterProperties = (groups: PropertyGroup[]): PropertyGroup[] => {
             return groups.map(group => {
                 const newGroup = { ...group };
                 if (group.properties) {
-                    newGroup.properties = group.properties.filter(prop => !kanbanPropsToHide.includes(prop.key));
+                    newGroup.properties = group.properties.filter(prop => !propsToHide.includes(prop.key));
                 }
                 if (group.propertyGroups) {
                     newGroup.propertyGroups = filterProperties(group.propertyGroups);

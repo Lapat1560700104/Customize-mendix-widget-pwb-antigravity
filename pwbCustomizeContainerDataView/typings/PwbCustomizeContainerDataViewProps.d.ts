@@ -21,6 +21,12 @@ export interface PwbCustomizeContainerDataViewContainerProps {
     tabIndex?: number;
     itemsSource: ListValue;
     customItemContent: ListWidgetValue;
+    enableHeader: boolean;
+    headerContent?: ReactNode;
+    enableFooter: boolean;
+    footerContent?: ReactNode;
+    enableMainFooter: boolean;
+    mainFooterContent?: ReactNode;
     sortedAttribute: EditableValue<string>;
     onSortAction?: ActionValue;
     layoutDirection: LayoutDirectionEnum;
@@ -51,6 +57,12 @@ export interface PwbCustomizeContainerDataViewPreviewProps {
     translate: (text: string) => string;
     itemsSource: {} | { caption: string } | { type: string } | null;
     customItemContent: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
+    enableHeader: boolean;
+    headerContent: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
+    enableFooter: boolean;
+    footerContent: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
+    enableMainFooter: boolean;
+    mainFooterContent: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     sortedAttribute: string;
     onSortAction: {} | null;
     layoutDirection: LayoutDirectionEnum;

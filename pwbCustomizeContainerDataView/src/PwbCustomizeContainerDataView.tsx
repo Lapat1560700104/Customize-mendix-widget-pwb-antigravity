@@ -1,7 +1,23 @@
-import { ReactElement, useMemo, useRef, useEffect } from "react";
+import { ReactElement, useMemo, useRef, useEffect, useState, CSSProperties } from "react";
 import { DragContainer, DragItem } from "./components/DragContainer";
 import { PwbCustomizeContainerDataViewContainerProps } from "../typings/PwbCustomizeContainerDataViewProps";
 import "./ui/PwbCustomizeContainerDataView.css";
+
+interface ActiveTransition {
+    itemId: string;
+    sourceContainerId: string;
+    targetContainerId: string;
+    targetColumnValue: string;
+    targetIndex: number;
+    draggedItemRaw: any;
+    timestamp: number;
+}
+
+declare global {
+    interface Window {
+        __pwbActiveTransition?: ActiveTransition;
+    }
+}
 
 export function PwbCustomizeContainerDataView({
     class: className,
@@ -59,6 +75,18 @@ export function PwbCustomizeContainerDataView({
     const safeItemGap = sanitizeSpacing(itemGap, "12px");
 
     // 2. Handle Loading & Empty States Elegantly
+    const [transitionTrigger, setTransitionTrigger] = useState(0);
+
+    useEffect(() => {
+        const handleTransition = () => {
+            setTransitionTrigger(prev => prev + 1);
+        };
+        window.addEventListener("pwb-transition-start", handleTransition);
+        return () => {
+            window.removeEventListener("pwb-transition-start", handleTransition);
+        };
+    }, []);
+
     const isLoading = itemsSource.status === "loading";
     const hasItems = itemsSource.items && itemsSource.items.length > 0;
 
@@ -66,14 +94,33 @@ export function PwbCustomizeContainerDataView({
     // We sort them based on the initial or current value of `sortedAttribute` if it's set,
     // to preserve Mendix side sorting order when the widget loads.
     const dragItems: DragItem[] = useMemo(() => {
-        if (!itemsSource.items) {
-            return [];
-        }
+        let rawList = itemsSource.items
+            ? itemsSource.items.map(item => ({
+                  id: item.id,
+                  rawObject: item
+              }))
+            : [];
 
-        const rawList = itemsSource.items.map(item => ({
-            id: item.id,
-            rawObject: item
-        }));
+        // Apply global optimistic transition if valid (less than 1.2s old)
+        const transition = window.__pwbActiveTransition;
+        if (transition && Date.now() - transition.timestamp < 1200) {
+            // A. Optimistic Remove (for Source column)
+            if (containerId === transition.sourceContainerId) {
+                rawList = rawList.filter(item => item.id !== transition.itemId);
+            }
+            // B. Optimistic Insert (for Target column)
+            else if (containerId === transition.targetContainerId) {
+                const alreadyContains = rawList.some(item => item.id === transition.itemId);
+                if (!alreadyContains) {
+                    const optimisticItem: DragItem = {
+                        id: transition.itemId,
+                        rawObject: transition.draggedItemRaw
+                    };
+                    rawList = [...rawList];
+                    rawList.splice(transition.targetIndex, 0, optimisticItem);
+                }
+            }
+        }
 
         // If the parent attribute already has a sorted order, sort the items accordingly
         if (sortedAttribute && sortedAttribute.value) {
@@ -86,6 +133,22 @@ export function PwbCustomizeContainerDataView({
                 const sortedMap = new Map<string, number>();
                 sortedIds.forEach((id, idx) => sortedMap.set(id, idx));
 
+                // If this is the target container and there is an active transition,
+                // override sorting to place the optimistic item exactly at targetIndex
+                if (transition && containerId === transition.targetContainerId && Date.now() - transition.timestamp < 1200) {
+                    const nextList = rawList.filter(item => item.id !== transition.itemId);
+                    const movingItem = rawList.find(item => item.id === transition.itemId);
+                    if (movingItem) {
+                        nextList.sort((a, b) => {
+                            const idxA = sortedMap.has(a.id) ? sortedMap.get(a.id)! : Infinity;
+                            const idxB = sortedMap.has(b.id) ? sortedMap.get(b.id)! : Infinity;
+                            return idxA - idxB;
+                        });
+                        nextList.splice(transition.targetIndex, 0, movingItem);
+                        return nextList;
+                    }
+                }
+
                 return [...rawList].sort((a, b) => {
                     const idxA = sortedMap.has(a.id) ? sortedMap.get(a.id)! : Infinity;
                     const idxB = sortedMap.has(b.id) ? sortedMap.get(b.id)! : Infinity;
@@ -95,10 +158,10 @@ export function PwbCustomizeContainerDataView({
         }
 
         return rawList;
-    }, [itemsSource.items, sortedAttribute]);
+    }, [itemsSource.items, sortedAttribute, transitionTrigger, containerId]);
 
     // 4. Performance Debouncing logic for Mendix Persistence
-    const debounceTimeoutRef = useRef<any>(null);
+    const debounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         return () => {
@@ -156,6 +219,26 @@ export function PwbCustomizeContainerDataView({
             return;
         }
 
+        // Set active transition for optimistic UI updates
+        window.__pwbActiveTransition = {
+            itemId: draggedItemId,
+            sourceContainerId: _sourceContainerId,
+            targetContainerId: containerId,
+            targetColumnValue: columnValue || "",
+            targetIndex,
+            draggedItemRaw: registry.draggedItem,
+            timestamp: Date.now()
+        };
+        window.dispatchEvent(new CustomEvent("pwb-transition-start"));
+
+        // Auto clean up after 1200ms in case Mendix completely fails or times out
+        setTimeout(() => {
+            if (window.__pwbActiveTransition && window.__pwbActiveTransition.itemId === draggedItemId) {
+                window.__pwbActiveTransition = undefined;
+                window.dispatchEvent(new CustomEvent("pwb-transition-start"));
+            }
+        }, 1200);
+
         // A. Remove from source container Mendix sorting state
         if (registry.onRemoveItem) {
             registry.onRemoveItem(draggedItemId);
@@ -196,7 +279,7 @@ export function PwbCustomizeContainerDataView({
             {enableHeader && headerContent && <div className="pwb-section-header">{headerContent}</div>}
 
             {isLoading ? (
-                <div className="pwb-loading-state" style={{ "--accent-color": safeAccentColor } as any}>
+                <div className="pwb-loading-state" style={{ "--accent-color": safeAccentColor } as CSSProperties}>
                     <div className="pwb-spinner"></div>
                     <span>Loading options...</span>
                 </div>

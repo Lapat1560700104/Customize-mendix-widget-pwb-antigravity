@@ -1,14 +1,15 @@
 import { ReactElement, useState, useEffect, useRef, PointerEvent as ReactPointerEvent } from "react";
+import { ObjectItem } from "mendix";
 
 export interface DragItem {
     id: string;
-    rawObject: any;
+    rawObject: ObjectItem;
 }
 
 export interface DragContainerProps {
     containerId: string;
     items: DragItem[];
-    renderItem: (rawObject: any) => ReactElement;
+    renderItem: (rawObject: ObjectItem) => ReactElement;
     onOrderChange: (newOrderIds: string[]) => void;
     accentColor: string;
     borderRadius: string;
@@ -27,7 +28,7 @@ export interface DragContainerProps {
 
 interface DragRegistry {
     itemId: string;
-    draggedItem: any;
+    draggedItem: ObjectItem;
     sourceDragGroup?: string;
     sourceContainerId: string;
     sourceColumnValue?: string;
@@ -39,6 +40,21 @@ declare global {
         __pwbDragRegistry?: DragRegistry;
     }
 }
+
+const getScrollParent = (node: HTMLElement | null): HTMLElement | null => {
+    if (!node || node === document.body || node === document.documentElement) {
+        return null;
+    }
+    const style = window.getComputedStyle(node);
+    const overflowY = style.overflowY;
+    const overflowX = style.overflowX;
+    const isScrollableY = (overflowY === "auto" || overflowY === "scroll") && node.scrollHeight > node.clientHeight;
+    const isScrollableX = (overflowX === "auto" || overflowX === "scroll") && node.scrollWidth > node.clientWidth;
+    if (isScrollableY || isScrollableX) {
+        return node;
+    }
+    return getScrollParent(node.parentElement);
+};
 
 export function DragContainer({
     containerId,
@@ -63,7 +79,82 @@ export function DragContainer({
     const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
     const [wobblingItemId, setWobblingItemId] = useState<string | null>(null);
+    const [keyboardGrabbedId, setKeyboardGrabbedId] = useState<string | null>(null);
+    const [originalItemsBeforeKeyboardDrag, setOriginalItemsBeforeKeyboardDrag] = useState<DragItem[]>([]);
+    const [announcement, setAnnouncement] = useState("");
     const containerRef = useRef<HTMLDivElement>(null);
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, index: number) => {
+        const item = orderedItems[index];
+        const isGrabbed = keyboardGrabbedId === item.id;
+        const itemTitle = e.currentTarget.innerText.split("\n")[0] || `Item ${index + 1}`;
+
+        if (e.key === " " || e.key === "Enter") {
+            e.preventDefault();
+            if (isGrabbed) {
+                // Drop the item
+                setKeyboardGrabbedId(null);
+                setOriginalItemsBeforeKeyboardDrag([]);
+                // Trigger save
+                const currentOrderIds = orderedItems.map(it => it.id);
+                const originalOrderIds = originalItemsBeforeKeyboardDrag.map(it => it.id);
+                const orderChanged = currentOrderIds.some((id, idx) => id !== originalOrderIds[idx]);
+                if (orderChanged) {
+                    onOrderChange(currentOrderIds);
+                    setAnnouncement(`Dropped ${itemTitle}. Order updated.`);
+                } else {
+                    setAnnouncement(`Dropped ${itemTitle}. Position unchanged.`);
+                }
+            } else {
+                // Grab the item
+                setKeyboardGrabbedId(item.id);
+                setOriginalItemsBeforeKeyboardDrag([...orderedItems]);
+                setAnnouncement(`Grabbed ${itemTitle}. Use Up or Down Arrow keys to reorder. Press Space or Enter to drop, or Escape to cancel.`);
+            }
+        } else if (e.key === "Escape") {
+            if (isGrabbed) {
+                e.preventDefault();
+                // Cancel reordering and restore original state
+                setOrderedItems(originalItemsBeforeKeyboardDrag);
+                setKeyboardGrabbedId(null);
+                const origIndex = originalItemsBeforeKeyboardDrag.findIndex(it => it.id === item.id);
+                setAnnouncement(`Reordering canceled. ${itemTitle} returned to position ${origIndex + 1}.`);
+                setOriginalItemsBeforeKeyboardDrag([]);
+            }
+        } else if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+            if (isGrabbed) {
+                e.preventDefault();
+                if (index < orderedItems.length - 1) {
+                    const nextItems = [...orderedItems];
+                    const temp = nextItems[index];
+                    nextItems[index] = nextItems[index + 1];
+                    nextItems[index + 1] = temp;
+                    setOrderedItems(nextItems);
+                    setAnnouncement(`Moved ${itemTitle} to position ${index + 2} of ${orderedItems.length}.`);
+                    setTimeout(() => {
+                        const nextEl = containerRef.current?.querySelector(`[data-index="${index + 1}"]`) as HTMLElement;
+                        nextEl?.focus();
+                    }, 0);
+                }
+            }
+        } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+            if (isGrabbed) {
+                e.preventDefault();
+                if (index > 0) {
+                    const nextItems = [...orderedItems];
+                    const temp = nextItems[index];
+                    nextItems[index] = nextItems[index - 1];
+                    nextItems[index - 1] = temp;
+                    setOrderedItems(nextItems);
+                    setAnnouncement(`Moved ${itemTitle} to position ${index} of ${orderedItems.length}.`);
+                    setTimeout(() => {
+                        const prevEl = containerRef.current?.querySelector(`[data-index="${index - 1}"]`) as HTMLElement;
+                        prevEl?.focus();
+                    }, 0);
+                }
+            }
+        }
+    };
 
     // Sync state when items source updates from Mendix
     useEffect(() => {
@@ -149,6 +240,7 @@ export function DragContainer({
         let dragInitiated = false;
         let ghostEl: HTMLDivElement | null = null;
         let lastTargetContainer: HTMLElement | null = null;
+        const scrollParent = getScrollParent(containerRef.current);
 
         // Tracks original and current order states directly in closure for 100% async state safety
         const originalOrderIds = orderedItems.map(item => item.id);
@@ -226,24 +318,76 @@ export function DragContainer({
                 ghostEl.style.left = `${moveEvent.clientX - offsetX}px`;
                 ghostEl.style.top = `${moveEvent.clientY - offsetY}px`;
 
-                // Premium Dynamic Mobile Auto-Scrolling Engine (Closer to edge = faster scroll)
+                // Premium Dynamic Mobile Auto-Scrolling Engine for nested Scroll Containers + Window Fallback
                 const scrollThreshold = 75;
-                const viewHeight = window.innerHeight;
+                let scrolled = false;
 
-                if (moveEvent.clientY < scrollThreshold) {
-                    const distanceToEdge = Math.max(0, moveEvent.clientY);
-                    const dynamicSpeed = Math.max(
-                        1,
-                        Math.min(25, Math.round((scrollThreshold - distanceToEdge) * 0.4))
-                    );
-                    window.scrollBy(0, -dynamicSpeed);
-                } else if (moveEvent.clientY > viewHeight - scrollThreshold) {
-                    const distanceToEdge = Math.max(0, viewHeight - moveEvent.clientY);
-                    const dynamicSpeed = Math.max(
-                        1,
-                        Math.min(25, Math.round((scrollThreshold - distanceToEdge) * 0.4))
-                    );
-                    window.scrollBy(0, dynamicSpeed);
+                if (scrollParent) {
+                    const parentRect = scrollParent.getBoundingClientRect();
+                    const parentTop = parentRect.top;
+                    const parentBottom = parentRect.bottom;
+                    const parentLeft = parentRect.left;
+                    const parentRight = parentRect.right;
+                    const clientY = moveEvent.clientY;
+                    const clientX = moveEvent.clientX;
+
+                    // Vertical scroll of parent container
+                    if (clientY < parentTop + scrollThreshold && clientY > parentTop) {
+                        const distance = clientY - parentTop;
+                        const speed = Math.max(1, Math.min(25, Math.round((scrollThreshold - distance) * 0.4)));
+                        scrollParent.scrollTop -= speed;
+                        scrolled = true;
+                    } else if (clientY > parentBottom - scrollThreshold && clientY < parentBottom) {
+                        const distance = parentBottom - clientY;
+                        const speed = Math.max(1, Math.min(25, Math.round((scrollThreshold - distance) * 0.4)));
+                        scrollParent.scrollTop += speed;
+                        scrolled = true;
+                    }
+
+                    // Horizontal scroll of parent container (if layoutDirection is horizontal)
+                    if (layoutDirection === "horizontal") {
+                        if (clientX < parentLeft + scrollThreshold && clientX > parentLeft) {
+                            const distance = clientX - parentLeft;
+                            const speed = Math.max(1, Math.min(25, Math.round((scrollThreshold - distance) * 0.4)));
+                            scrollParent.scrollLeft -= speed;
+                            scrolled = true;
+                        } else if (clientX > parentRight - scrollThreshold && clientX < parentRight) {
+                            const distance = parentRight - clientX;
+                            const speed = Math.max(1, Math.min(25, Math.round((scrollThreshold - distance) * 0.4)));
+                            scrollParent.scrollLeft += speed;
+                            scrolled = true;
+                        }
+                    }
+                }
+
+                // Fallback to Window Scrolling if parent didn't scroll or no scroll parent exists
+                if (!scrolled) {
+                    const viewHeight = window.innerHeight;
+                    const viewWidth = window.innerWidth;
+                    const clientY = moveEvent.clientY;
+                    const clientX = moveEvent.clientX;
+
+                    if (clientY < scrollThreshold) {
+                        const distance = Math.max(0, clientY);
+                        const speed = Math.max(1, Math.min(25, Math.round((scrollThreshold - distance) * 0.4)));
+                        window.scrollBy(0, -speed);
+                    } else if (clientY > viewHeight - scrollThreshold) {
+                        const distance = Math.max(0, viewHeight - clientY);
+                        const speed = Math.max(1, Math.min(25, Math.round((scrollThreshold - distance) * 0.4)));
+                        window.scrollBy(0, speed);
+                    }
+
+                    if (layoutDirection === "horizontal") {
+                        if (clientX < scrollThreshold) {
+                            const distance = Math.max(0, clientX);
+                            const speed = Math.max(1, Math.min(25, Math.round((scrollThreshold - distance) * 0.4)));
+                            window.scrollBy(-speed, 0);
+                        } else if (clientX > viewWidth - scrollThreshold) {
+                            const distance = Math.max(0, viewWidth - clientX);
+                            const speed = Math.max(1, Math.min(25, Math.round((scrollThreshold - distance) * 0.4)));
+                            window.scrollBy(speed, 0);
+                        }
+                    }
                 }
 
                 // Detect what elements sit directly under user finger coordinates
@@ -427,6 +571,7 @@ export function DragContainer({
     return (
         <div
             ref={containerRef}
+            role="list"
             data-container-id={containerId}
             data-drag-group={dragGroup}
             data-enable-kanban={String(enableKanban)}
@@ -444,18 +589,28 @@ export function DragContainer({
                 } as any
             }
         >
+            <div className="pwb-sr-only" aria-live="assertive" aria-atomic="true">
+                {announcement}
+            </div>
+
             {orderedItems.map((item, idx) => {
                 const isDragging = idx === draggingIndex;
                 const isDragOver = idx === dragOverIndex;
+                const isGrabbed = item.id === keyboardGrabbedId;
 
                 return (
                     <div
                         key={item.id}
                         data-index={idx}
+                        tabIndex={0}
+                        role="listitem"
+                        aria-grabbed={isDragging || isGrabbed}
+                        aria-roledescription="Draggable row card. Press Spacebar or Enter to grab, then use Arrow Up or Arrow Down keys to reorder. Press Escape to cancel."
                         onPointerDown={e => handlePointerDown(e, idx)}
+                        onKeyDown={e => handleKeyDown(e, idx)}
                         className={`pwb-draggable-row-item ${isDragging ? "pwb-dragging" : ""} ${
                             isDragOver ? "pwb-drag-over" : ""
-                        } ${wobblingItemId === item.id ? "pwb-wobble-shake" : ""}`}
+                        } ${isGrabbed ? "pwb-keyboard-grabbed" : ""} ${wobblingItemId === item.id ? "pwb-wobble-shake" : ""}`}
                         style={{
                             borderRadius: `calc(${borderRadius} * 0.5)`
                         }}

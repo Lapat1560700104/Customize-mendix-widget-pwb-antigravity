@@ -431,3 +431,31 @@
     box-sizing: border-box;
 }
 
+/* Accessibility helper class for screen readers */
+.pwb-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Focus outline for keyboard users */
+.pwb-draggable-row-item:focus-visible {
+    outline: 2px solid var(--accent-color, #3b82f6) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 4px var(--accent-glow) !important;
+}
+
+/* Grabbed styling for keyboard users */
+.pwb-draggable-row-item.pwb-keyboard-grabbed {
+    border-color: var(--accent-color, #3b82f6) !important;
+    background: var(--pwb-bg-hover) !important;
+    box-shadow: 0 4px 12px var(--accent-glow) !important;
+    transform: scale(0.99);
+}
+

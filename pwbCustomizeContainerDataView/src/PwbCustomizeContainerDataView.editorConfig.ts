@@ -116,6 +116,12 @@ export function getProperties(
     if (!values.enableMainFooter) {
         propsToHide.push("mainFooterContent");
     }
+    if (!values.enableLaneTitle) {
+        propsToHide.push("laneTitle", "laneTitleContent");
+    }
+    if (!values.enableOuterFooter) {
+        propsToHide.push("outerFooterContent");
+    }
 
     if (propsToHide.length > 0) {
         const filterProperties = (groups: PropertyGroup[]): PropertyGroup[] => {

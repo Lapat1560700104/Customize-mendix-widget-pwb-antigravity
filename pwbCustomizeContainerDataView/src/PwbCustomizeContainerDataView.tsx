@@ -24,12 +24,18 @@ export function PwbCustomizeContainerDataView({
     darkModeBehavior,
     itemPadding,
     itemGap,
+    laneClass,
     enableHeader,
     headerContent,
     enableFooter,
     footerContent,
     enableMainFooter,
-    mainFooterContent
+    mainFooterContent,
+    enableOuterFooter,
+    outerFooterContent,
+    enableLaneTitle,
+    laneTitle,
+    laneTitleContent
 }: PwbCustomizeContainerDataViewContainerProps): ReactElement {
     // 1. Sanitize Aesthetics Configuration
     const colorRegex =
@@ -178,8 +184,15 @@ export function PwbCustomizeContainerDataView({
         }
     };
 
-    return (
-        <div className={`pwb-customize-container-dataview-wrapper ${className || ""}`} style={style}>
+    const renderInnerContent = () => (
+        <>
+            {enableLaneTitle && (
+                <div className="pwb-lane-title-section">
+                    {laneTitle && laneTitle.value && <h3 className="pwb-lane-title-text">{laneTitle.value}</h3>}
+                    {laneTitleContent && <div className="pwb-lane-title-content">{laneTitleContent}</div>}
+                </div>
+            )}
+
             {enableHeader && headerContent && <div className="pwb-section-header">{headerContent}</div>}
 
             {isLoading ? (
@@ -250,6 +263,27 @@ export function PwbCustomizeContainerDataView({
             {enableFooter && footerContent && <div className="pwb-section-footer">{footerContent}</div>}
 
             {enableMainFooter && mainFooterContent && <div className="pwb-main-footer">{mainFooterContent}</div>}
+        </>
+    );
+
+    if (enableOuterFooter) {
+        return (
+            <div className={`pwb-customize-container-dataview-root ${className || ""}`} style={style}>
+                <div className={`pwb-customize-container-dataview-wrapper ${laneClass || ""}`}>
+                    {renderInnerContent()}
+                </div>
+                {outerFooterContent && (
+                    <div className="pwb-outer-footer-section">
+                        {outerFooterContent}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    return (
+        <div className={`pwb-customize-container-dataview-wrapper ${className || ""}`} style={style}>
+            {renderInnerContent()}
         </div>
     );
 }

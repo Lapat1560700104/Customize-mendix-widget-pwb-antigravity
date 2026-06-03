@@ -215,6 +215,8 @@ function App() {
     const [enableHeader, setEnableHeader] = useState<boolean>(true);
     const [enableFooter, setEnableFooter] = useState<boolean>(true);
     const [enableMainFooter, setEnableMainFooter] = useState<boolean>(true);
+    const [enableLaneTitle, setEnableLaneTitle] = useState<boolean>(true);
+    const [enableOuterFooter, setEnableOuterFooter] = useState<boolean>(true);
 
     // Kanban Lanes count (defaults to 3, max 4)
     const [laneCount, setLaneCount] = useState<number>(3);
@@ -415,6 +417,43 @@ function App() {
             </div>
         );
 
+        const laneTitle = {
+            status: "available" as const,
+            value: status === "todo" ? "🔴 TO DO" :
+                   status === "in_progress" ? "🟡 IN PROGRESS" :
+                   status === "done" ? "🟢 DONE" : "🟣 ARCHIVED"
+        };
+
+        const laneTitleContent = (
+            <span style={{
+                fontSize: "11px",
+                fontWeight: 700,
+                padding: "2px 8px",
+                borderRadius: "10px",
+                background: status === "todo" ? "rgba(239,68,68,0.15)" :
+                            status === "in_progress" ? "rgba(245,158,11,0.15)" :
+                            status === "done" ? "rgba(34,197,94,0.15)" : "rgba(168,85,247,0.15)",
+                color: status === "todo" ? "#f87171" :
+                       status === "in_progress" ? "#fbbf24" :
+                       status === "done" ? "#34d399" : "#c084fc"
+            }}>
+                {statusItems.length} items
+            </span>
+        );
+
+        const outerFooterContent = (
+            <div style={{
+                fontSize: "11px",
+                color: "#64748b",
+                textAlign: "right",
+                padding: "4px 8px",
+                borderTop: "1px dashed rgba(255,255,255,0.06)",
+                marginTop: "8px"
+            }}>
+                🎛️ Outer Footer Level
+            </div>
+        );
+
         return {
             name: `simulated-column-${status}`,
             class: `pwb-column-${status}`,
@@ -437,6 +476,12 @@ function App() {
             footerContent,
             enableMainFooter,
             mainFooterContent,
+            enableLaneTitle,
+            laneTitle,
+            laneTitleContent,
+            enableOuterFooter,
+            outerFooterContent,
+            laneClass: "playground-inner-lane-card",
             themePreset,
             darkModeBehavior,
             itemPadding,
@@ -565,6 +610,14 @@ function App() {
 
                     <Section title="Header & Footer Settings">
                         <Toggle
+                            label="Enable Lane Title"
+                            value={enableLaneTitle}
+                            onChange={(v) => {
+                                setEnableLaneTitle(v);
+                                addLog(`🎛️ [Lane Title Toggle] → ${v ? "Enabled" : "Disabled"}`);
+                            }}
+                        />
+                        <Toggle
                             label="Enable Section Header"
                             value={enableHeader}
                             onChange={(v) => {
@@ -586,6 +639,14 @@ function App() {
                             onChange={(v) => {
                                 setEnableMainFooter(v);
                                 addLog(`🎛️ [Main Footer Toggle] → ${v ? "Enabled" : "Disabled"}`);
+                            }}
+                        />
+                        <Toggle
+                            label="Enable Outer Footer"
+                            value={enableOuterFooter}
+                            onChange={(v) => {
+                                setEnableOuterFooter(v);
+                                addLog(`🎛️ [Outer Footer Toggle] → ${v ? "Enabled" : "Disabled"}`);
                             }}
                         />
                     </Section>
@@ -748,12 +809,14 @@ function App() {
                             flexDirection: "column",
                             gap: "12px"
                         }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>🔴 TO DO</h3>
-                                <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "10px", background: "rgba(239,68,68,0.15)", color: "#f87171" }}>
-                                    {tasks.filter(t => t.status === "todo").length}
-                                </span>
-                            </div>
+                            {!enableLaneTitle && (
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>🔴 TO DO</h3>
+                                    <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "10px", background: "rgba(239,68,68,0.15)", color: "#f87171" }}>
+                                        {tasks.filter(t => t.status === "todo").length}
+                                    </span>
+                                </div>
+                            )}
                             <div style={{ flex: 1, overflowY: "auto" }}>
                                 <PwbCustomizeContainerDataView {...getColumnProps("todo")} />
                             </div>
@@ -772,12 +835,14 @@ function App() {
                             flexDirection: "column",
                             gap: "12px"
                         }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>🟡 IN PROGRESS</h3>
-                                <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "10px", background: "rgba(245,158,11,0.15)", color: "#fbbf24" }}>
-                                    {tasks.filter(t => t.status === "in_progress").length}
-                                </span>
-                            </div>
+                            {!enableLaneTitle && (
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>🟡 IN PROGRESS</h3>
+                                    <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "10px", background: "rgba(245,158,11,0.15)", color: "#fbbf24" }}>
+                                        {tasks.filter(t => t.status === "in_progress").length}
+                                    </span>
+                                </div>
+                            )}
                             <div style={{ flex: 1, overflowY: "auto" }}>
                                 <PwbCustomizeContainerDataView {...getColumnProps("in_progress")} />
                             </div>
@@ -796,12 +861,14 @@ function App() {
                             flexDirection: "column",
                             gap: "12px"
                         }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>🟢 DONE</h3>
-                                <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "10px", background: "rgba(34,197,94,0.15)", color: "#34d399" }}>
-                                    {tasks.filter(t => t.status === "done").length}
-                                </span>
-                            </div>
+                            {!enableLaneTitle && (
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>🟢 DONE</h3>
+                                    <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "10px", background: "rgba(34,197,94,0.15)", color: "#34d399" }}>
+                                        {tasks.filter(t => t.status === "done").length}
+                                    </span>
+                                </div>
+                            )}
                             <div style={{ flex: 1, overflowY: "auto" }}>
                                 <PwbCustomizeContainerDataView {...getColumnProps("done")} />
                             </div>
@@ -820,12 +887,14 @@ function App() {
                             flexDirection: "column",
                             gap: "12px"
                         }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>🟣 ARCHIVED</h3>
-                                <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "10px", background: "rgba(168,85,247,0.15)", color: "#c084fc" }}>
-                                    {tasks.filter(t => t.status === "archived").length}
-                                </span>
-                            </div>
+                            {!enableLaneTitle && (
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>🟣 ARCHIVED</h3>
+                                    <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "10px", background: "rgba(168,85,247,0.15)", color: "#c084fc" }}>
+                                        {tasks.filter(t => t.status === "archived").length}
+                                    </span>
+                                </div>
+                            )}
                             <div style={{ flex: 1, overflowY: "auto" }}>
                                 <PwbCustomizeContainerDataView {...getColumnProps("archived")} />
                             </div>
@@ -885,6 +954,12 @@ function App() {
                 ::-webkit-scrollbar { width: 4px; }
                 ::-webkit-scrollbar-track { background: transparent; }
                 ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 2px; }
+                .playground-inner-lane-card {
+                    background: rgba(255, 255, 255, 0.03);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 12px;
+                    padding: 12px;
+                }
             `}</style>
         </div>
     );

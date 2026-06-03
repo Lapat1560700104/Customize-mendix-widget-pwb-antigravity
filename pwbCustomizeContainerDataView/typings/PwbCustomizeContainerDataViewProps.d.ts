@@ -4,7 +4,7 @@
  * @author Mendix Widgets Framework Team
  */
 import { ComponentType, CSSProperties, ReactNode } from "react";
-import { ActionValue, EditableValue, ListValue, ListAttributeValue, ListWidgetValue } from "mendix";
+import { ActionValue, DynamicValue, EditableValue, ListValue, ListAttributeValue, ListWidgetValue } from "mendix";
 
 export type LayoutDirectionEnum = "vertical" | "horizontal";
 
@@ -27,6 +27,11 @@ export interface PwbCustomizeContainerDataViewContainerProps {
     footerContent?: ReactNode;
     enableMainFooter: boolean;
     mainFooterContent?: ReactNode;
+    enableOuterFooter: boolean;
+    outerFooterContent?: ReactNode;
+    enableLaneTitle: boolean;
+    laneTitle?: DynamicValue<string>;
+    laneTitleContent?: ReactNode;
     sortedAttribute: EditableValue<string>;
     onSortAction?: ActionValue;
     layoutDirection: LayoutDirectionEnum;
@@ -37,6 +42,7 @@ export interface PwbCustomizeContainerDataViewContainerProps {
     darkModeBehavior: DarkModeBehaviorEnum;
     itemPadding: string;
     itemGap: string;
+    laneClass: string;
     enableKanban: boolean;
     dragGroup: string;
     columnValue: string;
@@ -63,6 +69,11 @@ export interface PwbCustomizeContainerDataViewPreviewProps {
     footerContent: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     enableMainFooter: boolean;
     mainFooterContent: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
+    enableOuterFooter: boolean;
+    outerFooterContent: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
+    enableLaneTitle: boolean;
+    laneTitle: string;
+    laneTitleContent: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     sortedAttribute: string;
     onSortAction: {} | null;
     layoutDirection: LayoutDirectionEnum;
@@ -73,6 +84,7 @@ export interface PwbCustomizeContainerDataViewPreviewProps {
     darkModeBehavior: DarkModeBehaviorEnum;
     itemPadding: string;
     itemGap: string;
+    laneClass: string;
     enableKanban: boolean;
     dragGroup: string;
     columnValue: string;

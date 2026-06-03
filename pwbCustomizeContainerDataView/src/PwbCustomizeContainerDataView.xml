@@ -46,6 +46,30 @@
                 <caption>Main Footer Content</caption>
                 <description>Custom widgets to place in the main footer section at the bottom of the lane.</description>
             </property>
+            <property key="enableOuterFooter" type="boolean" defaultValue="false">
+                <caption>Enable Outer Footer</caption>
+                <description>Enable or disable the custom outer footer section below the lane container card.</description>
+            </property>
+            <property key="outerFooterContent" type="widgets" required="false">
+                <caption>Outer Footer Content</caption>
+                <description>Custom widgets to place in the outer footer section below the lane container card.</description>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Lane Title Settings">
+            <property key="enableLaneTitle" type="boolean" defaultValue="false">
+                <caption>Enable Lane Title</caption>
+                <description>Enable or disable the lane title section.</description>
+            </property>
+            <property key="laneTitle" type="expression" required="false">
+                <caption>Lane Title Text</caption>
+                <description>Dynamic title for this lane/container.</description>
+                <returnType type="String"/>
+            </property>
+            <property key="laneTitleContent" type="widgets" required="false">
+                <caption>Lane Title Custom Widgets</caption>
+                <description>Custom widgets to place in the lane title section (e.g. edit buttons, custom status badges).</description>
+            </property>
         </propertyGroup>
 
         <propertyGroup caption="Sorting Persistence">
@@ -113,6 +137,10 @@
             <property key="itemGap" type="string" required="false" defaultValue="12px">
                 <caption>Card Spacing Gap</caption>
                 <description>Gap spacing between card rows inside the container (e.g. '12px', '8px', '20px').</description>
+            </property>
+            <property key="laneClass" type="string" required="false" defaultValue="">
+                <caption>Inner Lane Card Class</caption>
+                <description>CSS class to apply to the inner lane card container. Useful when you want to apply card styling (like card, shadow, border) to the lane card while keeping the outer footer outside of it.</description>
             </property>
         </propertyGroup>
 

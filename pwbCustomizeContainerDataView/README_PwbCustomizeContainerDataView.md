@@ -1,4 +1,4 @@
-# คู่มืออ้างอิง - รายละเอียดทางเทคนิค PWB Customize Container DataView (v1.0.0)
+# คู่มืออ้างอิง - รายละเอียดทางเทคนิค PWB Customize Container DataView (v1.1.0)
 
 **PWB Customize Container DataView** เป็น Mendix Pluggable Widget เกรดพรีเมียมระดับองค์กร (Enterprise-grade) ที่ออกแบบมาเพื่อทำหน้าที่เป็น **Container อัจฉริยะแบบลากสลับลำดับได้ (Drag & Drop Sortable) พร้อมรองรับสภาพแวดล้อม DataView เต็มรูปแบบ** ช่วยให้นักพัฒนาสามารถวาง Mendix Widget มาตรฐานหรือ Widget กำหนดเองใดๆ เข้าไปด้านในตัวมันได้ตามใจชอบ ช่วยให้ผู้ใช้งานทั่วไปสามารถลากสลับตำแหน่งสิ่งของต่างๆ ได้อย่างลื่นไหล และบันทึกผลการจัดลำดับกลับไปยัง String Attribute ของ Mendix โดยอัตโนมัติในรูปแบบ Comma-separated GUIDs ทำให้เหมาะอย่างยิ่งสำหรับการสร้างบอร์ดคัมบัง (Kanban Board) รายการจัดลำดับความสำคัญ (Priority List) และการจัดหน้าจอแสดงผลคอนเทนต์ที่สามารถจัดเรียงลำดับขั้นความสำคัญได้
 
@@ -7,7 +7,10 @@
 ## 🌟 คุณสมบัติหลัก (Key Features)
 
 * **Nested Widget Dropzone (การลากวาง Widget ซ้อนด้านใน)**: รองรับการวาง Mendix Widget ใดๆ (เช่น Cards, Buttons, Images, หรือ Custom Widgets) เข้าไปในแต่ละแถวรายการของตัวลากวาง โดยจะส่งต่อ Entity Context ของแต่ละไอเทมไปยัง Widget ด้านในโดยอัตโนมัติผ่านการผูก Datasource แบบ `ListWidgetValue`
-* **Drag & Drop Reordering (ระบบลากจัดลำดับที่ลื่นไหล)**: ใช้ HTML5 Native drag events พร้อมแอนิเมชันที่สวยงามพรีเมียม — มีไฟเรืองแสงบอกทิศทางการวาง (Drop indicator glow) ฟิสิกส์จังหวะยกการ์ดขณะลาก (Item lift physics) และสัญลักษณ์ระบุการแทรกรายการ รองรับการจัดวางทั้งแบบแนวตั้ง (**Vertical List**) และแนวนอน (**Horizontal Grid**)
+* **Drag & Drop Reordering (ระบบลากจัดลำดับที่ลื่นไหล)**: ใช้ **Web Pointer Events API** เต็มรูปแบบ (ไม่ใช่ HTML5 DnD แบบเดิม) รองรับ Mouse, Stylus และ Touch Screen บนโทรศัพท์มือถือและ Safari 100% พร้อมฟิสิกส์จังหวะยกการ์ดขณะลาก (Item lift physics) แอนิเมชันสั่นดีดกลับ (Wobble Snap-Back) และ Drop indicator glow
+* **Keyboard Navigation & WCAG 2.1 (การเข้าถึงด้วยแป้นพิมพ์)**: สนับสนุนการควบคุมด้วยคีย์บอร์ดโดยใช้ปุ่ม Tab เพื่อย้ายโฟกัส, Spacebar/Enter เพื่อคีบจับหรือปล่อยวางการ์ดไอเทม, ปุ่มลูกศร Arrow Keys เพื่อเลื่อนระดับตำแหน่งขึ้น/ลง/ซ้าย/ขวา และ Escape เพื่อยกเลิกดีดแถวกลับคืนตำแหน่งเดิม พร้อมการแจ้งเตือนเสียง (Aria Live assertive region)
+* **Container-Aware Auto-Scrolling (เลื่อนหน้าจออัตโนมัติระดับกล่องซ้อน)**: ค้นหา Scroll parent ที่มีแถบเลื่อนซ้อนอยู่ (`overflow: auto`) และสั่งเลื่อนแถบสกロールนั้นโดยตรงเมื่อลากการ์ดเข้าใกล้ขอบกล่อง และใช้ window scrolling เป็นระบบ Fallback เสมอ
+* **Optimistic UI transitions (การอัปเดตแบบคาดคะเน)**: จัดการตัดดีเลย์ Asynchronous Database ของ Mendix ในช่วงลากย้ายการ์ดข้ามระหว่างคอลัมน์คัมบัน (Kanban columns) ด้วย Event-driven optimistic transition ทำให้อินเตอร์เฟซไม่กะพริบหรือการ์ดโผล่ซ้อนกัน
 * **DataView Context Provider (การรองรับ Context ของหน้าหลัก)**: ถูกประกาศแบบ `needsEntityContext="true"` ทำให้นักพัฒนาสามารถดึงข้อมูล Context ของ Entity หลักส่งเข้ามาในตัว Widget เพื่อใช้ผูกเข้ากับ Attributes ต่างๆ ได้โดยตรง
 * **Sorted Order Persistence (การบันทึกลำดับแบบอัตโนมัติ)**: ในทุกจังหวะที่ลากสลับตำแหน่งสำเร็จ ตัว Widget จะแปลงการจัดเรียงลำดับใหม่ให้อยู่ในรูปข้อความ GUIDs คั่นด้วยเครื่องหมายจุลภาค (เช่น `"id_3,id_1,id_2"`) แล้วเขียนค่าดังกล่าวลง String Attribute ของ Mendix โดยตรงผ่านคำสั่ง `sortedAttribute.setValue()`
 * **On Sort Action (ทำงานหลังการจัดเรียง)**: เรียกใช้งาน Action แบบ Microflow หรือ Nanoflow (`onSortAction`) ทันทีเมื่อผู้ใช้ลากวางสลับตำแหน่งเสร็จสิ้น ช่วยให้นักพัฒนาสามารถรันโปรเซสบันทึกค่าลงฐานข้อมูลทางฝั่งเซิร์ฟเวอร์ต่อได้ในทันที
@@ -186,7 +189,7 @@ npm run lint:fix
 npm run release
 ```
 
-_ไฟล์ผลลัพธ์: ไฟล์ในรูปแบบแพ็กเกจ `.mpk` จะถูกสร้างขึ้นมาในตำแหน่ง `dist/1.0.0/pwb.PwbCustomizeContainerDataView_1.0.0_YYYYMMDD_HHMMSS.mpk` และตัวสคริปต์จะคัดลอกไฟล์เวอร์ชันนี้ไปทับในโฟลเดอร์ `widgets/` ของโปรเจกต์ Mendix โดยอัตโนมัติทันที_
+_ไฟล์ผลลัพธ์: ไฟล์ในรูปแบบแพ็กเกจ `.mpk` จะถูกสร้างขึ้นมาในตำแหน่ง `dist/1.1.0/pwb.PwbCustomizeContainerDataView_1.1.0_YYYYMMDD_HHMMSS.mpk` และตัวสคริปต์จะคัดลอกไฟล์เวอร์ชันนี้ไปทับในโฟลเดอร์ `widgets/` ของโปรเจกต์ Mendix โดยอัตโนมัติทันที_
 
 ---
 
@@ -209,7 +212,7 @@ pwbCustomizeContainerDataView/
     ├── PwbCustomizeContainerDataView.editorPreview.tsx  # ส่วนพรีวิวโครงสร้างแบบสมจริงใน Studio Pro
     ├── PwbCustomizeContainerDataView.editorConfig.ts    # ชุดตรวจจับกฎปัญหาสำหรับ Studio Pro
     ├── components/
-    │   └── DragContainer.tsx      # กลไกระบบ Drag & Drop และ HTML5 Event Engine
+    │   └── DragContainer.tsx      # กลไกระบบ Drag & Drop, Web Pointer Events และ Keyboard/Accessibility Engine
     └── ui/
         └── PwbCustomizeContainerDataView.css  # ชุด CSS และ CSS Variables สำหรับตกแต่งรูปลักษณ์
 ```

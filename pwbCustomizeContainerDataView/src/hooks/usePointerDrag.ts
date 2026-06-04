@@ -124,6 +124,7 @@ export function usePointerDrag({
 
         // Tracks original and current order states directly in closure for 100% async state safety
         const originalOrderIds = orderedItems.map(item => item.id);
+        let activeItemsState = [...orderedItems];
         let currentOrderIds = [...originalOrderIds];
         let draggingIndexState = index;
 
@@ -397,15 +398,13 @@ export function usePointerDrag({
                     // A. Same Container Dropzone: Transient Real-time Shifting!
                     if (hoverContainer === containerRef.current) {
                         if (hoverCard && targetIdx !== draggingIndexState) {
-                            // Swap array element positions in local React visual state immediately
-                            setOrderedItems(prevItems => {
-                                const nextItems = [...prevItems];
-                                const [movedItem] = nextItems.splice(draggingIndexState, 1);
-                                nextItems.splice(targetIdx, 0, movedItem);
-                                currentOrderIds = nextItems.map(item => item.id);
-                                return nextItems;
-                            });
+                            // Swap array element positions synchronously in mutable closure state
+                            const [movedItem] = activeItemsState.splice(draggingIndexState, 1);
+                            activeItemsState.splice(targetIdx, 0, movedItem);
+                            currentOrderIds = activeItemsState.map(item => item.id);
 
+                            // Trigger React re-render visually with copy of state
+                            setOrderedItems([...activeItemsState]);
                             setDraggingIndex(targetIdx);
                             draggingIndexState = targetIdx; // Update closure variable to keep track!
                         }

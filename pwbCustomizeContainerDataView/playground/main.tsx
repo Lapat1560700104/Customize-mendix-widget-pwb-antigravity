@@ -504,17 +504,10 @@ function App() {
         addLog("📋 [Form Builder] Loaded 'Event Registration' template");
     };
 
-    // Helper: Gets sorted list of fields on Canvas
-    const getSortedCanvasFields = () => {
-        const sortedIds = canvasOrderIds.split(",").map(id => id.trim()).filter(Boolean);
-        if (sortedIds.length === 0) return formFields;
-        const sortedMap = new Map(sortedIds.map((id, idx) => [id, idx]));
-        return [...formFields].sort((a, b) => {
-            const idxA = sortedMap.has(a.id) ? sortedMap.get(a.id)! : Infinity;
-            const idxB = sortedMap.has(b.id) ? sortedMap.get(b.id)! : Infinity;
-            return idxA - idxB;
-        });
-    };
+    // Helper: Gets sorted list of fields on Canvas.
+    // formFields is directly reordered in state by setSortedValue on every drag,
+    // so filtering by "canvas" status gives the correct order without needing canvasOrderIds.
+    const getSortedCanvasFields = () => formFields.filter(f => f.status === "canvas");
 
     // Helper: Updates selected field properties
     const updateSelectedField = (updated: Partial<FormField>) => {
@@ -854,6 +847,19 @@ function App() {
                 });
                 const cleanedIds = ids.join(",");
                 setCanvasOrderIds(cleanedIds);
+
+                // Update formFields order in state to guarantee Live Preview re-renders in correct order
+                const idArray = cleanedIds.split(",").map(id => id.trim()).filter(Boolean);
+                if (idArray.length > 0) {
+                    setFormFields(prev => {
+                        const fieldMap = new Map(prev.map(f => [f.id, f]));
+                        const reordered = idArray.map(id => fieldMap.get(id)).filter(Boolean) as FormField[];
+                        const addedIds = new Set(idArray);
+                        const remaining = prev.filter(f => !addedIds.has(f.id));
+                        return [...reordered, ...remaining];
+                    });
+                }
+
                 addLog(`💾 [Form Builder] Canvas order updated: "${cleanedIds}"`);
             };
         }

@@ -132,7 +132,7 @@ export function DragContainer({
                 setAnnouncement(`Reordering canceled. ${itemTitle} returned to position ${origIndex + 1}.`);
                 setOriginalItemsBeforeKeyboardDrag([]);
             }
-        } else if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+        } else if (e.key === "ArrowDown" || (e.key === "ArrowRight" && !(enableKanban && dragGroup))) {
             if (isGrabbed) {
                 e.preventDefault();
                 if (index < orderedItems.length - 1) {
@@ -150,7 +150,7 @@ export function DragContainer({
                     }, 0);
                 }
             }
-        } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+        } else if (e.key === "ArrowUp" || (e.key === "ArrowLeft" && !(enableKanban && dragGroup))) {
             if (isGrabbed) {
                 e.preventDefault();
                 if (index > 0) {
@@ -166,6 +166,45 @@ export function DragContainer({
                         ) as HTMLElement;
                         prevEl?.focus();
                     }, 0);
+                }
+            }
+        } else if ((e.key === "ArrowRight" || e.key === "ArrowLeft") && enableKanban && dragGroup) {
+            if (isGrabbed) {
+                e.preventDefault();
+                const groupContainers = Array.from(
+                    document.querySelectorAll(`.pwb-drag-container[data-drag-group="${dragGroup}"]`)
+                ) as HTMLElement[];
+                const currentIdx = groupContainers.indexOf(containerRef.current!);
+                if (currentIdx !== -1) {
+                    const targetIdx = e.key === "ArrowRight" ? currentIdx + 1 : currentIdx - 1;
+                    if (targetIdx >= 0 && targetIdx < groupContainers.length) {
+                        const targetContainer = groupContainers[targetIdx];
+                        const isDenied = targetContainer.getAttribute("data-drop-denied") === "true";
+                        if (isDenied) {
+                            setAnnouncement(`Cannot move ${itemTitle} to this column: drop is not allowed.`);
+                            return;
+                        }
+
+                        // Dispatch custom event to target container
+                        const accepted = targetContainer.dispatchEvent(
+                            new CustomEvent("pwb-keyboard-accept-item", {
+                                detail: {
+                                    item,
+                                    sourceContainerId: containerId,
+                                    sourceIndex: index,
+                                    sourceColumnValue: columnValue,
+                                    onRemoveItemExternal
+                                },
+                                cancelable: true
+                            })
+                        );
+
+                        if (accepted) {
+                            // Remove item visually from source container
+                            setOrderedItems(prev => prev.filter(it => it.id !== item.id));
+                            setKeyboardGrabbedId(null);
+                        }
+                    }
                 }
             }
         }
@@ -221,16 +260,85 @@ export function DragContainer({
             setDropDenied(false);
         };
 
+        const handleKeyboardAccept = (e: Event): void => {
+            const customEvent = e as CustomEvent;
+            const {
+                item,
+                sourceContainerId,
+                sourceColumnValue,
+                onRemoveItemExternal: srcRemoveHandler
+            } = customEvent.detail;
+
+            if (isDropAllowed) {
+                const allowed = isDropAllowed(item.rawObject, sourceColumnValue || "");
+                if (!allowed) {
+                    e.preventDefault(); // Deny cross-column drop
+                    return;
+                }
+            }
+
+            // Simulate global registry for Mendix saving callbacks
+            window.__pwbDragRegistry = {
+                itemId: item.id,
+                draggedItem: item.rawObject,
+                sourceDragGroup: dragGroup,
+                sourceContainerId,
+                sourceColumnValue,
+                onRemoveItem: srcRemoveHandler
+            };
+
+            if (onDropExternal) {
+                // Drop at the top of the column (index 0)
+                onDropExternal(item.id, sourceContainerId, 0);
+            }
+
+            window.__pwbDragRegistry = undefined;
+
+            // Update target container state visually
+            setOrderedItems(prev => {
+                const filtered = prev.filter(it => it.id !== item.id);
+                return [item, ...filtered];
+            });
+
+            // Auto-grab it in the target container
+            setKeyboardGrabbedId(item.id);
+            setOriginalItemsBeforeKeyboardDrag([item, ...orderedItems.filter(it => it.id !== item.id)]);
+
+            if (window.navigator && window.navigator.vibrate) {
+                window.navigator.vibrate(10);
+            }
+
+            const itemTitle = item.rawObject ? "Item" : "Item";
+            setAnnouncement(`Moved ${itemTitle} to this column. Use Arrow Up or Down to reorder.`);
+
+            setTimeout(() => {
+                const targetEl = containerRef.current?.querySelector(`[data-index="0"]`) as HTMLElement;
+                targetEl?.focus();
+            }, 50);
+        };
+
         if (!readOnlyMode) {
             el.addEventListener("pwb-drag-over-container", handleHoverEvent);
             el.addEventListener("pwb-drag-leave-container", handleLeaveEvent);
+            el.addEventListener("pwb-keyboard-accept-item", handleKeyboardAccept);
         }
 
         return () => {
             el.removeEventListener("pwb-drag-over-container", handleHoverEvent);
             el.removeEventListener("pwb-drag-leave-container", handleLeaveEvent);
+            el.removeEventListener("pwb-keyboard-accept-item", handleKeyboardAccept);
         };
-    }, [containerId, dragGroup, enableKanban, isDropAllowed, readOnlyMode]);
+    }, [
+        containerId,
+        dragGroup,
+        enableKanban,
+        isDropAllowed,
+        readOnlyMode,
+        onDropExternal,
+        orderedItems,
+        onRemoveItemExternal,
+        columnValue
+    ]);
 
     const handlePointerDown = (e: ReactPointerEvent<HTMLDivElement>, index: number): void => {
         if (readOnlyMode) {
@@ -340,11 +448,48 @@ export function DragContainer({
 
                 // Clone only the visible inner custom content for flawless look
                 const contentWrapper = cardEl.querySelector(".pwb-draggable-item-content");
-                if (contentWrapper) {
-                    ghostEl.innerHTML = contentWrapper.innerHTML;
-                } else {
-                    ghostEl.innerHTML = cardEl.innerHTML;
+                const sourceNode = contentWrapper || cardEl;
+                const clonedNode = sourceNode.cloneNode(true) as HTMLElement;
+
+                // Copy canvas elements content if any
+                const sourceCanvases = Array.from(sourceNode.querySelectorAll("canvas"));
+                if (sourceCanvases.length > 0) {
+                    const clonedCanvases = Array.from(clonedNode.querySelectorAll("canvas"));
+                    sourceCanvases.forEach((srcCanvas, i) => {
+                        const destCanvas = clonedCanvases[i];
+                        if (destCanvas) {
+                            const destCtx = destCanvas.getContext("2d");
+                            if (destCtx) {
+                                try {
+                                    destCtx.drawImage(srcCanvas, 0, 0);
+                                } catch {
+                                    // Ignore security/drawing issues
+                                }
+                            }
+                        }
+                    });
                 }
+
+                // Copy user input values if any
+                const sourceInputs = Array.from(
+                    sourceNode.querySelectorAll("input, textarea, select")
+                ) as HTMLInputElement[];
+                if (sourceInputs.length > 0) {
+                    const clonedInputs = Array.from(
+                        clonedNode.querySelectorAll("input, textarea, select")
+                    ) as HTMLInputElement[];
+                    sourceInputs.forEach((srcInput, i) => {
+                        const destInput = clonedInputs[i];
+                        if (destInput) {
+                            destInput.value = srcInput.value;
+                            if (srcInput.type === "checkbox" || srcInput.type === "radio") {
+                                destInput.checked = srcInput.checked;
+                            }
+                        }
+                    });
+                }
+
+                ghostEl.appendChild(clonedNode);
 
                 document.body.appendChild(ghostEl);
 

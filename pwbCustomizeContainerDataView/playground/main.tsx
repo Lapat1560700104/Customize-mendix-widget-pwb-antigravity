@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import { useState, useCallback, ReactNode, useRef, useEffect } from "react";
+import { useState, useCallback, ReactNode, useRef, useEffect, CSSProperties } from "react";
 import { PwbCustomizeContainerDataView } from "../src/PwbCustomizeContainerDataView";
 import "../src/ui/PwbCustomizeContainerDataView.css";
 
@@ -365,9 +365,47 @@ function ColorPicker({
     );
 }
 
+// ─── Form Builder Configurations ─────────────────────────────────────────────
+interface FormField {
+    id: string;
+    type: "text" | "number" | "dropdown" | "checkbox" | "textarea" | "datepicker" | "button";
+    label: string;
+    placeholder: string;
+    required: boolean;
+    options?: string;
+    status: "toolbox" | "canvas";
+    sortId: number;
+}
+
+const FORM_TEMPLATES: FormField[] = [
+    { id: "tmpl-text", type: "text", label: "ข้อความสั้น (Short Text)", placeholder: "ระบุข้อความ...", required: false, status: "toolbox", sortId: 1 },
+    { id: "tmpl-number", type: "number", label: "ตัวเลข (Number)", placeholder: "0", required: false, status: "toolbox", sortId: 2 },
+    { id: "tmpl-dropdown", type: "dropdown", label: "ตัวเลือก (Dropdown)", placeholder: "โปรดเลือก...", required: false, options: "ตัวเลือก 1, ตัวเลือก 2, ตัวเลือก 3", status: "toolbox", sortId: 3 },
+    { id: "tmpl-datepicker", type: "datepicker", label: "วันที่ (Date Picker)", placeholder: "วว/ดด/ปปปป", required: false, status: "toolbox", sortId: 4 },
+    { id: "tmpl-checkbox", type: "checkbox", label: "กล่องเลือก (Checkbox)", placeholder: "", required: false, status: "toolbox", sortId: 5 },
+    { id: "tmpl-textarea", type: "textarea", label: "ข้อความยาว (Textarea)", placeholder: "ระบุรายละเอียดเพิ่มเติม...", required: false, status: "toolbox", sortId: 6 },
+    { id: "tmpl-button", type: "button", label: "ปุ่มส่งข้อมูล (Submit Button)", placeholder: "", required: false, status: "toolbox", sortId: 7 }
+];
+
+const inputStyle: CSSProperties = {
+    width: "100%",
+    padding: "8px 12px",
+    borderRadius: "6px",
+    border: "1px solid rgba(255, 255, 255, 0.12)",
+    background: "rgba(15, 23, 42, 0.6)",
+    color: "#f1f5f9",
+    fontSize: "13px",
+    boxSizing: "border-box",
+    outline: "none",
+    transition: "border-color 0.2s"
+};
+
 // ─── Main App Component ──────────────────────────────────────────────────────
 function App() {
-    // Styling Options
+    // Mode Switcher: "kanban" | "form_builder"
+    const [playgroundMode, setPlaygroundMode] = useState<"kanban" | "form_builder">("kanban");
+
+    // Kanban Simulation State (Original)
     const [accentColor, setAccentColor] = useState("#3b82f6");
     const [borderRadiusPx, setBorderRadiusPx] = useState(16);
     const [layoutDirection, setLayoutDirection] = useState<"vertical" | "horizontal">("vertical");
@@ -379,30 +417,31 @@ function App() {
     const [darkModeBehavior, setDarkModeBehavior] = useState<"auto" | "light" | "dark">("auto");
     const [itemPadding, setItemPadding] = useState<string>("");
     const [itemGap, setItemGap] = useState<string>("");
-
-    // Performance Options
     const [saveDelay, setSaveDelay] = useState<number>(300);
     const [enableKanban, setEnableKanban] = useState<boolean>(true);
-
-    // Header & Footer Options
     const [enableHeader, setEnableHeader] = useState<boolean>(true);
     const [enableFooter, setEnableFooter] = useState<boolean>(true);
     const [enableMainFooter, setEnableMainFooter] = useState<boolean>(true);
     const [enableLaneTitle, setEnableLaneTitle] = useState<boolean>(true);
     const [enableOuterFooter, setEnableOuterFooter] = useState<boolean>(true);
     const [readOnlyMode, setReadOnlyMode] = useState<boolean>(false);
-
-    // Kanban Lanes count (defaults to 3, max 4)
     const [laneCount, setLaneCount] = useState<number>(3);
-
-    // Mendix Simulated DB / Global Task state
     const [tasks, setTasks] = useState<TaskItem[]>(INITIAL_TASKS);
-
-    // Mendix Simulated Attributes (Serialized order of each column)
     const [todoOrderIds, setTodoOrderIds] = useState<string>("task-1,task-3");
     const [inProgressOrderIds, setInProgressOrderIds] = useState<string>("task-2,task-5");
     const [doneOrderIds, setDoneOrderIds] = useState<string>("task-4");
     const [archivedOrderIds, setArchivedOrderIds] = useState<string>("task-6");
+
+    // Form Builder Simulation State (New)
+    const [formTitle, setFormTitle] = useState<string>("แบบฟอร์มติดต่อสอบถาม (Contact Form)");
+    const [formFields, setFormFields] = useState<FormField[]>([]);
+    const [canvasOrderIds, setCanvasOrderIds] = useState<string>("");
+    const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
+    const [formBuilderTab, setFormBuilderTab] = useState<"preview" | "schema">("preview");
+    const [liveFormValues, setLiveFormValues] = useState<Record<string, any>>({});
+    const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+    const lastClonedIdRef = useRef<string | null>(null);
 
     // Event Logs Panel
     const [logs, setLogs] = useState<string[]>([]);
@@ -419,6 +458,68 @@ function App() {
         setArchivedOrderIds("task-6");
         setLogs([]);
         addLog("Database reset to defaults.");
+    };
+
+    const handleClearFormCanvas = () => {
+        setFormFields([]);
+        setCanvasOrderIds("");
+        setSelectedFieldId(null);
+        setLiveFormValues({});
+        setIsSubmitted(false);
+        setFormErrors({});
+        addLog("🧹 [Form Builder] Canvas cleared");
+    };
+
+    const loadContactTemplate = () => {
+        const fields: FormField[] = [
+            { id: "contact-name", type: "text", label: "ชื่อผู้ติดต่อ (Full Name)", placeholder: "ระบุชื่อ-นามสกุล", required: true, status: "canvas", sortId: 1 },
+            { id: "contact-email", type: "text", label: "อีเมล (Email Address)", placeholder: "example@domain.com", required: true, status: "canvas", sortId: 2 },
+            { id: "contact-message", type: "textarea", label: "ข้อความถึงเรา (Your Message)", placeholder: "ระบุรายละเอียดข้อความ...", required: false, status: "canvas", sortId: 3 },
+            { id: "contact-submit", type: "button", label: "ส่งข้อความ (Send Message)", placeholder: "", required: false, status: "canvas", sortId: 4 }
+        ];
+        setFormFields(fields);
+        setCanvasOrderIds(fields.map(f => f.id).join(","));
+        setSelectedFieldId("contact-name");
+        setLiveFormValues({});
+        setIsSubmitted(false);
+        setFormErrors({});
+        addLog("📋 [Form Builder] Loaded 'Contact Us' template");
+    };
+
+    const loadRegisterTemplate = () => {
+        const fields: FormField[] = [
+            { id: "reg-name", type: "text", label: "ชื่อผู้ลงทะเบียน (Full Name)", placeholder: "นาย/นาง/นางสาว...", required: true, status: "canvas", sortId: 1 },
+            { id: "reg-qty", type: "number", label: "จำนวนบัตรที่จอง (Ticket Qty)", placeholder: "1", required: true, status: "canvas", sortId: 2 },
+            { id: "reg-date", type: "datepicker", label: "วันที่เข้าร่วมงาน (Attendance Date)", placeholder: "วว/ดด/ปปปป", required: true, status: "canvas", sortId: 3 },
+            { id: "reg-type", type: "dropdown", label: "ประเภทบัตร (Ticket Type)", placeholder: "เลือกประเภทบัตร...", required: true, options: "General Admission, VIP Pass, Student Pass", status: "canvas", sortId: 4 },
+            { id: "reg-terms", type: "checkbox", label: "ฉันยอมรับข้อตกลงและเงื่อนไขการร่วมงาน", placeholder: "", required: true, status: "canvas", sortId: 5 },
+            { id: "reg-submit", type: "button", label: "ยืนยันลงทะเบียน (Confirm Registration)", placeholder: "", required: false, status: "canvas", sortId: 6 }
+        ];
+        setFormFields(fields);
+        setCanvasOrderIds(fields.map(f => f.id).join(","));
+        setSelectedFieldId("reg-name");
+        setLiveFormValues({});
+        setIsSubmitted(false);
+        setFormErrors({});
+        addLog("📋 [Form Builder] Loaded 'Event Registration' template");
+    };
+
+    // Helper: Gets sorted list of fields on Canvas
+    const getSortedCanvasFields = () => {
+        const sortedIds = canvasOrderIds.split(",").map(id => id.trim()).filter(Boolean);
+        if (sortedIds.length === 0) return formFields;
+        const sortedMap = new Map(sortedIds.map((id, idx) => [id, idx]));
+        return [...formFields].sort((a, b) => {
+            const idxA = sortedMap.has(a.id) ? sortedMap.get(a.id)! : Infinity;
+            const idxB = sortedMap.has(b.id) ? sortedMap.get(b.id)! : Infinity;
+            return idxA - idxB;
+        });
+    };
+
+    // Helper: Updates selected field properties
+    const updateSelectedField = (updated: Partial<FormField>) => {
+        if (!selectedFieldId) return;
+        setFormFields(prev => prev.map(f => f.id === selectedFieldId ? { ...f, ...updated } : f));
     };
 
     // Helper: Gets simulated props for a column status
@@ -573,7 +674,8 @@ function App() {
                         category: "Development",
                         assignee: "ผู้ใช้",
                         progress: 0,
-                        status: status
+                        status: status,
+                        sortId: 1
                     };
                     setTasks(prev => [...prev, newTask]);
 
@@ -726,10 +828,315 @@ function App() {
         };
     };
 
+    // Helper: Gets simulated props for the Form Builder Columns (Toolbox / Canvas)
+    const getFormColumnProps = (column: "toolbox" | "canvas") => {
+        const columnItems = column === "toolbox" ? FORM_TEMPLATES : formFields;
+
+        const itemsSource = {
+            status: "available" as const,
+            items: columnItems.map(f => ({
+                id: f.id,
+                ...f
+            }))
+        };
+
+        let sortedValue = "";
+        let setSortedValue: (val: string) => void = () => {};
+
+        if (column === "canvas") {
+            sortedValue = canvasOrderIds;
+            setSortedValue = val => {
+                const ids = val.split(",").map(id => {
+                    if (id.startsWith("tmpl-")) {
+                        return lastClonedIdRef.current || id;
+                    }
+                    return id;
+                });
+                const cleanedIds = ids.join(",");
+                setCanvasOrderIds(cleanedIds);
+                addLog(`💾 [Form Builder] Canvas order updated: "${cleanedIds}"`);
+            };
+        }
+
+        const sortedAttribute = {
+            value: sortedValue,
+            readOnly: false,
+            setValue: (val: string) => {
+                setSortedValue(val);
+            }
+        };
+
+        const itemColumnAttribute = {
+            get: (itemObj: any) => ({
+                readOnly: false,
+                setValue: (newStatus: "toolbox" | "canvas") => {
+                    if (column === "canvas" && itemObj.status === "toolbox") {
+                        const newId = `field-${Date.now()}`;
+                        lastClonedIdRef.current = newId;
+                        const clonedField: FormField = {
+                            id: newId,
+                            type: itemObj.type,
+                            label: itemObj.label.split(" (")[0] + " Field",
+                            placeholder: itemObj.placeholder,
+                            required: itemObj.required,
+                            options: itemObj.options,
+                            status: "canvas",
+                            sortId: formFields.length + 1
+                        };
+                        setFormFields(prev => [...prev, clonedField]);
+                        setSelectedFieldId(newId);
+                        setIsSubmitted(false);
+                        addLog(`➕ [Form Builder] Created field instance "${newId}" from template "${itemObj.type}"`);
+                    } else if (column === "toolbox" && itemObj.status === "canvas") {
+                        setFormFields(prev => prev.filter(f => f.id !== itemObj.id));
+                        if (selectedFieldId === itemObj.id) {
+                            setSelectedFieldId(null);
+                        }
+                        setIsSubmitted(false);
+                        addLog(`🗑️ [Form Builder] Deleted field "${itemObj.id}" by dragging back to Toolbox`);
+                    }
+                }
+            })
+        };
+
+        const sortIdAttribute = {
+            get: (itemObj: any) => {
+                const f = formFields.find(x => x.id === itemObj.id);
+                const val = f ? f.sortId : 0;
+                return {
+                    value: {
+                        comparedTo: (other: any) => {
+                            const otherVal = other && typeof other === "object" && "value" in other ? other.value : other;
+                            return val - otherVal;
+                        },
+                        value: val,
+                        toString: () => String(val)
+                    }
+                };
+            }
+        };
+
+        const onSortAction = {
+            canExecute: true,
+            isExecuting: false,
+            execute: () => {}
+        };
+
+        const customItemContent = {
+            get: (itemObj: any) => {
+                if (column === "toolbox") {
+                    return (
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%" }}>
+                            <span style={{ fontSize: "18px" }}>
+                                {itemObj.type === "text" && "🔤"}
+                                {itemObj.type === "number" && "🔢"}
+                                {itemObj.type === "dropdown" && "🔽"}
+                                {itemObj.type === "datepicker" && "📅"}
+                                {itemObj.type === "checkbox" && "☑️"}
+                                {itemObj.type === "textarea" && "📝"}
+                                {itemObj.type === "button" && "🔘"}
+                            </span>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: "12px", fontWeight: 700, color: "#f1f5f9" }}>{itemObj.label}</div>
+                            </div>
+                        </div>
+                    );
+                } else {
+                    const isSelected = selectedFieldId === itemObj.id;
+                    return (
+                        <div
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedFieldId(itemObj.id);
+                            }}
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "6px",
+                                width: "100%",
+                                cursor: "pointer",
+                                border: isSelected ? "1.5px solid #8b5cf6" : "1.5px solid rgba(255,255,255,0.06)",
+                                borderRadius: "8px",
+                                padding: "8px",
+                                background: isSelected ? "rgba(139,92,246,0.06)" : "rgba(255,255,255,0.02)",
+                                transition: "all 0.15s"
+                            }}
+                        >
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <span style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1" }}>
+                                    {itemObj.label} {itemObj.required && <span style={{ color: "#ef4444" }}>*</span>}
+                                </span>
+                                <div style={{ display: "flex", gap: "6px" }} onClick={e => e.stopPropagation()}>
+                                    <button
+                                        onClick={() => setSelectedFieldId(itemObj.id)}
+                                        style={{
+                                            border: "none",
+                                            background: "rgba(255,255,255,0.05)",
+                                            color: "#cbd5e1",
+                                            borderRadius: "4px",
+                                            padding: "2px 6px",
+                                            fontSize: "10px",
+                                            cursor: "pointer"
+                                        }}
+                                    >
+                                        ⚙️ ตั้งค่า
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setFormFields(prev => prev.filter(f => f.id !== itemObj.id));
+                                            if (selectedFieldId === itemObj.id) {
+                                                setSelectedFieldId(null);
+                                            }
+                                            setIsSubmitted(false);
+                                            addLog(`🗑️ [Form Builder] Removed field "${itemObj.id}"`);
+                                        }}
+                                        style={{
+                                            border: "none",
+                                            background: "rgba(239,68,68,0.15)",
+                                            color: "#f87171",
+                                            borderRadius: "4px",
+                                            padding: "2px 6px",
+                                            fontSize: "10px",
+                                            cursor: "pointer"
+                                        }}
+                                    >
+                                        🗑️ ลบ
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div style={{ pointerEvents: "none", opacity: 0.8 }}>
+                                {itemObj.type === "text" && (
+                                    <input type="text" placeholder={itemObj.placeholder} style={inputStyle} readOnly />
+                                )}
+                                {itemObj.type === "number" && (
+                                    <input type="number" placeholder={itemObj.placeholder} style={inputStyle} readOnly />
+                                )}
+                                {itemObj.type === "textarea" && (
+                                    <textarea placeholder={itemObj.placeholder} rows={2} style={{ ...inputStyle, resize: "none" }} readOnly />
+                                )}
+                                {itemObj.type === "datepicker" && (
+                                    <input type="date" style={inputStyle} readOnly />
+                                )}
+                                {itemObj.type === "dropdown" && (
+                                    <select style={inputStyle} disabled>
+                                        <option value="">{itemObj.placeholder || "เลือก..."}</option>
+                                        {(itemObj.options || "").split(",").map((opt: string) => (
+                                            <option key={opt} value={opt.trim()}>{opt.trim()}</option>
+                                        ))}
+                                    </select>
+                                )}
+                                {itemObj.type === "checkbox" && (
+                                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                        <input type="checkbox" style={{ width: "16px", height: "16px" }} disabled />
+                                        <label style={{ fontSize: "11px", color: "#94a3b8" }}>กดยอมรับเงื่อนไข</label>
+                                    </div>
+                                )}
+                                {itemObj.type === "button" && (
+                                    <button
+                                        style={{
+                                            width: "100%",
+                                            padding: "8px",
+                                            borderRadius: "6px",
+                                            background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)",
+                                            border: "none",
+                                            color: "#fff",
+                                            fontWeight: 600,
+                                            fontSize: "12px"
+                                        }}
+                                    >
+                                        {itemObj.label}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    );
+                }
+            }
+        };
+
+        return {
+            name: `form-column-${column}`,
+            class: `pwb-form-${column}`,
+            itemsSource: itemsSource as any,
+            customItemContent: customItemContent as any,
+            sortedAttribute: sortedAttribute as any,
+            onSortAction: onSortAction as any,
+            layoutDirection: "vertical" as const,
+            dragHandleDisplay: "left" as const,
+            accentColor: "#8b5cf6",
+            borderRadius: `${borderRadiusPx}px`,
+            enableKanban: true,
+            dragGroup: "form-builder-group",
+            columnValue: column,
+            itemColumnAttribute: itemColumnAttribute as any,
+            saveDelay: 0,
+            enableHeader: false,
+            enableFooter: false,
+            enableMainFooter: false,
+            enableLaneTitle: false,
+            enableOuterFooter: false,
+            themePreset,
+            darkModeBehavior,
+            itemPadding: "8px 12px",
+            itemGap: "8px",
+            readOnlyMode: false,
+            sortIdAttribute: sortIdAttribute as any
+        };
+    };
+
+    const selectedField = formFields.find(f => f.id === selectedFieldId);
+
+    const handlePreviewSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const errors: Record<string, string> = {};
+        const activeFields = getSortedCanvasFields();
+        
+        activeFields.forEach(f => {
+            if (f.type !== "button") {
+                const val = liveFormValues[f.id];
+                if (f.required && (val === undefined || val === null || val === "" || val === false)) {
+                    errors[f.id] = `โปรดป้อนหรือกดยอมรับ ${f.label}`;
+                }
+            }
+        });
+
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
+            addLog("⚠️ [Live Form] Validation failed. Missing required fields.");
+        } else {
+            setFormErrors({});
+            setIsSubmitted(true);
+            addLog("🎉 [Live Form] Submitted successfully!");
+        }
+    };
+
+    const handleFormValueChange = (fieldId: string, value: any) => {
+        setLiveFormValues(prev => ({
+            ...prev,
+            [fieldId]: value
+        }));
+    };
+
+    const schemaObj = {
+        formTitle,
+        totalFields: formFields.length,
+        fields: getSortedCanvasFields().map(f => ({
+            id: f.id,
+            type: f.type,
+            label: f.label,
+            placeholder: f.placeholder,
+            required: f.required,
+            options: f.type === "dropdown" ? f.options?.split(",").map(o => o.trim()) : undefined
+        }))
+    };
+    const schemaStr = JSON.stringify(schemaObj, null, 2);
+
     return (
         <div
             style={{
                 display: "flex",
+                flexDirection: "column",
                 minHeight: "100vh",
                 width: "100%",
                 background: "#0b0f19",
@@ -737,628 +1144,1212 @@ function App() {
                 fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif"
             }}
         >
-            {/* ── LEFT: Properties Control Panel ─────────────────────── */}
+            {/* ── TOP: High-Premium Navigation Bar ─────────────────────── */}
             <div
                 style={{
-                    width: "320px",
-                    minHeight: "100vh",
-                    flexShrink: 0,
-                    background: "rgba(15,23,42,0.95)",
-                    borderRight: "1px solid rgba(255,255,255,0.06)",
                     display: "flex",
-                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "12px 24px",
+                    background: "rgba(15, 23, 42, 0.8)",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
                     backdropFilter: "blur(12px)",
-                    zIndex: 10
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 20
                 }}
             >
-                <div style={{ padding: "20px 20px 14px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                    <div
-                        style={{
-                            fontSize: "10px",
-                            color: "#3b82f6",
-                            fontWeight: 700,
-                            letterSpacing: "1px",
-                            textTransform: "uppercase",
-                            marginBottom: "4px"
-                        }}
-                    >
-                        🧩 Pluggable Widget Upgrade
-                    </div>
-                    <div style={{ fontSize: "16px", fontWeight: 800, color: "#f1f5f9" }}>Kanban & Perf Playground</div>
-                    <div style={{ fontSize: "12px", color: "#64748b", marginTop: "2px" }}>
-                        pwbCustomizeContainerDataView v1.1.0
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <span style={{ fontSize: "20px" }}>⚡</span>
+                    <div>
+                        <div style={{ fontWeight: 800, fontSize: "15px", color: "#f1f5f9" }}>
+                            Mendix Customize Container DataView
+                        </div>
+                        <div style={{ fontSize: "11px", color: "#64748b" }}>Developer Playground Workspace</div>
                     </div>
                 </div>
 
-                <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
-                    <Section title="Read Only Settings">
-                        <Toggle
-                            label="Enable Read Only Mode"
-                            value={readOnlyMode}
-                            onChange={v => {
-                                setReadOnlyMode(v);
-                                addLog(`🎛️ [Read Only Toggle] → ${v ? "Enabled (sorting by SortID)" : "Disabled"}`);
-                            }}
-                        />
-                        {readOnlyMode && (
-                            <div style={{ fontSize: "11px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
-                                🔒 ล็อกไม่ให้ลากวางหรือขยับตำแหน่งการ์ด และจัดเรียงรายการอ้างอิงตามค่า SortID
-                                ของการ์ดแต่ละใบ
-                            </div>
-                        )}
-                    </Section>
-
-                    <Section title="Performance Settings">
-                        <Slider
-                            label="Save Debounce Delay"
-                            value={saveDelay}
-                            min={0}
-                            max={2000}
-                            onChange={setSaveDelay}
-                            unit="ms"
-                        />
-                        <div style={{ fontSize: "11px", color: "#475569", marginTop: "4px", lineHeight: "1.4" }}>
-                            ⏰ หน่วงเวลาบันทึกและส่ง Action กลับ Mendix ช่วยลด Database workload
-                        </div>
-                    </Section>
-
-                    <Section title="Kanban Core Attributes">
-                        <Toggle
-                            label="Enable Kanban Support"
-                            value={enableKanban}
-                            onChange={v => {
-                                setEnableKanban(v);
-                                if (!v) {
-                                    setLaneCount(1);
-                                } else {
-                                    setLaneCount(3);
-                                }
-                                addLog(
-                                    `🎛️ [Kanban Toggle] → ${v ? "Enabled (cross-column)" : "Disabled (single column)"}`
-                                );
-                            }}
-                        />
-                        {enableKanban && (
-                            <Slider
-                                label="Simulated Lanes"
-                                value={laneCount}
-                                min={1}
-                                max={4}
-                                onChange={val => {
-                                    setLaneCount(val);
-                                    addLog(`🎛️ [Lane Count] → Set to ${val} columns`);
-                                }}
-                                unit=" Lanes"
-                            />
-                        )}
-                        <div
-                            style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "6px",
-                                marginTop: "8px",
-                                borderTop: "1px solid rgba(255,255,255,0.04)",
-                                paddingTop: "8px"
-                            }}
-                        >
-                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
-                                <span style={{ color: "#94a3b8" }}>Drag Group:</span>
-                                <span style={{ color: "#3b82f6", fontWeight: 700 }}>kanban-playground</span>
-                            </div>
-                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
-                                <span style={{ color: "#94a3b8" }}>Column Attribute:</span>
-                                <span style={{ color: "#10b981", fontWeight: 700 }}>status (Enum/String)</span>
-                            </div>
-                        </div>
-                    </Section>
-
-                    <Section title="Layout Direction">
-                        <div style={{ display: "flex", gap: "8px" }}>
-                            {(["vertical", "horizontal"] as const).map(dir => (
-                                <button
-                                    key={dir}
-                                    onClick={() => setLayoutDirection(dir)}
-                                    style={{
-                                        flex: 1,
-                                        padding: "8px",
-                                        borderRadius: "8px",
-                                        cursor: "pointer",
-                                        border: `1.5px solid ${layoutDirection === dir ? "#3b82f6" : "#1e293b"}`,
-                                        background: layoutDirection === dir ? "rgba(59,130,246,0.15)" : "#0f172a",
-                                        color: layoutDirection === dir ? "#3b82f6" : "#64748b",
-                                        fontWeight: layoutDirection === dir ? 700 : 400,
-                                        fontSize: "13px",
-                                        transition: "all 0.2s"
-                                    }}
-                                >
-                                    {dir === "vertical" ? "⬇ แนวตั้ง" : "➡ แนวนอน"}
-                                </button>
-                            ))}
-                        </div>
-                    </Section>
-
-                    <Section title="Card Display Style">
-                        <div style={{ display: "flex", gap: "8px" }}>
-                            {(
-                                [
-                                    { key: "progress", label: "📊 Progress Bar" },
-                                    { key: "icon", label: "🎯 Icon Badge" }
-                                ] as const
-                            ).map(s => (
-                                <button
-                                    key={s.key}
-                                    onClick={() => setCardStyle(s.key)}
-                                    style={{
-                                        flex: 1,
-                                        padding: "8px",
-                                        borderRadius: "8px",
-                                        cursor: "pointer",
-                                        border: `1.5px solid ${cardStyle === s.key ? "#a855f7" : "#1e293b"}`,
-                                        background: cardStyle === s.key ? "rgba(168,85,247,0.12)" : "#0f172a",
-                                        color: cardStyle === s.key ? "#c084fc" : "#64748b",
-                                        fontWeight: cardStyle === s.key ? 700 : 400,
-                                        fontSize: "12px",
-                                        transition: "all 0.2s"
-                                    }}
-                                >
-                                    {s.label}
-                                </button>
-                            ))}
-                        </div>
-                    </Section>
-
-                    <Section title="Header & Footer Settings">
-                        <Toggle
-                            label="Enable Lane Title"
-                            value={enableLaneTitle}
-                            onChange={v => {
-                                setEnableLaneTitle(v);
-                                addLog(`🎛️ [Lane Title Toggle] → ${v ? "Enabled" : "Disabled"}`);
-                            }}
-                        />
-                        <Toggle
-                            label="Enable Section Header"
-                            value={enableHeader}
-                            onChange={v => {
-                                setEnableHeader(v);
-                                addLog(`🎛️ [Header Toggle] → ${v ? "Enabled" : "Disabled"}`);
-                            }}
-                        />
-                        <Toggle
-                            label="Enable Section Footer (Button)"
-                            value={enableFooter}
-                            onChange={v => {
-                                setEnableFooter(v);
-                                addLog(`🎛️ [Footer Toggle] → ${v ? "Enabled" : "Disabled"}`);
-                            }}
-                        />
-                        <Toggle
-                            label="Enable Main Footer (Summary)"
-                            value={enableMainFooter}
-                            onChange={v => {
-                                setEnableMainFooter(v);
-                                addLog(`🎛️ [Main Footer Toggle] → ${v ? "Enabled" : "Disabled"}`);
-                            }}
-                        />
-                        <Toggle
-                            label="Enable Outer Footer"
-                            value={enableOuterFooter}
-                            onChange={v => {
-                                setEnableOuterFooter(v);
-                                addLog(`🎛️ [Outer Footer Toggle] → ${v ? "Enabled" : "Disabled"}`);
-                            }}
-                        />
-                    </Section>
-
-                    <Section title="Theme & Dark Mode">
-                        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                            <span style={{ fontSize: "13px", color: "#94a3b8" }}>Theme Preset</span>
-                            <select
-                                value={themePreset}
-                                onChange={e => setThemePreset(e.target.value as any)}
-                                style={{
-                                    width: "100%",
-                                    padding: "8px",
-                                    borderRadius: "8px",
-                                    background: "#0f172a",
-                                    border: "1.5px solid #1e293b",
-                                    color: "#f1f5f9",
-                                    fontSize: "13px",
-                                    cursor: "pointer"
-                                }}
-                            >
-                                <option value="default_rounded">Default Rounded</option>
-                                <option value="modern_glass">Glassmorphism</option>
-                                <option value="minimalist_flat">Minimalist Flat</option>
-                                <option value="neo_brutalist">Neo-Brutalist</option>
-                            </select>
-                        </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px" }}>
-                            <span style={{ fontSize: "13px", color: "#94a3b8" }}>Dark Mode Behavior</span>
-                            <div style={{ display: "flex", gap: "6px" }}>
-                                {(["auto", "light", "dark"] as const).map(mode => (
-                                    <button
-                                        key={mode}
-                                        onClick={() => setDarkModeBehavior(mode)}
-                                        style={{
-                                            flex: 1,
-                                            padding: "6px",
-                                            borderRadius: "8px",
-                                            cursor: "pointer",
-                                            border: `1.5px solid ${darkModeBehavior === mode ? "#3b82f6" : "#1e293b"}`,
-                                            background: darkModeBehavior === mode ? "rgba(59,130,246,0.15)" : "#0f172a",
-                                            color: darkModeBehavior === mode ? "#3b82f6" : "#64748b",
-                                            fontSize: "12px",
-                                            transition: "all 0.2s"
-                                        }}
-                                    >
-                                        {mode.toUpperCase()}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </Section>
-
-                    <Section title="Item Spacing">
-                        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                            <span style={{ fontSize: "13px", color: "#94a3b8" }}>Item Padding</span>
-                            <select
-                                value={itemPadding}
-                                onChange={e => setItemPadding(e.target.value)}
-                                style={{
-                                    width: "100%",
-                                    padding: "8px",
-                                    borderRadius: "8px",
-                                    background: "#0f172a",
-                                    border: "1.5px solid #1e293b",
-                                    color: "#f1f5f9",
-                                    fontSize: "13px",
-                                    cursor: "pointer"
-                                }}
-                            >
-                                <option value="">Default (12px 16px)</option>
-                                <option value="6px 10px">Compact (6px 10px)</option>
-                                <option value="16px 20px">Coarse (16px 20px)</option>
-                                <option value="24px">Spacious (24px)</option>
-                            </select>
-                        </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px" }}>
-                            <span style={{ fontSize: "13px", color: "#94a3b8" }}>Item Gap</span>
-                            <select
-                                value={itemGap}
-                                onChange={e => setItemGap(e.target.value)}
-                                style={{
-                                    width: "100%",
-                                    padding: "8px",
-                                    borderRadius: "8px",
-                                    background: "#0f172a",
-                                    border: "1.5px solid #1e293b",
-                                    color: "#f1f5f9",
-                                    fontSize: "13px",
-                                    cursor: "pointer"
-                                }}
-                            >
-                                <option value="">Default (12px)</option>
-                                <option value="6px">Tight (6px)</option>
-                                <option value="16px">Spacious (16px)</option>
-                                <option value="24px">Extra Large (24px)</option>
-                            </select>
-                        </div>
-                    </Section>
-
-                    <Section title="Aesthetics">
-                        <ColorPicker
-                            label="Accent Color"
-                            value={accentColor}
-                            onChange={setAccentColor}
-                            presets={["#3b82f6", "#8b5cf6", "#ec4899", "#10b981", "#f59e0b", "#ef4444", "#06b6d4"]}
-                        />
-                        <Slider
-                            label="Border Radius"
-                            value={borderRadiusPx}
-                            min={0}
-                            max={24}
-                            onChange={setBorderRadiusPx}
-                            unit="px"
-                        />
-                        <Toggle
-                            label="Show Drag Handles (⠿)"
-                            value={dragHandleDisplay === "left"}
-                            onChange={v => setDragHandleDisplay(v ? "left" : "hide")}
-                        />
-                    </Section>
-
+                <div
+                    style={{
+                        display: "flex",
+                        background: "#090d16",
+                        borderRadius: "10px",
+                        padding: "4px",
+                        border: "1px solid rgba(255,255,255,0.06)"
+                    }}
+                >
                     <button
-                        onClick={handleReset}
+                        onClick={() => {
+                            setPlaygroundMode("kanban");
+                            addLog("🔄 Switched to Kanban Simulation Mode");
+                        }}
                         style={{
-                            width: "100%",
-                            padding: "10px",
-                            marginTop: "8px",
-                            background: "rgba(239,68,68,0.1)",
-                            border: "1px solid rgba(239,68,68,0.25)",
-                            borderRadius: "10px",
-                            color: "#f87171",
-                            fontSize: "13px",
+                            padding: "8px 16px",
+                            borderRadius: "8px",
+                            border: "none",
+                            background:
+                                playgroundMode === "kanban"
+                                    ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
+                                    : "transparent",
+                            color: playgroundMode === "kanban" ? "#fff" : "#64748b",
                             fontWeight: 600,
+                            fontSize: "13px",
                             cursor: "pointer",
                             transition: "all 0.2s"
                         }}
-                        onMouseEnter={e => (e.currentTarget.style.background = "rgba(239,68,68,0.18)")}
-                        onMouseLeave={e => (e.currentTarget.style.background = "rgba(239,68,68,0.1)")}
                     >
-                        🔄 รีเซ็ตกระดาน & ฐานข้อมูล
+                        📋 Kanban Simulation
+                    </button>
+                    <button
+                        onClick={() => {
+                            setPlaygroundMode("form_builder");
+                            addLog("🔄 Switched to Form Builder Test Mode");
+                        }}
+                        style={{
+                            padding: "8px 16px",
+                            borderRadius: "8px",
+                            border: "none",
+                            background:
+                                playgroundMode === "form_builder"
+                                    ? "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)"
+                                    : "transparent",
+                            color: playgroundMode === "form_builder" ? "#fff" : "#64748b",
+                            fontWeight: 600,
+                            fontSize: "13px",
+                            cursor: "pointer",
+                            transition: "all 0.2s"
+                        }}
+                    >
+                        🛠️ Form Builder Test Mode
                     </button>
                 </div>
             </div>
 
-            {/* ── RIGHT: Live Canvas ─────────────────────────────────── */}
-            <div
-                style={{
-                    flex: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    padding: "24px 32px",
-                    overflowY: "auto",
-                    height: "100vh"
-                }}
-            >
-                {/* Header */}
-                <div style={{ marginBottom: "20px" }}>
-                    <div
-                        style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "8px",
-                            background: "rgba(16,185,129,0.1)",
-                            border: "1px solid rgba(16,185,129,0.25)",
-                            borderRadius: "8px",
-                            padding: "6px 12px",
-                            marginBottom: "10px"
-                        }}
-                    >
-                        <div
-                            style={{
-                                width: "8px",
-                                height: "8px",
-                                borderRadius: "50%",
-                                background: "#10b981",
-                                boxShadow: "0 0 6px #10b981",
-                                animation: "pulse 2s infinite"
-                            }}
-                        />
-                        <span style={{ color: "#a7f3d0", fontSize: "12px", fontWeight: 600 }}>
-                            Playground Mode - 3 Columns Kanban Board Simulation
-                        </span>
-                    </div>
-                    <h1 style={{ margin: "0 0 4px", fontSize: "22px", fontWeight: 800 }}>
-                        PWB Customize Container DataView (Kanban Engine)
-                    </h1>
-                    <p style={{ margin: 0, color: "#64748b", fontSize: "13px" }}>
-                        ทดลองลากการ์ดสลับระหว่าง **คอลัมน์แนวตั้ง** หรือ **กล่องแนวนอน** และสังเกตการหน่วงเวลาบันทึก
-                        (Debounce Delay) เพื่อยืนยันความไหลลื่นและประสิทธิภาพ
-                    </p>
-                </div>
-
-                {/* DYNAMIC KANBAN BOARD CONTAINER */}
+            {/* ── BOTTOM CONTENT AREA ────────────────────────────────── */}
+            <div style={{ display: "flex", flex: 1, minHeight: "calc(100vh - 65px)" }}>
+                
+                {/* ── LEFT: Properties Control Panel ─────────────────────── */}
                 <div
                     style={{
-                        display: "flex",
-                        gap: "20px",
-                        flex: 1,
-                        minHeight: "450px",
-                        marginBottom: "20px"
-                    }}
-                >
-                    {/* Column 1: TODO */}
-                    {laneCount >= 1 && (
-                        <div
-                            style={{
-                                flex: 1,
-                                background: "rgba(255,255,255,0.02)",
-                                border: "1px solid rgba(255,255,255,0.06)",
-                                borderRadius: "16px",
-                                padding: "16px",
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "12px"
-                            }}
-                        >
-                            {!enableLaneTitle && (
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>
-                                        🔴 TO DO
-                                    </h3>
-                                    <span
-                                        style={{
-                                            fontSize: "11px",
-                                            fontWeight: 700,
-                                            padding: "2px 8px",
-                                            borderRadius: "10px",
-                                            background: "rgba(239,68,68,0.15)",
-                                            color: "#f87171"
-                                        }}
-                                    >
-                                        {tasks.filter(t => t.status === "todo").length}
-                                    </span>
-                                </div>
-                            )}
-                            <div style={{ flex: 1, overflowY: "auto" }}>
-                                <PwbCustomizeContainerDataView {...getColumnProps("todo")} />
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Column 2: IN PROGRESS */}
-                    {laneCount >= 2 && (
-                        <div
-                            style={{
-                                flex: 1,
-                                background: "rgba(255,255,255,0.02)",
-                                border: "1px solid rgba(255,255,255,0.06)",
-                                borderRadius: "16px",
-                                padding: "16px",
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "12px"
-                            }}
-                        >
-                            {!enableLaneTitle && (
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>
-                                        🟡 IN PROGRESS
-                                    </h3>
-                                    <span
-                                        style={{
-                                            fontSize: "11px",
-                                            fontWeight: 700,
-                                            padding: "2px 8px",
-                                            borderRadius: "10px",
-                                            background: "rgba(245,158,11,0.15)",
-                                            color: "#fbbf24"
-                                        }}
-                                    >
-                                        {tasks.filter(t => t.status === "in_progress").length}
-                                    </span>
-                                </div>
-                            )}
-                            <div style={{ flex: 1, overflowY: "auto" }}>
-                                <PwbCustomizeContainerDataView {...getColumnProps("in_progress")} />
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Column 3: DONE */}
-                    {laneCount >= 3 && (
-                        <div
-                            style={{
-                                flex: 1,
-                                background: "rgba(255,255,255,0.02)",
-                                border: "1px solid rgba(255,255,255,0.06)",
-                                borderRadius: "16px",
-                                padding: "16px",
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "12px"
-                            }}
-                        >
-                            {!enableLaneTitle && (
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>
-                                        🟢 DONE
-                                    </h3>
-                                    <span
-                                        style={{
-                                            fontSize: "11px",
-                                            fontWeight: 700,
-                                            padding: "2px 8px",
-                                            borderRadius: "10px",
-                                            background: "rgba(34,197,94,0.15)",
-                                            color: "#34d399"
-                                        }}
-                                    >
-                                        {tasks.filter(t => t.status === "done").length}
-                                    </span>
-                                </div>
-                            )}
-                            <div style={{ flex: 1, overflowY: "auto" }}>
-                                <PwbCustomizeContainerDataView {...getColumnProps("done")} />
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Column 4: ARCHIVED */}
-                    {laneCount >= 4 && (
-                        <div
-                            style={{
-                                flex: 1,
-                                background: "rgba(255,255,255,0.02)",
-                                border: "1px solid rgba(255,255,255,0.06)",
-                                borderRadius: "16px",
-                                padding: "16px",
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "12px"
-                            }}
-                        >
-                            {!enableLaneTitle && (
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>
-                                        🟣 ARCHIVED
-                                    </h3>
-                                    <span
-                                        style={{
-                                            fontSize: "11px",
-                                            fontWeight: 700,
-                                            padding: "2px 8px",
-                                            borderRadius: "10px",
-                                            background: "rgba(168,85,247,0.15)",
-                                            color: "#c084fc"
-                                        }}
-                                    >
-                                        {tasks.filter(t => t.status === "archived").length}
-                                    </span>
-                                </div>
-                            )}
-                            <div style={{ flex: 1, overflowY: "auto" }}>
-                                <PwbCustomizeContainerDataView {...getColumnProps("archived")} />
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* LOGS PANEL */}
-                <div
-                    style={{
-                        background: "#080c14",
-                        border: "1px solid rgba(255,255,255,0.06)",
-                        borderRadius: "12px",
-                        padding: "12px 16px",
-                        height: "150px",
+                        width: "320px",
+                        background: "rgba(15,23,42,0.95)",
+                        borderRight: "1px solid rgba(255,255,255,0.06)",
                         display: "flex",
                         flexDirection: "column",
+                        backdropFilter: "blur(12px)",
+                        zIndex: 10,
+                        maxHeight: "calc(100vh - 65px)",
+                        overflowY: "auto"
+                    }}
+                >
+                    {playgroundMode === "kanban" ? (
+                        /* Kanban Properties */
+                        <div style={{ padding: "16px 20px" }}>
+                            <div style={{ marginBottom: "14px", borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "10px" }}>
+                                <div style={{ fontSize: "16px", fontWeight: 800, color: "#f1f5f9" }}>Kanban & Perf Playground</div>
+                                <div style={{ fontSize: "12px", color: "#64748b", marginTop: "2px" }}>
+                                    pwbCustomizeContainerDataView v1.1.0
+                                </div>
+                            </div>
+                            <Section title="Read Only Settings">
+                                <Toggle
+                                    label="Enable Read Only Mode"
+                                    value={readOnlyMode}
+                                    onChange={v => {
+                                        setReadOnlyMode(v);
+                                        addLog(`🎛️ [Read Only Toggle] → ${v ? "Enabled (sorting by SortID)" : "Disabled"}`);
+                                    }}
+                                />
+                                {readOnlyMode && (
+                                    <div style={{ fontSize: "11px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
+                                        🔒 ล็อกไม่ให้ลากวางหรือขยับตำแหน่งการ์ด และจัดเรียงรายการอ้างอิงตามค่า SortID
+                                        ของการ์ดแต่ละใบ
+                                    </div>
+                                )}
+                            </Section>
+
+                            <Section title="Performance Settings">
+                                <Slider
+                                    label="Save Debounce Delay"
+                                    value={saveDelay}
+                                    min={0}
+                                    max={2000}
+                                    onChange={setSaveDelay}
+                                    unit="ms"
+                                />
+                                <div style={{ fontSize: "11px", color: "#475569", marginTop: "4px", lineHeight: "1.4" }}>
+                                    ⏰ หน่วงเวลาบันทึกและส่ง Action กลับ Mendix ช่วยลด Database workload
+                                </div>
+                            </Section>
+
+                            <Section title="Kanban Core Attributes">
+                                <Toggle
+                                    label="Enable Kanban Support"
+                                    value={enableKanban}
+                                    onChange={v => {
+                                        setEnableKanban(v);
+                                        if (!v) {
+                                            setLaneCount(1);
+                                        } else {
+                                            setLaneCount(3);
+                                        }
+                                        addLog(
+                                            `🎛️ [Kanban Toggle] → ${v ? "Enabled (cross-column)" : "Disabled (single column)"}`
+                                        );
+                                    }}
+                                />
+                                {enableKanban && (
+                                    <Slider
+                                        label="Simulated Lanes"
+                                        value={laneCount}
+                                        min={1}
+                                        max={4}
+                                        onChange={val => {
+                                            setLaneCount(val);
+                                            addLog(`🎛️ [Lane Count] → Set to ${val} columns`);
+                                        }}
+                                        unit=" Lanes"
+                                    />
+                                )}
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "6px",
+                                        marginTop: "8px",
+                                        borderTop: "1px solid rgba(255,255,255,0.04)",
+                                        paddingTop: "8px"
+                                    }}
+                                >
+                                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
+                                        <span style={{ color: "#94a3b8" }}>Drag Group:</span>
+                                        <span style={{ color: "#3b82f6", fontWeight: 700 }}>kanban-playground</span>
+                                    </div>
+                                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
+                                        <span style={{ color: "#94a3b8" }}>Column Attribute:</span>
+                                        <span style={{ color: "#10b981", fontWeight: 700 }}>status (Enum/String)</span>
+                                    </div>
+                                </div>
+                            </Section>
+
+                            <Section title="Layout Direction">
+                                <div style={{ display: "flex", gap: "8px" }}>
+                                    {(["vertical", "horizontal"] as const).map(dir => (
+                                        <button
+                                            key={dir}
+                                            onClick={() => setLayoutDirection(dir)}
+                                            style={{
+                                                flex: 1,
+                                                padding: "8px",
+                                                borderRadius: "8px",
+                                                cursor: "pointer",
+                                                border: `1.5px solid ${layoutDirection === dir ? "#3b82f6" : "#1e293b"}`,
+                                                background: layoutDirection === dir ? "rgba(59,130,246,0.15)" : "#0f172a",
+                                                color: layoutDirection === dir ? "#3b82f6" : "#64748b",
+                                                fontWeight: layoutDirection === dir ? 700 : 400,
+                                                fontSize: "13px",
+                                                transition: "all 0.2s"
+                                            }}
+                                        >
+                                            {dir === "vertical" ? "⬇ แนวตั้ง" : "➡ แนวนอน"}
+                                        </button>
+                                    ))}
+                                </div>
+                            </Section>
+
+                            <Section title="Card Display Style">
+                                <div style={{ display: "flex", gap: "8px" }}>
+                                    {(
+                                        [
+                                            { key: "progress", label: "📊 Progress Bar" },
+                                            { key: "icon", label: "🎯 Icon Badge" }
+                                        ] as const
+                                    ).map(s => (
+                                        <button
+                                            key={s.key}
+                                            onClick={() => setCardStyle(s.key)}
+                                            style={{
+                                                flex: 1,
+                                                padding: "8px",
+                                                borderRadius: "8px",
+                                                cursor: "pointer",
+                                                border: `1.5px solid ${cardStyle === s.key ? "#a855f7" : "#1e293b"}`,
+                                                background: cardStyle === s.key ? "rgba(168,85,247,0.12)" : "#0f172a",
+                                                color: cardStyle === s.key ? "#c084fc" : "#64748b",
+                                                fontWeight: cardStyle === s.key ? 700 : 400,
+                                                fontSize: "12px",
+                                                transition: "all 0.2s"
+                                            }}
+                                        >
+                                            {s.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </Section>
+
+                            <Section title="Header & Footer Settings">
+                                <Toggle
+                                    label="Enable Lane Title"
+                                    value={enableLaneTitle}
+                                    onChange={v => {
+                                        setEnableLaneTitle(v);
+                                        addLog(`🎛️ [Lane Title Toggle] → ${v ? "Enabled" : "Disabled"}`);
+                                    }}
+                                />
+                                <Toggle
+                                    label="Enable Section Header"
+                                    value={enableHeader}
+                                    onChange={v => {
+                                        setEnableHeader(v);
+                                        addLog(`🎛️ [Header Toggle] → ${v ? "Enabled" : "Disabled"}`);
+                                    }}
+                                />
+                                <Toggle
+                                    label="Enable Section Footer (Button)"
+                                    value={enableFooter}
+                                    onChange={v => {
+                                        setEnableFooter(v);
+                                        addLog(`🎛️ [Footer Toggle] → ${v ? "Enabled" : "Disabled"}`);
+                                    }}
+                                />
+                                <Toggle
+                                    label="Enable Main Footer (Summary)"
+                                    value={enableMainFooter}
+                                    onChange={v => {
+                                        setEnableMainFooter(v);
+                                        addLog(`🎛️ [Main Footer Toggle] → ${v ? "Enabled" : "Disabled"}`);
+                                    }}
+                                />
+                                <Toggle
+                                    label="Enable Outer Footer"
+                                    value={enableOuterFooter}
+                                    onChange={v => {
+                                        setEnableOuterFooter(v);
+                                        addLog(`🎛️ [Outer Footer Toggle] → ${v ? "Enabled" : "Disabled"}`);
+                                    }}
+                                />
+                            </Section>
+
+                            <Section title="Theme & Dark Mode">
+                                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                    <span style={{ fontSize: "13px", color: "#94a3b8" }}>Theme Preset</span>
+                                    <select
+                                        value={themePreset}
+                                        onChange={e => setThemePreset(e.target.value as any)}
+                                        style={{
+                                            width: "100%",
+                                            padding: "8px",
+                                            borderRadius: "8px",
+                                            background: "#0f172a",
+                                            border: "1.5px solid #1e293b",
+                                            color: "#f1f5f9",
+                                            fontSize: "13px",
+                                            cursor: "pointer"
+                                        }}
+                                    >
+                                        <option value="default_rounded">Default Rounded</option>
+                                        <option value="modern_glass">Glassmorphism</option>
+                                        <option value="minimalist_flat">Minimalist Flat</option>
+                                        <option value="neo_brutalist">Neo-Brutalist</option>
+                                    </select>
+                                </div>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px" }}>
+                                    <span style={{ fontSize: "13px", color: "#94a3b8" }}>Dark Mode Behavior</span>
+                                    <div style={{ display: "flex", gap: "6px" }}>
+                                        {(["auto", "light", "dark"] as const).map(mode => (
+                                            <button
+                                                key={mode}
+                                                onClick={() => setDarkModeBehavior(mode)}
+                                                style={{
+                                                    flex: 1,
+                                                    padding: "6px",
+                                                    borderRadius: "8px",
+                                                    cursor: "pointer",
+                                                    border: `1.5px solid ${darkModeBehavior === mode ? "#3b82f6" : "#1e293b"}`,
+                                                    background: darkModeBehavior === mode ? "rgba(59,130,246,0.15)" : "#0f172a",
+                                                    color: darkModeBehavior === mode ? "#3b82f6" : "#64748b",
+                                                    fontSize: "12px",
+                                                    transition: "all 0.2s"
+                                                }}
+                                            >
+                                                {mode.toUpperCase()}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </Section>
+
+                            <Section title="Item Spacing">
+                                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                    <span style={{ fontSize: "13px", color: "#94a3b8" }}>Item Padding</span>
+                                    <select
+                                        value={itemPadding}
+                                        onChange={e => setItemPadding(e.target.value)}
+                                        style={{
+                                            width: "100%",
+                                            padding: "8px",
+                                            borderRadius: "8px",
+                                            background: "#0f172a",
+                                            border: "1.5px solid #1e293b",
+                                            color: "#f1f5f9",
+                                            fontSize: "13px",
+                                            cursor: "pointer"
+                                        }}
+                                    >
+                                        <option value="">Default (12px 16px)</option>
+                                        <option value="6px 10px">Compact (6px 10px)</option>
+                                        <option value="16px 20px">Coarse (16px 20px)</option>
+                                        <option value="24px">Spacious (24px)</option>
+                                    </select>
+                                </div>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px" }}>
+                                    <span style={{ fontSize: "13px", color: "#94a3b8" }}>Item Gap</span>
+                                    <select
+                                        value={itemGap}
+                                        onChange={e => setItemGap(e.target.value)}
+                                        style={{
+                                            width: "100%",
+                                            padding: "8px",
+                                            borderRadius: "8px",
+                                            background: "#0f172a",
+                                            border: "1.5px solid #1e293b",
+                                            color: "#f1f5f9",
+                                            fontSize: "13px",
+                                            cursor: "pointer"
+                                        }}
+                                    >
+                                        <option value="">Default (12px)</option>
+                                        <option value="6px">Tight (6px)</option>
+                                        <option value="16px">Spacious (16px)</option>
+                                        <option value="24px">Extra Large (24px)</option>
+                                    </select>
+                                </div>
+                            </Section>
+
+                            <Section title="Aesthetics">
+                                <ColorPicker
+                                    label="Accent Color"
+                                    value={accentColor}
+                                    onChange={setAccentColor}
+                                    presets={["#3b82f6", "#8b5cf6", "#ec4899", "#10b981", "#f59e0b", "#ef4444", "#06b6d4"]}
+                                />
+                                <Slider
+                                    label="Border Radius"
+                                    value={borderRadiusPx}
+                                    min={0}
+                                    max={24}
+                                    onChange={setBorderRadiusPx}
+                                    unit="px"
+                                />
+                                <Toggle
+                                    label="Show Drag Handles (⠿)"
+                                    value={dragHandleDisplay === "left"}
+                                    onChange={v => setDragHandleDisplay(v ? "left" : "hide")}
+                                />
+                            </Section>
+
+                            <button
+                                onClick={handleReset}
+                                style={{
+                                    width: "100%",
+                                    padding: "10px",
+                                    marginTop: "8px",
+                                    background: "rgba(239,68,68,0.1)",
+                                    border: "1px solid rgba(239,68,68,0.25)",
+                                    borderRadius: "10px",
+                                    color: "#f87171",
+                                    fontSize: "13px",
+                                    fontWeight: 600,
+                                    cursor: "pointer",
+                                    transition: "all 0.2s"
+                                }}
+                                onMouseEnter={e => (e.currentTarget.style.background = "rgba(239,68,68,0.18)")}
+                                onMouseLeave={e => (e.currentTarget.style.background = "rgba(239,68,68,0.1)")}
+                            >
+                                🔄 รีเซ็ตกระดาน & ฐานข้อมูล
+                            </button>
+                        </div>
+                    ) : (
+                        /* Form Builder Properties */
+                        <div style={{ padding: "16px 20px" }}>
+                            <div style={{ marginBottom: "14px", borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "10px" }}>
+                                <div style={{ fontSize: "16px", fontWeight: 800, color: "#f1f5f9" }}>Form Builder Core</div>
+                                <div style={{ fontSize: "12px", color: "#8b5cf6", marginTop: "2px" }}>
+                                    Drag field template into canvas to instantiate.
+                                </div>
+                            </div>
+                            
+                            <Section title="Preload Templates">
+                                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                                    <button
+                                        onClick={loadContactTemplate}
+                                        style={{
+                                            padding: "8px 12px",
+                                            borderRadius: "8px",
+                                            border: "1px solid rgba(139,92,246,0.25)",
+                                            background: "rgba(139,92,246,0.1)",
+                                            color: "#c084fc",
+                                            fontSize: "12px",
+                                            fontWeight: 600,
+                                            cursor: "pointer",
+                                            textAlign: "left"
+                                        }}
+                                    >
+                                        📞 โหลดแบบฟอร์มติดต่อ (Contact Form)
+                                    </button>
+                                    <button
+                                        onClick={loadRegisterTemplate}
+                                        style={{
+                                            padding: "8px 12px",
+                                            borderRadius: "8px",
+                                            border: "1px solid rgba(139,92,246,0.25)",
+                                            background: "rgba(139,92,246,0.1)",
+                                            color: "#c084fc",
+                                            fontSize: "12px",
+                                            fontWeight: 600,
+                                            cursor: "pointer",
+                                            textAlign: "left"
+                                        }}
+                                    >
+                                        🎟️ โหลดแบบฟอร์มลงทะเบียน (Registration Form)
+                                    </button>
+                                </div>
+                            </Section>
+
+                            <Section title="Form Options">
+                                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                                    <div>
+                                        <span style={{ fontSize: "12px", color: "#94a3b8", display: "block", marginBottom: "4px" }}>
+                                            หัวข้อแบบฟอร์ม (Form Title)
+                                        </span>
+                                        <input
+                                            type="text"
+                                            value={formTitle}
+                                            onChange={e => setFormTitle(e.target.value)}
+                                            style={inputStyle}
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={handleClearFormCanvas}
+                                        style={{
+                                            width: "100%",
+                                            padding: "8px",
+                                            borderRadius: "8px",
+                                            border: "1px solid rgba(239,68,68,0.25)",
+                                            background: "rgba(239,68,68,0.1)",
+                                            color: "#f87171",
+                                            fontSize: "12px",
+                                            fontWeight: 600,
+                                            cursor: "pointer"
+                                        }}
+                                    >
+                                        🧹 เคลียร์หน้ากระดาษ (Clear Canvas)
+                                    </button>
+                                </div>
+                            </Section>
+
+                            {selectedField ? (
+                                <Section title="Field Properties">
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                                        <div>
+                                            <span style={{ fontSize: "11px", color: "#64748b", display: "block", marginBottom: "2px" }}>ID</span>
+                                            <input type="text" value={selectedField.id} disabled style={{ ...inputStyle, opacity: 0.6, fontSize: "11px" }} />
+                                        </div>
+                                        <div>
+                                            <span style={{ fontSize: "11px", color: "#64748b", display: "block", marginBottom: "2px" }}>ประเภทช่อง (Type)</span>
+                                            <input type="text" value={selectedField.type.toUpperCase()} disabled style={{ ...inputStyle, opacity: 0.6, fontSize: "11px" }} />
+                                        </div>
+                                        <div>
+                                            <span style={{ fontSize: "11px", color: "#94a3b8", display: "block", marginBottom: "4px" }}>ป้ายกำกับ (Label)</span>
+                                            <input
+                                                type="text"
+                                                value={selectedField.label}
+                                                onChange={e => updateSelectedField({ label: e.target.value })}
+                                                style={inputStyle}
+                                            />
+                                        </div>
+                                        {selectedField.type !== "checkbox" && selectedField.type !== "button" && (
+                                            <div>
+                                                <span style={{ fontSize: "11px", color: "#94a3b8", display: "block", marginBottom: "4px" }}>คำอธิบายเสริม (Placeholder)</span>
+                                                <input
+                                                    type="text"
+                                                    value={selectedField.placeholder}
+                                                    onChange={e => updateSelectedField({ placeholder: e.target.value })}
+                                                    style={inputStyle}
+                                                />
+                                            </div>
+                                        )}
+                                        {selectedField.type === "dropdown" && (
+                                            <div>
+                                                <span style={{ fontSize: "11px", color: "#94a3b8", display: "block", marginBottom: "4px" }}>ตัวเลือก (แยกด้วยเครื่องหมายลูกน้ำ ,)</span>
+                                                <textarea
+                                                    value={selectedField.options || ""}
+                                                    onChange={e => updateSelectedField({ options: e.target.value })}
+                                                    rows={3}
+                                                    style={{ ...inputStyle, fontSize: "11px", fontFamily: "monospace" }}
+                                                />
+                                            </div>
+                                        )}
+                                        {selectedField.type !== "button" && (
+                                            <Toggle
+                                                label="จำเป็นต้องกรอก (Required)"
+                                                value={selectedField.required}
+                                                onChange={v => updateSelectedField({ required: v })}
+                                            />
+                                        )}
+                                    </div>
+                                </Section>
+                            ) : (
+                                <div style={{ textAlign: "center", padding: "16px", color: "#475569", fontSize: "12px", border: "1px dashed rgba(255,255,255,0.06)", borderRadius: "8px" }}>
+                                    💡 คลิกที่ช่องฟิลด์ในการ์ดสีม่วงเพื่อตั้งค่ารายละเอียดฟิลด์ได้ที่นี่
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* ── RIGHT: Live Canvas ─────────────────────────────────── */}
+                <div
+                    style={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        padding: "24px 32px",
+                        overflowY: "auto",
+                        maxHeight: "calc(100vh - 65px)",
                         boxSizing: "border-box"
                     }}
                 >
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                        <span
-                            style={{
-                                fontSize: "11px",
-                                fontWeight: 700,
-                                color: "#475569",
-                                textTransform: "uppercase",
-                                letterSpacing: "1px"
-                            }}
-                        >
-                            📋 Real-time Event & Performance Logs
-                        </span>
-                        <span style={{ fontSize: "10px", color: saveDelay > 0 ? "#60a5fa" : "#94a3b8" }}>
-                            {saveDelay > 0 ? `Debounce Delay active: ${saveDelay}ms` : "Synchronous Saving"}
-                        </span>
-                    </div>
+                    {playgroundMode === "kanban" ? (
+                        /* KANBAN LAYOUT */
+                        <>
+                            {/* Header */}
+                            <div style={{ marginBottom: "20px" }}>
+                                <div
+                                    style={{
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        background: "rgba(16,185,129,0.1)",
+                                        border: "1px solid rgba(16,185,129,0.25)",
+                                        borderRadius: "8px",
+                                        padding: "6px 12px",
+                                        marginBottom: "10px"
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            width: "8px",
+                                            height: "8px",
+                                            borderRadius: "50%",
+                                            background: "#10b981",
+                                            boxShadow: "0 0 6px #10b981",
+                                            animation: "pulse 2s infinite"
+                                        }}
+                                    />
+                                    <span style={{ color: "#a7f3d0", fontSize: "12px", fontWeight: 600 }}>
+                                        Playground Mode - 3 Columns Kanban Board Simulation
+                                    </span>
+                                </div>
+                                <h1 style={{ margin: "0 0 4px", fontSize: "22px", fontWeight: 800 }}>
+                                    PWB Customize Container DataView (Kanban Engine)
+                                </h1>
+                                <p style={{ margin: 0, color: "#64748b", fontSize: "13px" }}>
+                                    ทดลองลากการ์ดสลับระหว่าง **คอลัมน์แนวตั้ง** หรือ **กล่องแนวนอน** และสังเกตการหน่วงเวลาบันทึก
+                                    (Debounce Delay) เพื่อยืนยันความไหลลื่นและประสิทธิภาพ
+                                </p>
+                            </div>
+
+                            {/* DYNAMIC KANBAN BOARD CONTAINER */}
+                            <div
+                                style={{
+                                    display: "flex",
+                                    gap: "20px",
+                                    flex: 1,
+                                    minHeight: "450px",
+                                    marginBottom: "20px"
+                                }}
+                            >
+                                {/* Column 1: TODO */}
+                                {laneCount >= 1 && (
+                                    <div
+                                        style={{
+                                            flex: 1,
+                                            background: "rgba(255,255,255,0.02)",
+                                            border: "1px solid rgba(255,255,255,0.06)",
+                                            borderRadius: "16px",
+                                            padding: "16px",
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "12px"
+                                        }}
+                                    >
+                                        {!enableLaneTitle && (
+                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>
+                                                    🔴 TO DO
+                                                </h3>
+                                                <span
+                                                    style={{
+                                                        fontSize: "11px",
+                                                        fontWeight: 700,
+                                                        padding: "2px 8px",
+                                                        borderRadius: "10px",
+                                                        background: "rgba(239,68,68,0.15)",
+                                                        color: "#f87171"
+                                                    }}
+                                                >
+                                                    {tasks.filter(t => t.status === "todo").length}
+                                                </span>
+                                            </div>
+                                        )}
+                                        <div style={{ flex: 1, overflowY: "auto" }}>
+                                            <PwbCustomizeContainerDataView {...getColumnProps("todo")} />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Column 2: IN PROGRESS */}
+                                {laneCount >= 2 && (
+                                    <div
+                                        style={{
+                                            flex: 1,
+                                            background: "rgba(255,255,255,0.02)",
+                                            border: "1px solid rgba(255,255,255,0.06)",
+                                            borderRadius: "16px",
+                                            padding: "16px",
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "12px"
+                                        }}
+                                    >
+                                        {!enableLaneTitle && (
+                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>
+                                                    🟡 IN PROGRESS
+                                                </h3>
+                                                <span
+                                                    style={{
+                                                        fontSize: "11px",
+                                                        fontWeight: 700,
+                                                        padding: "2px 8px",
+                                                        borderRadius: "10px",
+                                                        background: "rgba(245,158,11,0.15)",
+                                                        color: "#fbbf24"
+                                                    }}
+                                                >
+                                                    {tasks.filter(t => t.status === "in_progress").length}
+                                                </span>
+                                            </div>
+                                        )}
+                                        <div style={{ flex: 1, overflowY: "auto" }}>
+                                            <PwbCustomizeContainerDataView {...getColumnProps("in_progress")} />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Column 3: DONE */}
+                                {laneCount >= 3 && (
+                                    <div
+                                        style={{
+                                            flex: 1,
+                                            background: "rgba(255,255,255,0.02)",
+                                            border: "1px solid rgba(255,255,255,0.06)",
+                                            borderRadius: "16px",
+                                            padding: "16px",
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "12px"
+                                        }}
+                                    >
+                                        {!enableLaneTitle && (
+                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>
+                                                    🟢 DONE
+                                                </h3>
+                                                <span
+                                                    style={{
+                                                        fontSize: "11px",
+                                                        fontWeight: 700,
+                                                        padding: "2px 8px",
+                                                        borderRadius: "10px",
+                                                        background: "rgba(34,197,94,0.15)",
+                                                        color: "#34d399"
+                                                    }}
+                                                >
+                                                    {tasks.filter(t => t.status === "done").length}
+                                                </span>
+                                            </div>
+                                        )}
+                                        <div style={{ flex: 1, overflowY: "auto" }}>
+                                            <PwbCustomizeContainerDataView {...getColumnProps("done")} />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Column 4: ARCHIVED */}
+                                {laneCount >= 4 && (
+                                    <div
+                                        style={{
+                                            flex: 1,
+                                            background: "rgba(255,255,255,0.02)",
+                                            border: "1px solid rgba(255,255,255,0.06)",
+                                            borderRadius: "16px",
+                                            padding: "16px",
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "12px"
+                                        }}
+                                    >
+                                        {!enableLaneTitle && (
+                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>
+                                                    🟣 ARCHIVED
+                                                </h3>
+                                                <span
+                                                    style={{
+                                                        fontSize: "11px",
+                                                        fontWeight: 700,
+                                                        padding: "2px 8px",
+                                                        borderRadius: "10px",
+                                                        background: "rgba(168,85,247,0.15)",
+                                                        color: "#c084fc"
+                                                    }}
+                                                >
+                                                    {tasks.filter(t => t.status === "archived").length}
+                                                </span>
+                                            </div>
+                                        )}
+                                        <div style={{ flex: 1, overflowY: "auto" }}>
+                                            <PwbCustomizeContainerDataView {...getColumnProps("archived")} />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    ) : (
+                        /* FORM BUILDER WORKSPACE */
+                        <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: "20px" }}>
+                            
+                            {/* Info Banner */}
+                            <div>
+                                <div
+                                    style={{
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        background: "rgba(139,92,246,0.15)",
+                                        border: "1px solid rgba(139,92,246,0.3)",
+                                        borderRadius: "8px",
+                                        padding: "6px 12px",
+                                        marginBottom: "10px"
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            width: "8px",
+                                            height: "8px",
+                                            borderRadius: "50%",
+                                            background: "#a78bfa",
+                                            boxShadow: "0 0 6px #a78bfa",
+                                            animation: "pulse 2s infinite"
+                                        }}
+                                    />
+                                    <span style={{ color: "#ddd6fe", fontSize: "12px", fontWeight: 600 }}>
+                                        Playground Mode - Drag-and-drop Form Builder Simulation
+                                    </span>
+                                </div>
+                                <h1 style={{ margin: "0 0 4px", fontSize: "22px", fontWeight: 800, background: "linear-gradient(90deg, #a78bfa, #818cf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                                    Drag-and-Drop Form Builder
+                                </h1>
+                                <p style={{ margin: 0, color: "#64748b", fontSize: "13px" }}>
+                                    ทดลองลากเทมเพลตฟิลด์จากฝั่งซ้ายมือ (Toolbox) ไปวางลงบนพื้นที่ออกแบบฟอร์ม (Form Canvas) แล้วจัดเรียง หรือลบได้ตามใจชอบ
+                                </p>
+                            </div>
+
+                            {/* Split Columns Grid */}
+                            <div style={{ display: "flex", gap: "20px", flex: 1, minHeight: "500px" }}>
+                                
+                                {/* 1. Toolbox Column */}
+                                <div
+                                    style={{
+                                        width: "240px",
+                                        background: "rgba(255,255,255,0.01)",
+                                        border: "1px solid rgba(255,255,255,0.06)",
+                                        borderRadius: "16px",
+                                        padding: "16px",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "12px"
+                                    }}
+                                >
+                                    <h3 style={{ fontSize: "13px", fontWeight: 700, color: "#94a3b8", margin: 0, borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "8px" }}>
+                                        📥 เทมเพลตฟิลด์ (Toolbox)
+                                    </h3>
+                                    <div style={{ flex: 1, overflowY: "auto" }}>
+                                        <PwbCustomizeContainerDataView {...getFormColumnProps("toolbox")} />
+                                    </div>
+                                    <div style={{ fontSize: "10px", color: "#64748b", textAlign: "center", lineHeight: "1.4" }}>
+                                        💡 ลากจากกล่องนี้ไป Canvas เพื่อสร้างฟิลด์ใหม่
+                                    </div>
+                                </div>
+
+                                {/* 2. Active Canvas Column */}
+                                <div
+                                    style={{
+                                        flex: 1.2,
+                                        background: "rgba(139,92,246,0.02)",
+                                        border: "1px dashed rgba(139,92,246,0.15)",
+                                        borderRadius: "16px",
+                                        padding: "16px",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "12px"
+                                    }}
+                                >
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px dashed rgba(139,92,246,0.15)", paddingBottom: "8px" }}>
+                                        <h3 style={{ fontSize: "13px", fontWeight: 700, color: "#a78bfa", margin: 0 }}>
+                                            📝 พื้นที่ออกแบบฟอร์ม (Form Canvas)
+                                        </h3>
+                                        <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "10px", background: "rgba(139,92,246,0.15)", color: "#c084fc" }}>
+                                            {formFields.length} ฟิลด์
+                                        </span>
+                                    </div>
+                                    
+                                    <div style={{ flex: 1, overflowY: "auto" }}>
+                                        <PwbCustomizeContainerDataView {...getFormColumnProps("canvas")} />
+                                    </div>
+                                    
+                                    <div style={{ fontSize: "10px", color: "#8b5cf6", textAlign: "center", lineHeight: "1.4" }}>
+                                        💡 ลากย้อนกลับไปด้านซ้ายเพื่อลบออกจาก Canvas
+                                    </div>
+                                </div>
+
+                                {/* 3. Preview/Schema Column */}
+                                <div
+                                    style={{
+                                        flex: 1.2,
+                                        background: "rgba(15,23,42,0.4)",
+                                        border: "1px solid rgba(255,255,255,0.06)",
+                                        borderRadius: "16px",
+                                        padding: "16px",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "12px"
+                                    }}
+                                >
+                                    {/* Tabs */}
+                                    <div style={{ display: "flex", gap: "4px", borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "8px" }}>
+                                        <button
+                                            onClick={() => setFormBuilderTab("preview")}
+                                            style={{
+                                                padding: "6px 12px",
+                                                borderRadius: "6px",
+                                                border: "none",
+                                                background: formBuilderTab === "preview" ? "rgba(255,255,255,0.08)" : "transparent",
+                                                color: formBuilderTab === "preview" ? "#f1f5f9" : "#64748b",
+                                                fontWeight: 600,
+                                                fontSize: "12px",
+                                                cursor: "pointer"
+                                            }}
+                                        >
+                                            👁️ แสดงผลจริง (Live Preview)
+                                        </button>
+                                        <button
+                                            onClick={() => setFormBuilderTab("schema")}
+                                            style={{
+                                                padding: "6px 12px",
+                                                borderRadius: "6px",
+                                                border: "none",
+                                                background: formBuilderTab === "schema" ? "rgba(255,255,255,0.08)" : "transparent",
+                                                color: formBuilderTab === "schema" ? "#f1f5f9" : "#64748b",
+                                                fontWeight: 600,
+                                                fontSize: "12px",
+                                                cursor: "pointer"
+                                            }}
+                                        >
+                                            💻 ข้อมูลโมเดล (JSON Schema)
+                                        </button>
+                                    </div>
+
+                                    <div style={{ flex: 1, overflowY: "auto" }}>
+                                        {formBuilderTab === "preview" ? (
+                                            /* Live Form Preview */
+                                            isSubmitted ? (
+                                                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", padding: "20px", textAlign: "center", animation: "pulse 1.5s infinite" }}>
+                                                    <span style={{ fontSize: "40px" }}>🎉</span>
+                                                    <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#10b981", margin: "10px 0 6px" }}>ส่งข้อมูลสำเร็จ! (Submit Success)</h3>
+                                                    <p style={{ fontSize: "12px", color: "#94a3b8", margin: "0 0 16px" }}>นี่คือข้อมูลที่ท่านกรอกส่งจำลองกลับระบบ</p>
+                                                    <div style={{ width: "100%", background: "#090d16", borderRadius: "10px", padding: "12px", textAlign: "left", fontSize: "11px", border: "1px solid rgba(255,255,255,0.06)", boxSizing: "border-box" }}>
+                                                        {getSortedCanvasFields().filter(f => f.type !== "button").map(f => (
+                                                            <div key={f.id} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+                                                                <span style={{ color: "#64748b" }}>{f.label}:</span>
+                                                                <span style={{ color: "#10b981", fontWeight: 600 }}>{String(liveFormValues[f.id] ?? "—")}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                    <button
+                                                        onClick={() => {
+                                                            setIsSubmitted(false);
+                                                            setLiveFormValues({});
+                                                        }}
+                                                        style={{
+                                                            marginTop: "16px",
+                                                            padding: "8px 16px",
+                                                            borderRadius: "8px",
+                                                            border: "none",
+                                                            background: "rgba(255,255,255,0.05)",
+                                                            color: "#f1f5f9",
+                                                            fontSize: "12px",
+                                                            cursor: "pointer"
+                                                        }}
+                                                    >
+                                                        กรอกฟอร์มใหม่อีกครั้ง
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <form onSubmit={handlePreviewSubmit} style={{ display: "flex", flexDirection: "column", gap: "14px", padding: "4px" }}>
+                                                    <h3 style={{ fontSize: "15px", fontWeight: 700, margin: "0 0 4px", color: "#f1f5f9", textAlign: "center" }}>
+                                                        {formTitle || "ไม่ได้ระบุหัวข้อ"}
+                                                    </h3>
+                                                    
+                                                    {getSortedCanvasFields().length === 0 ? (
+                                                        <div style={{ textAlign: "center", padding: "40px 10px", color: "#475569", fontSize: "12px", border: "1px dashed rgba(255,255,255,0.06)", borderRadius: "8px" }}>
+                                                            ฟอร์มว่างเปล่า ลากฟิลด์มาใส่เพื่อจำลองใช้งานจริง
+                                                        </div>
+                                                    ) : (
+                                                        getSortedCanvasFields().map(f => (
+                                                            <div key={f.id} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                                                                {f.type !== "button" && f.type !== "checkbox" && (
+                                                                    <label style={{ fontSize: "12px", fontWeight: 600, color: "#cbd5e1" }}>
+                                                                        {f.label} {f.required && <span style={{ color: "#ef4444" }}>*</span>}
+                                                                    </label>
+                                                                )}
+                                                                
+                                                                {f.type === "text" && (
+                                                                    <input
+                                                                        type="text"
+                                                                        placeholder={f.placeholder}
+                                                                        value={liveFormValues[f.id] || ""}
+                                                                        onChange={e => handleFormValueChange(f.id, e.target.value)}
+                                                                        style={{
+                                                                            ...inputStyle,
+                                                                            borderColor: formErrors[f.id] ? "#ef4444" : "rgba(255, 255, 255, 0.12)"
+                                                                        }}
+                                                                    />
+                                                                )}
+                                                                {f.type === "number" && (
+                                                                    <input
+                                                                        type="number"
+                                                                        placeholder={f.placeholder}
+                                                                        value={liveFormValues[f.id] || ""}
+                                                                        onChange={e => handleFormValueChange(f.id, e.target.value)}
+                                                                        style={{
+                                                                            ...inputStyle,
+                                                                            borderColor: formErrors[f.id] ? "#ef4444" : "rgba(255, 255, 255, 0.12)"
+                                                                        }}
+                                                                    />
+                                                                )}
+                                                                {f.type === "textarea" && (
+                                                                    <textarea
+                                                                        placeholder={f.placeholder}
+                                                                        rows={3}
+                                                                        value={liveFormValues[f.id] || ""}
+                                                                        onChange={e => handleFormValueChange(f.id, e.target.value)}
+                                                                        style={{
+                                                                            ...inputStyle,
+                                                                            borderColor: formErrors[f.id] ? "#ef4444" : "rgba(255, 255, 255, 0.12)",
+                                                                            resize: "vertical"
+                                                                        }}
+                                                                    />
+                                                                )}
+                                                                {f.type === "datepicker" && (
+                                                                    <input
+                                                                        type="date"
+                                                                        value={liveFormValues[f.id] || ""}
+                                                                        onChange={e => handleFormValueChange(f.id, e.target.value)}
+                                                                        style={{
+                                                                            ...inputStyle,
+                                                                            borderColor: formErrors[f.id] ? "#ef4444" : "rgba(255, 255, 255, 0.12)"
+                                                                        }}
+                                                                    />
+                                                                )}
+                                                                {f.type === "dropdown" && (
+                                                                    <select
+                                                                        value={liveFormValues[f.id] || ""}
+                                                                        onChange={e => handleFormValueChange(f.id, e.target.value)}
+                                                                        style={{
+                                                                            ...inputStyle,
+                                                                            borderColor: formErrors[f.id] ? "#ef4444" : "rgba(255, 255, 255, 0.12)"
+                                                                        }}
+                                                                    >
+                                                                        <option value="">{f.placeholder || "เลือก..."}</option>
+                                                                        {(f.options || "").split(",").map((opt: string) => (
+                                                                            <option key={opt} value={opt.trim()}>{opt.trim()}</option>
+                                                                        ))}
+                                                                    </select>
+                                                                )}
+                                                                {f.type === "checkbox" && (
+                                                                    <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", padding: "4px 0" }}>
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            id={`preview-chk-${f.id}`}
+                                                                            checked={liveFormValues[f.id] || false}
+                                                                            onChange={e => handleFormValueChange(f.id, e.target.checked)}
+                                                                            style={{ width: "16px", height: "16px", marginTop: "2px", accentColor: "#8b5cf6" }}
+                                                                        />
+                                                                        <label
+                                                                            htmlFor={`preview-chk-${f.id}`}
+                                                                            style={{
+                                                                                fontSize: "12px",
+                                                                                color: formErrors[f.id] ? "#ef4444" : "#94a3b8",
+                                                                                cursor: "pointer",
+                                                                                lineHeight: "1.4"
+                                                                            }}
+                                                                        >
+                                                                            {f.label} {f.required && <span style={{ color: "#ef4444" }}>*</span>}
+                                                                        </label>
+                                                                    </div>
+                                                                )}
+                                                                {f.type === "button" && (
+                                                                    <button
+                                                                        type="submit"
+                                                                        style={{
+                                                                            width: "100%",
+                                                                            padding: "10px",
+                                                                            borderRadius: "8px",
+                                                                            background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)",
+                                                                            border: "none",
+                                                                            color: "#fff",
+                                                                            fontWeight: 700,
+                                                                            fontSize: "13px",
+                                                                            cursor: "pointer",
+                                                                            marginTop: "8px",
+                                                                            boxShadow: "0 4px 12px rgba(139, 92, 246, 0.2)"
+                                                                        }}
+                                                                    >
+                                                                        {f.label}
+                                                                    </button>
+                                                                )}
+                                                                
+                                                                {formErrors[f.id] && (
+                                                                    <span style={{ fontSize: "10px", color: "#f87171" }}>
+                                                                        ⚠️ {formErrors[f.id]}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        ))
+                                                    )}
+                                                </form>
+                                            )
+                                        ) : (
+                                            /* JSON Schema Code Render */
+                                            <div style={{ position: "relative", height: "100%" }}>
+                                                <button
+                                                    onClick={() => {
+                                                        navigator.clipboard.writeText(schemaStr);
+                                                        addLog("📋 Schema JSON copied to clipboard!");
+                                                    }}
+                                                    style={{
+                                                        position: "absolute",
+                                                        top: "8px",
+                                                        right: "8px",
+                                                        background: "rgba(255,255,255,0.06)",
+                                                        border: "1px solid rgba(255,255,255,0.1)",
+                                                        borderRadius: "4px",
+                                                        padding: "4px 8px",
+                                                        color: "#cbd5e1",
+                                                        fontSize: "10px",
+                                                        cursor: "pointer"
+                                                    }}
+                                                >
+                                                    Copy JSON
+                                                </button>
+                                                <pre
+                                                    style={{
+                                                        margin: 0,
+                                                        padding: "12px",
+                                                        background: "#080c14",
+                                                        border: "1px solid rgba(255,255,255,0.06)",
+                                                        borderRadius: "10px",
+                                                        color: "#86efac",
+                                                        fontSize: "11px",
+                                                        fontFamily: "monospace",
+                                                        lineHeight: "1.5",
+                                                        overflowX: "auto",
+                                                        maxHeight: "450px"
+                                                    }}
+                                                >
+                                                    {schemaStr}
+                                                </pre>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    )}
+
+                    {/* LOGS PANEL */}
                     <div
                         style={{
-                            flex: 1,
-                            overflowY: "auto",
-                            fontFamily: "monospace",
-                            fontSize: "11px",
-                            lineHeight: "1.6",
+                            background: "#080c14",
+                            border: "1px solid rgba(255,255,255,0.06)",
+                            borderRadius: "12px",
+                            padding: "12px 16px",
+                            height: "150px",
                             display: "flex",
                             flexDirection: "column",
-                            gap: "4px"
+                            boxSizing: "border-box",
+                            marginTop: "20px"
                         }}
                     >
-                        {logs.length === 0 ? (
-                            <span style={{ color: "#334155" }}>
-                                — ลากวางหรือขยับตำแหน่งการ์ดเพื่อจับตาดูระบบประมวลผล —
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                            <span
+                                style={{
+                                    fontSize: "11px",
+                                    fontWeight: 700,
+                                    color: "#475569",
+                                    textTransform: "uppercase",
+                                    letterSpacing: "1px"
+                                }}
+                            >
+                                📋 Real-time Event & Performance Logs
                             </span>
-                        ) : (
-                            logs.map((log, i) => (
-                                <span key={i} style={{ color: i === 0 ? "#22c55e" : "#475569" }}>
-                                    {i === 0 ? "▶ " : "  "}
-                                    {log}
+                            <span style={{ fontSize: "10px", color: saveDelay > 0 ? "#60a5fa" : "#94a3b8" }}>
+                                {playgroundMode === "kanban" ? (
+                                    saveDelay > 0 ? `Debounce Delay active: ${saveDelay}ms` : "Synchronous Saving"
+                                ) : (
+                                    "Interactive UI Mapping"
+                                )}
+                            </span>
+                        </div>
+                        <div
+                            style={{
+                                flex: 1,
+                                overflowY: "auto",
+                                fontFamily: "monospace",
+                                fontSize: "11px",
+                                lineHeight: "1.6",
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "4px"
+                            }}
+                        >
+                            {logs.length === 0 ? (
+                                <span style={{ color: "#334155" }}>
+                                    — ลากวางหรือขยับตำแหน่งการ์ดเพื่อจับตาดูระบบประมวลผล —
                                 </span>
-                            ))
-                        )}
+                            ) : (
+                                logs.map((log, i) => (
+                                    <span key={i} style={{ color: i === 0 ? (playgroundMode === "kanban" ? "#22c55e" : "#a78bfa") : "#475569" }}>
+                                        {i === 0 ? "▶ " : "  "}
+                                        {log}
+                                    </span>
+                                ))
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

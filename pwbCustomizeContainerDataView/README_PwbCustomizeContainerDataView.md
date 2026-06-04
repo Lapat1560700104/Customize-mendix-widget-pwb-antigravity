@@ -112,7 +112,7 @@ Widget ได้เปิดเผยตัวแปร CSS Custom Properties (V
 
 ## 🔄 กลไกการบันทึกการจัดเรียง (Sorted Order Persistence Flow)
 
-```
+```text
 1. ผู้ใช้ทำการลากการ์ดไปสลับวางในตำแหน่งใหม่
          │
          ▼

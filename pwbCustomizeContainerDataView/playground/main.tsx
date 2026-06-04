@@ -12,15 +12,16 @@ interface TaskItem {
     assignee: string;
     progress: number;
     status: "todo" | "in_progress" | "done" | "archived";
+    sortId: number;
 }
 
 const INITIAL_TASKS: TaskItem[] = [
-    { id: "task-1", title: "ออกแบบ UI หน้าหลัก", priority: "high", category: "Design", assignee: "สมชาย", progress: 85, status: "todo" },
-    { id: "task-2", title: "พัฒนา API Backend", priority: "high", category: "Development", assignee: "สมหญิง", progress: 60, status: "in_progress" },
-    { id: "task-3", title: "เขียน Unit Tests", priority: "medium", category: "QA", assignee: "สมศักดิ์", progress: 40, status: "todo" },
-    { id: "task-4", title: "Deploy สู่ Production", priority: "low", category: "DevOps", assignee: "สมใจ", progress: 10, status: "done" },
-    { id: "task-5", title: "ทำเอกสาร API", priority: "medium", category: "Documentation", assignee: "สมพร", progress: 70, status: "in_progress" },
-    { id: "task-6", title: "เก็บกวาดโค้ดเก่า (Refactor)", priority: "low", category: "Development", assignee: "สมนึก", progress: 100, status: "archived" },
+    { id: "task-1", title: "ออกแบบ UI หน้าหลัก", priority: "high", category: "Design", assignee: "สมชาย", progress: 85, status: "todo", sortId: 2 },
+    { id: "task-2", title: "พัฒนา API Backend", priority: "high", category: "Development", assignee: "สมหญิง", progress: 60, status: "in_progress", sortId: 1 },
+    { id: "task-3", title: "เขียน Unit Tests", priority: "medium", category: "QA", assignee: "สมศักดิ์", progress: 40, status: "todo", sortId: 1 },
+    { id: "task-4", title: "Deploy สู่ Production", priority: "low", category: "DevOps", assignee: "สมใจ", progress: 10, status: "done", sortId: 1 },
+    { id: "task-5", title: "ทำเอกสาร API", priority: "medium", category: "Documentation", assignee: "สมพร", progress: 70, status: "in_progress", sortId: 2 },
+    { id: "task-6", title: "เก็บกวาดโค้ดเก่า (Refactor)", priority: "low", category: "Development", assignee: "สมนึก", progress: 100, status: "archived", sortId: 1 },
 ];
 
 const PRIORITY_CONFIG = {
@@ -61,6 +62,7 @@ function CardStyleA({ task, accentColor }: { task: TaskItem; accentColor: string
                     background: `${catColor}18`, color: catColor
                 }}>{task.category}</span>
                 <span style={{ fontSize: "12px", color: "#94a3b8" }}>👤 {task.assignee}</span>
+                <span style={{ fontSize: "11px", color: "#64748b", background: "rgba(255,255,255,0.05)", padding: "1px 5px", borderRadius: "4px" }}>SortID: {task.sortId}</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <div style={{
@@ -99,7 +101,7 @@ function CardStyleB({ task }: { task: TaskItem }): ReactNode {
             </div>
             <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: "13px", color: "#f1f5f9", marginBottom: "2px" }}>{task.title}</div>
-                <div style={{ fontSize: "11px", color: "#94a3b8" }}>{task.assignee} · {task.progress}%</div>
+                <div style={{ fontSize: "11px", color: "#94a3b8" }}>{task.assignee} · {task.progress}% · SortID: {task.sortId}</div>
             </div>
         </div>
     );
@@ -217,6 +219,7 @@ function App() {
     const [enableMainFooter, setEnableMainFooter] = useState<boolean>(true);
     const [enableLaneTitle, setEnableLaneTitle] = useState<boolean>(true);
     const [enableOuterFooter, setEnableOuterFooter] = useState<boolean>(true);
+    const [readOnlyMode, setReadOnlyMode] = useState<boolean>(false);
 
     // Kanban Lanes count (defaults to 3, max 4)
     const [laneCount, setLaneCount] = useState<number>(3);
@@ -310,6 +313,30 @@ function App() {
                     setTasks(prev => prev.map(t => t.id === itemObj.id ? { ...t, status: newStatus } : t));
                 }
             })
+        };
+
+        // Simulated Mendix ListAttributeValue for SortID
+        const sortIdAttribute = {
+            get: (itemObj: any) => {
+                const task = tasks.find(t => t.id === itemObj.id)!;
+                const bigVal = {
+                    comparedTo: (other: any) => {
+                        const otherVal = other && typeof other === "object" && "value" in other ? other.value : other;
+                        if (task.sortId < otherVal) {
+                            return -1;
+                        }
+                        if (task.sortId > otherVal) {
+                            return 1;
+                        }
+                        return 0;
+                    },
+                    value: task.sortId,
+                    toString: () => String(task.sortId)
+                };
+                return {
+                    value: bigVal
+                };
+            }
         };
 
         // Action simulator
@@ -485,7 +512,9 @@ function App() {
             themePreset,
             darkModeBehavior,
             itemPadding,
-            itemGap
+            itemGap,
+            readOnlyMode,
+            sortIdAttribute: sortIdAttribute as any
         };
     };
 
@@ -519,6 +548,22 @@ function App() {
                 </div>
 
                 <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
+
+                    <Section title="Read Only Settings">
+                        <Toggle
+                            label="Enable Read Only Mode"
+                            value={readOnlyMode}
+                            onChange={(v) => {
+                                setReadOnlyMode(v);
+                                addLog(`🎛️ [Read Only Toggle] → ${v ? "Enabled (sorting by SortID)" : "Disabled"}`);
+                            }}
+                        />
+                        {readOnlyMode && (
+                            <div style={{ fontSize: "11px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
+                                🔒 ล็อกไม่ให้ลากวางหรือขยับตำแหน่งการ์ด และจัดเรียงรายการอ้างอิงตามค่า SortID ของการ์ดแต่ละใบ
+                            </div>
+                        )}
+                    </Section>
 
                     <Section title="Performance Settings">
                         <Slider

@@ -92,7 +92,9 @@ _คำสั่งนี้จะ build JavaScript bundle, package ทุกอ
 |---|---|---|---|---|
 | `itemsSource` | Datasource (List) | ✅ Yes | — | รายการข้อมูลที่จะแสดงและจัดลำดับ |
 | `customItemContent` | Widgets | ✅ Yes | — | Widget ที่จะแสดงในแต่ละแถว (ผูกกับ `itemsSource`) |
-| `sortedAttribute` | Attribute (String) | ✅ Yes | — | Attribute เก็บผลลัพธ์ GUIDs ที่เรียงลำดับแล้ว (comma-separated) |
+| `readOnlyMode` | Boolean | No | `false` | เมื่อเปิดใช้งาน จะล็อคการแสดงผลอย่างเดียว ไม่สามารถลากสลับหรือจับย้ายตำแหน่งการ์ดใดๆ ได้ |
+| `sortIdAttribute` | Attribute (Integer/Decimal/String) | No (Required in Read Only) | — | Attribute เก็บค่า Sort ID ประจำไอเทม สำหรับใช้จัดเรียงลำดับเมื่อเปิดใช้งาน Read Only Mode |
+| `sortedAttribute` | Attribute (String) | No (Required in normal mode) | — | Attribute เก็บผลลัพธ์ GUIDs ที่เรียงลำดับแล้ว (comma-separated) |
 | `onSortAction` | Action | No | — | Microflow/Nanoflow ที่จะถูกเรียกเมื่อลากวางเสร็จ |
 | `layoutDirection` | Enumeration | No | `vertical` | ทิศทางการจัดวาง: `vertical` (แนวตั้ง) หรือ `horizontal` (แนวนอน) |
 | `dragHandleDisplay` | Enumeration | No | `left` | การแสดงผลปุ่ม Drag Handle: `left` (แสดงทางซ้าย) หรือ `hide` (ซ่อนปุ่ม) |

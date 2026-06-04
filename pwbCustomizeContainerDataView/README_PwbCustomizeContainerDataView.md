@@ -36,10 +36,17 @@
 
 | Property Key | Caption | Type | Required | Default | Description |
 | :--- | :--- | :--- | :---: | :--- | :--- |
-| `sortedAttribute` | Sorted IDs Attribute | Attribute (String) | ✅ | — | String Attribute บน Entity หลักเพื่อเก็บบันทึกข้อมูลลำดับไอดีคั่นด้วยจุลภาค (Comma-separated GUIDs) |
+| `sortedAttribute` | Sorted IDs Attribute | Attribute (String) | No (Required in Normal) | — | String Attribute บน Entity หลักเพื่อเก็บบันทึกข้อมูลลำดับไอดีคั่นด้วยจุลภาค (Comma-separated GUIDs) |
 | `onSortAction` | On Sort Complete Action | Action | No | — | Action แบบ Microflow หรือ Nanoflow ที่จะทำงานทันทีเมื่อผู้ใช้ลากวางสลับตำแหน่งสำเร็จ |
 
-### 4. รูปลักษณ์และความสวยงาม (Aesthetics)
+### 4. การแสดงอย่างเดียวและการเรียงลำดับ (Read Only Settings)
+
+| Property Key | Caption | Type | Required | Default | Description |
+| :--- | :--- | :--- | :---: | :--- | :--- |
+| `readOnlyMode` | Read Only Mode | Boolean | No | `false` | เปิดการใช้งานโหมดแสดงผลอย่างเดียว ล็อกไม่ให้เมาส์/คีย์บอร์ดลากสลับหรือจับย้ายตำแหน่งการ์ดใดๆ |
+| `sortIdAttribute` | Sort ID Attribute | Attribute | No (Required in Read Only) | — | Attribute เก็บค่า Sort ID บน Entity ของไอเทม (Integer, Decimal, String) เพื่อใช้จัดเรียงลำดับในโหมดแสดงผลอย่างเดียว |
+
+### 5. รูปลักษณ์และความสวยงาม (Aesthetics)
 
 | Property Key | Caption | Type | Required | Default | Description |
 | :--- | :--- | :--- | :---: | :--- | :--- |
@@ -52,7 +59,7 @@
 | `itemPadding` | Card Padding | String | No | `12px 16px` | กำหนดขนาดระยะห่างด้านในการ์ดไอเทมแต่ละชิ้น (เช่น `12px 16px`, `16px`, `20px`) |
 | `itemGap` | Card Spacing Gap | String | No | `12px` | กำหนดระยะห่างช่องไฟว่างระหว่างการ์ดแต่ละใบ (เช่น `12px`, `8px`, `24px`) |
 
-### 5. การตั้งค่ากระดานคัมบัง (Kanban Settings)
+### 6. การตั้งค่ากระดานคัมบัง (Kanban Settings)
 
 | Property Key | Caption | Type | Required | Default | Description |
 | :--- | :--- | :--- | :---: | :--- | :--- |
@@ -61,7 +68,7 @@
 | `columnValue` | Column Value | String | No | — | ค่าสถานะข้อความประจำคอลัมน์นี้ สำหรับอัปเดตลงในการ์ดที่ย้ายเข้ามา (เช่น 'Done', 'ToDo') |
 | `itemColumnAttribute` | Item Column Attribute | Attribute | No | — | String หรือ Enum Attribute บนไอเทมการ์ดที่จะถูกเขียนสถานะใหม่ทับลงไปเมื่อย้ายคอลัมน์สำเร็จ |
 
-### 6. การตั้งค่าประสิทธิภาพ (Performance Settings)
+### 7. การตั้งค่าประสิทธิภาพ (Performance Settings)
 
 | Property Key | Caption | Type | Required | Default | Description |
 | :--- | :--- | :--- | :---: | :--- | :--- |

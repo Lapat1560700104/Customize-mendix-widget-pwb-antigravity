@@ -1,7 +1,7 @@
 # Mendix Marketplace Profile - PWB Advanced DatePicker
 
 ## 1. Title
-**PWB Advanced DatePicker**
+PWB Advanced DatePicker
 
 ## 2. Description
 A premium, highly interactive pluggable calendar widget for Mendix. It offers single date and range selections with native support for the Thai Buddhist Era (พ.ศ.), fluid slide animations, and quick jump grids for months and years. It supports binding to both native DateTime and formatted String attributes (with auto-serialization and parsing), custom boundary time inputs, weekend blocking, custom uploaded calendar icons, and full Mendix Batch Translation compatibility.
@@ -21,7 +21,7 @@ A premium, highly interactive pluggable calendar widget for Mendix. It offers si
 *(ภาษาไทย / Thai Version)*
 
 ## 1. ชื่อวิจเจต (Title)
-**PWB Advanced DatePicker**
+PWB Advanced DatePicker
 
 ## 2. คำอธิบายฟีเจอร์การทำงาน (Description)
 ปฏิทินเลือกวันที่และช่วงเวลา (DatePicker & DateRange) ระดับพรีเมียมสำหรับ Mendix ที่รองรับพุทธศักราช (พ.ศ.) สมบูรณ์แบบ มาพร้อมแอนิเมชันสไลด์ขยับเดือน แผงลัดสำหรับคลิกกระโดดข้ามเดือนและปีด่วนเพื่อหลีกเลี่ยงความยุ่งยากในการกดลูกศรถี่ๆ พร้อมความสามารถพิเศษในการผูกข้อความเข้ากับแอตทริบิวต์ได้ทั้งประเภท DateTime และ String ฟอร์แมตสำเร็จ รวมถึงสามารถระบุเวลาหลักชั่วโมงและนาทีด้วยการพิมพ์ตัวเลขขอบเขต และเปิดให้อัพโหลดไอคอนปฏิทินขององค์กรเข้าไปใช้งานได้อย่างอิสระ

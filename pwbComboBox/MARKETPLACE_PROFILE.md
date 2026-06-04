@@ -1,12 +1,15 @@
 # Mendix Marketplace Profile - PWB ComboBox
 
 ## 1. Title
-**PWB ComboBox**
+
+PWB ComboBox
 
 ## 2. Description
+
 A premium, high-performance pluggable dropdown search and multi-select tag widget for Mendix. It delivers a modern, glassmorphic select input with autocomplete, grouping, and DOM virtualization for handling large datasets smoothly. It offers single-select options (text, pill, or custom-rendered styles) and multi-select tags, fully integrated with Mendix reference associations, enumerations, or booleans. Features advanced search matching algorithms (including fuzzy match) and native event actions.
 
 ## 3. Key Features
+
 * **Autocomplete & Search Filtering**: Instant client-side search autocomplete. Includes multiple matching algorithms (Contains, StartsWith, EndsWith, Exact, and Fuzzy search) with case-sensitivity controls.
 * **Single & Multi-Select Tags**: Supports choosing a single item or selecting multiple options as clean tags with click-to-remove actions.
 * **Rich Mendix Data Bindings**: Binds to Entity list sources via Reference (Single-select) or ReferenceSet (Multi-select) associations, as well as native Enumerations and Booleans.
@@ -20,12 +23,15 @@ A premium, high-performance pluggable dropdown search and multi-select tag widge
 *(ภาษาไทย / Thai Version)*
 
 ## 1. ชื่อวิจเจต (Title)
-**PWB ComboBox**
+
+PWB ComboBox
 
 ## 2. คำอธิบายฟีเจอร์การทำงาน (Description)
+
 วิจเจตตัวเลือกและช่องค้นหา (Dropdown Dropdown Search & Tag) เกรดพรีเมียมสำหรับ Mendix ที่รองรับความเร็วการโหลดข้อมูลสูงและมีลูกเล่นครบถ้วน สามารถใช้งานได้ทั้งแบบเลือกข้อความชิ้นเดียว (Single-Select) หรือเลือกข้อความหลายชิ้นในรูปแบบแท็กติดกัน (Multi-Select Tag Mode) โดยเชื่อมโยงข้อมูลกับ Reference หรือ ReferenceSet ของ Mendix โดยตรง พร้อมทั้งยังรองรับระบบจัดหมวดหมู่ข้อมูล (Grouping), ระบบเรนเดอร์เฉพาะรายการที่ปรากฏบนจอเพื่อประหยัดหน่วยความจำ (DOM Virtualization) และฟิลเตอร์ค้นหาแบบละเอียด (Fuzzy Match)
 
 ## 3. คุณสมบัติเด่น (Key Features)
+
 * **ช่องค้นหาคำอัตโนมัติ (Search Autocomplete)**: ค้นหาคำได้รวดเร็วทันทีที่ผู้ใช้พิมพ์คำในช่อง โดยมีอัลกอริทึมการแมตช์คำให้เลือกหลากหลาย (Contains, StartsWith, EndsWith, Equals และระบบเดาคำใกล้เคียง Fuzzy Search)
 * **โหมดเลือกรายการเดี่ยวและกลุ่ม (Single/Multi-Select)**: แสดงรายการผลลัพธ์เป็นชิ้นเดี่ยวปกติ หรือแสดงเป็นแถวแท็กป้ายคำที่กดลบออกทีละชิ้นได้อย่างสะดวกสบาย
 * **เชื่อมโยงข้อมูล Mendix สมบูรณ์แบบ**: รองรับการผูกข้อมูล Database ผ่าน Reference หรือ ReferenceSet Association รวมถึงฟิลด์ประเภท Enumerations และ Booleans มาตรฐาน

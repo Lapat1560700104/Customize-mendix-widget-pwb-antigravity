@@ -705,7 +705,11 @@ export function DragContainer({
                                 tabIndex={readOnlyMode ? undefined : 0}
                                 role="listitem"
                                 aria-grabbed={readOnlyMode ? undefined : isGrabbed}
-                                aria-roledescription={readOnlyMode ? undefined : "Draggable row card. Press Spacebar or Enter to grab, then use Arrow Up or Arrow Down keys to reorder. Press Escape to cancel."}
+                                aria-roledescription={
+                                    readOnlyMode
+                                        ? undefined
+                                        : "Draggable row card. Press Spacebar or Enter to grab, then use Arrow Up or Arrow Down keys to reorder. Press Escape to cancel."
+                                }
                                 onPointerDown={readOnlyMode ? undefined : e => handlePointerDown(e, idx)}
                                 onKeyDown={readOnlyMode ? undefined : e => handleKeyDown(e, idx)}
                                 className={`pwb-draggable-row-item ${isDragOver ? "pwb-drag-over" : ""} ${

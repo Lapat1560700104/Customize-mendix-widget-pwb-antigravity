@@ -277,7 +277,9 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
                     {/* Row 1 — shows the LIVE nested widgets via renderer */}
                     <div style={rowStyle}>
                         <div style={accentBarStyle} />
-                        {props.dragHandleDisplay === "left" && !props.readOnlyMode && <DragHandle color={colors.handleColor} />}
+                        {props.dragHandleDisplay === "left" && !props.readOnlyMode && (
+                            <DragHandle color={colors.handleColor} />
+                        )}
                         <div style={{ flexGrow: 1, minWidth: 0 }}>
                             <props.customItemContent.renderer caption="Row 1 — Your content widgets render here">
                                 {/* Fallback shown only when dropzone is empty */}
@@ -301,7 +303,9 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
                     {/* Row 2 — mirror of row 1, shows same live content */}
                     <div style={{ ...rowStyle, opacity: 0.65 }}>
                         <div style={accentBarStyle} />
-                        {props.dragHandleDisplay === "left" && !props.readOnlyMode && <DragHandle color={colors.handleColor} />}
+                        {props.dragHandleDisplay === "left" && !props.readOnlyMode && (
+                            <DragHandle color={colors.handleColor} />
+                        )}
                         <div style={{ flexGrow: 1, minWidth: 0 }}>
                             <props.customItemContent.renderer caption="Row 2 — Repeated for each datasource item">
                                 <div

@@ -73,7 +73,7 @@
         </propertyGroup>
 
         <propertyGroup caption="Sorting Persistence">
-            <property key="sortedAttribute" type="attribute" required="true">
+            <property key="sortedAttribute" type="attribute" required="false">
                 <caption>Sorted IDs Attribute</caption>
                 <description>String Attribute on the parent context entity to store the comma-separated sorted IDs of the items (e.g. 'task_1,task_2,task_3').</description>
                 <attributeTypes>
@@ -83,6 +83,22 @@
             <property key="onSortAction" type="action" required="false">
                 <caption>On Sort Complete Action</caption>
                 <description>Microflow or nanoflow triggered immediately when drag-and-drop sorting completes, useful for committing order changes to the server.</description>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Read Only Settings">
+            <property key="readOnlyMode" type="boolean" defaultValue="false">
+                <caption>Read Only Mode</caption>
+                <description>When enabled, the container displays child items in a read-only list where items cannot be dragged, dropped, or reordered.</description>
+            </property>
+            <property key="sortIdAttribute" type="attribute" required="false" dataSource="itemsSource">
+                <caption>Sort ID Attribute</caption>
+                <description>Attribute on the item entity (Integer, Decimal, or String) used to order items in Read Only Mode.</description>
+                <attributeTypes>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="String"/>
+                </attributeTypes>
             </property>
         </propertyGroup>
 

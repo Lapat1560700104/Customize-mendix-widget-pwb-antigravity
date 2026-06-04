@@ -27,6 +27,8 @@ export function PwbCustomizeContainerDataView({
     customItemContent,
     sortedAttribute,
     onSortAction,
+    readOnlyMode,
+    sortIdAttribute,
     layoutDirection,
     dragHandleDisplay,
     accentColor,
@@ -107,6 +109,37 @@ export function PwbCustomizeContainerDataView({
               }))
             : [];
 
+        if (readOnlyMode) {
+            if (sortIdAttribute) {
+                return [...rawList].sort((a, b) => {
+                    const valA = sortIdAttribute.get(a.rawObject).value;
+                    const valB = sortIdAttribute.get(b.rawObject).value;
+
+                    if (valA === undefined || valA === null) {
+                        return 1;
+                    }
+                    if (valB === undefined || valB === null) {
+                        return -1;
+                    }
+
+                    if (typeof valA === "object" && typeof valB === "object" && valA !== null && valB !== null) {
+                        if (typeof (valA as any).comparedTo === "function") {
+                            return (valA as any).comparedTo(valB);
+                        }
+                    }
+
+                    if (valA < valB) {
+                        return -1;
+                    }
+                    if (valA > valB) {
+                        return 1;
+                    }
+                    return 0;
+                });
+            }
+            return rawList;
+        }
+
         // Apply global optimistic transition if valid (less than 1.2s old)
         const transition = window.__pwbActiveTransition;
         if (transition && Date.now() - transition.timestamp < 1200) {
@@ -168,7 +201,7 @@ export function PwbCustomizeContainerDataView({
         }
 
         return rawList;
-    }, [itemsSource.items, sortedAttribute, transitionTrigger, containerId]);
+    }, [itemsSource.items, sortedAttribute, transitionTrigger, containerId, readOnlyMode, sortIdAttribute]);
 
     // 4. Performance Debouncing logic for Mendix Persistence
     const debounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -333,6 +366,7 @@ export function PwbCustomizeContainerDataView({
                         darkModeBehavior={darkModeBehavior}
                         itemPadding={safeItemPadding}
                         itemGap={safeItemGap}
+                        readOnlyMode={readOnlyMode}
                     />
                     <div className="pwb-empty-state-content-overlay">
                         <svg
@@ -371,6 +405,7 @@ export function PwbCustomizeContainerDataView({
                     darkModeBehavior={darkModeBehavior}
                     itemPadding={safeItemPadding}
                     itemGap={safeItemGap}
+                    readOnlyMode={readOnlyMode}
                 />
             )}
 

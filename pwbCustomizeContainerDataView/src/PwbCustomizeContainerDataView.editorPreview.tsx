@@ -194,8 +194,11 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
                                 ? `${widgetCount} widget${widgetCount > 1 ? "s" : ""} inside each row`
                                 : "Drop widgets into rows below ↓"}
                         </span>
-                        {props.sortedAttribute && (
+                        {props.sortedAttribute && !props.readOnlyMode && (
                             <span style={{ color: accentColor, fontWeight: 600 }}>💾 Sorted IDs: bound</span>
+                        )}
+                        {props.readOnlyMode && props.sortIdAttribute && (
+                            <span style={{ color: accentColor, fontWeight: 600 }}>🔒 Read Only (Sort ID: bound)</span>
                         )}
                     </div>
                 )}
@@ -274,7 +277,7 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
                     {/* Row 1 — shows the LIVE nested widgets via renderer */}
                     <div style={rowStyle}>
                         <div style={accentBarStyle} />
-                        {props.dragHandleDisplay === "left" && <DragHandle color={colors.handleColor} />}
+                        {props.dragHandleDisplay === "left" && !props.readOnlyMode && <DragHandle color={colors.handleColor} />}
                         <div style={{ flexGrow: 1, minWidth: 0 }}>
                             <props.customItemContent.renderer caption="Row 1 — Your content widgets render here">
                                 {/* Fallback shown only when dropzone is empty */}
@@ -298,7 +301,7 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
                     {/* Row 2 — mirror of row 1, shows same live content */}
                     <div style={{ ...rowStyle, opacity: 0.65 }}>
                         <div style={accentBarStyle} />
-                        {props.dragHandleDisplay === "left" && <DragHandle color={colors.handleColor} />}
+                        {props.dragHandleDisplay === "left" && !props.readOnlyMode && <DragHandle color={colors.handleColor} />}
                         <div style={{ flexGrow: 1, minWidth: 0 }}>
                             <props.customItemContent.renderer caption="Row 2 — Repeated for each datasource item">
                                 <div

@@ -25,6 +25,7 @@ export interface DragContainerProps {
     darkModeBehavior: "auto" | "light" | "dark";
     itemPadding?: string;
     itemGap?: string;
+    readOnlyMode?: boolean;
 }
 
 interface DragRegistry {
@@ -76,7 +77,8 @@ export function DragContainer({
     themePreset,
     darkModeBehavior,
     itemPadding,
-    itemGap
+    itemGap,
+    readOnlyMode = false
 }: DragContainerProps): ReactElement {
     const [orderedItems, setOrderedItems] = useState<DragItem[]>([]);
     const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
@@ -89,6 +91,9 @@ export function DragContainer({
     const containerRef = useRef<HTMLDivElement>(null);
 
     const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>, index: number): void => {
+        if (readOnlyMode) {
+            return;
+        }
         const item = orderedItems[index];
         const isGrabbed = keyboardGrabbedId === item.id;
         const itemTitle = e.currentTarget.innerText.split("\n")[0] || `Item ${index + 1}`;
@@ -216,16 +221,21 @@ export function DragContainer({
             setDropDenied(false);
         };
 
-        el.addEventListener("pwb-drag-over-container", handleHoverEvent);
-        el.addEventListener("pwb-drag-leave-container", handleLeaveEvent);
+        if (!readOnlyMode) {
+            el.addEventListener("pwb-drag-over-container", handleHoverEvent);
+            el.addEventListener("pwb-drag-leave-container", handleLeaveEvent);
+        }
 
         return () => {
             el.removeEventListener("pwb-drag-over-container", handleHoverEvent);
             el.removeEventListener("pwb-drag-leave-container", handleLeaveEvent);
         };
-    }, [containerId, dragGroup, enableKanban, isDropAllowed]);
+    }, [containerId, dragGroup, enableKanban, isDropAllowed, readOnlyMode]);
 
     const handlePointerDown = (e: ReactPointerEvent<HTMLDivElement>, index: number): void => {
+        if (readOnlyMode) {
+            return;
+        }
         // Only trigger on left-click for mouse pointer devices
         if (e.pointerType === "mouse" && e.button !== 0) {
             return;
@@ -636,10 +646,10 @@ export function DragContainer({
             data-drag-group={dragGroup}
             data-enable-kanban={String(enableKanban)}
             data-items-count={orderedItems.length}
-            data-drop-denied={dropDenied ? "true" : "false"}
+            data-drop-denied={readOnlyMode || dropDenied ? "true" : "false"}
             className={`pwb-drag-container pwb-direction-${layoutDirection} ${themeClass} ${modeClass} ${
                 orderedItems.length === 0 ? "pwb-empty-container-dropzone" : ""
-            } ${dropDenied ? "pwb-lane-denied" : ""}`}
+            } ${dropDenied ? "pwb-lane-denied" : ""} ${readOnlyMode ? "pwb-read-only-mode" : ""}`}
             style={
                 {
                     "--accent-color": accentColor,
@@ -692,20 +702,22 @@ export function DragContainer({
                             <div
                                 key={item.id}
                                 data-index={idx}
-                                tabIndex={0}
+                                tabIndex={readOnlyMode ? undefined : 0}
                                 role="listitem"
-                                aria-grabbed={isGrabbed}
-                                aria-roledescription="Draggable row card. Press Spacebar or Enter to grab, then use Arrow Up or Arrow Down keys to reorder. Press Escape to cancel."
-                                onPointerDown={e => handlePointerDown(e, idx)}
-                                onKeyDown={e => handleKeyDown(e, idx)}
+                                aria-grabbed={readOnlyMode ? undefined : isGrabbed}
+                                aria-roledescription={readOnlyMode ? undefined : "Draggable row card. Press Spacebar or Enter to grab, then use Arrow Up or Arrow Down keys to reorder. Press Escape to cancel."}
+                                onPointerDown={readOnlyMode ? undefined : e => handlePointerDown(e, idx)}
+                                onKeyDown={readOnlyMode ? undefined : e => handleKeyDown(e, idx)}
                                 className={`pwb-draggable-row-item ${isDragOver ? "pwb-drag-over" : ""} ${
                                     isGrabbed ? "pwb-keyboard-grabbed" : ""
-                                } ${wobblingItemId === item.id ? "pwb-wobble-shake" : ""}`}
+                                } ${wobblingItemId === item.id ? "pwb-wobble-shake" : ""} ${
+                                    readOnlyMode ? "pwb-read-only-item" : ""
+                                }`}
                                 style={{
                                     borderRadius: `calc(${borderRadius} * 0.5)`
                                 }}
                             >
-                                {dragHandleDisplay === "left" && (
+                                {dragHandleDisplay === "left" && !readOnlyMode && (
                                     <div className="pwb-drag-handle" title="Drag to reorder">
                                         <svg
                                             viewBox="0 0 24 24"

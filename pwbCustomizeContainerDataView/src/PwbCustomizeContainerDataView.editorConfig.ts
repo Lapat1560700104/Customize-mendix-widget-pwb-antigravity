@@ -104,8 +104,23 @@ export function getProperties(
     defaultProperties: Properties /* , target: Platform*/
 ): Properties {
     const propsToHide: string[] = [];
-    if (!values.enableKanban) {
-        propsToHide.push("dragGroup", "columnValue", "itemColumnAttribute");
+    if (values.readOnlyMode) {
+        propsToHide.push(
+            "enableKanban",
+            "dragGroup",
+            "columnValue",
+            "itemColumnAttribute",
+            "allowedSourceColumns",
+            "itemAllowDropExpression",
+            "sortedAttribute",
+            "onSortAction",
+            "saveDelay"
+        );
+    } else {
+        propsToHide.push("sortIdAttribute");
+        if (!values.enableKanban) {
+            propsToHide.push("dragGroup", "columnValue", "itemColumnAttribute");
+        }
     }
     if (!values.enableHeader) {
         propsToHide.push("headerContent");
@@ -145,12 +160,49 @@ export function getProperties(
 export function check(values: PwbCustomizeContainerDataViewPreviewProps): Problem[] {
     const errors: Problem[] = [];
 
-    if (!values.sortedAttribute) {
-        errors.push({
-            property: "sortedAttribute",
-            severity: "error",
-            message: "A Sorted IDs Attribute is required to persist the sorted order of child items."
-        });
+    if (values.readOnlyMode) {
+        if (!values.sortIdAttribute) {
+            errors.push({
+                property: "sortIdAttribute",
+                severity: "error",
+                message: "A Sort ID Attribute is required to order items in Read Only Mode."
+            });
+        }
+    } else {
+        if (!values.sortedAttribute) {
+            errors.push({
+                property: "sortedAttribute",
+                severity: "error",
+                message: "A Sorted IDs Attribute is required to persist the sorted order of child items."
+            });
+        }
+
+        if (values.enableKanban) {
+            if (!values.dragGroup || values.dragGroup.trim() === "") {
+                errors.push({
+                    property: "dragGroup",
+                    severity: "error",
+                    message:
+                        "When Kanban mode is active, a Drag Group Name is required to bind drag interactions between columns."
+                });
+            }
+            if (!values.itemColumnAttribute) {
+                errors.push({
+                    property: "itemColumnAttribute",
+                    severity: "error",
+                    message:
+                        "An Item Column Attribute is required to persist status changes when moving cards across Kanban columns."
+                });
+            }
+        }
+
+        if (values.saveDelay !== undefined && values.saveDelay !== null && values.saveDelay < 0) {
+            errors.push({
+                property: "saveDelay",
+                severity: "error",
+                message: "Save Delay must be a positive integer in milliseconds (use 0 for immediate sync)."
+            });
+        }
     }
 
     if (
@@ -163,33 +215,6 @@ export function check(values: PwbCustomizeContainerDataViewPreviewProps): Proble
             property: "accentColor",
             severity: "warning",
             message: "Please enter a valid CSS hex, rgb, or color name."
-        });
-    }
-
-    if (values.enableKanban) {
-        if (!values.dragGroup || values.dragGroup.trim() === "") {
-            errors.push({
-                property: "dragGroup",
-                severity: "error",
-                message:
-                    "When Kanban mode is active, a Drag Group Name is required to bind drag interactions between columns."
-            });
-        }
-        if (!values.itemColumnAttribute) {
-            errors.push({
-                property: "itemColumnAttribute",
-                severity: "error",
-                message:
-                    "An Item Column Attribute is required to persist status changes when moving cards across Kanban columns."
-            });
-        }
-    }
-
-    if (values.saveDelay !== undefined && values.saveDelay !== null && values.saveDelay < 0) {
-        errors.push({
-            property: "saveDelay",
-            severity: "error",
-            message: "Save Delay must be a positive integer in milliseconds (use 0 for immediate sync)."
         });
     }
 

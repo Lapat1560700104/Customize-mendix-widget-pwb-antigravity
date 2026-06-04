@@ -5,6 +5,7 @@
  */
 import { ComponentType, CSSProperties, ReactNode } from "react";
 import { ActionValue, DynamicValue, EditableValue, ListValue, ListAttributeValue, ListExpressionValue, ListWidgetValue } from "mendix";
+import { Big } from "big.js";
 
 export type LayoutDirectionEnum = "vertical" | "horizontal";
 
@@ -32,8 +33,10 @@ export interface PwbCustomizeContainerDataViewContainerProps {
     enableLaneTitle: boolean;
     laneTitle?: DynamicValue<string>;
     laneTitleContent?: ReactNode;
-    sortedAttribute: EditableValue<string>;
+    sortedAttribute?: EditableValue<string>;
     onSortAction?: ActionValue;
+    readOnlyMode: boolean;
+    sortIdAttribute?: ListAttributeValue<Big | string>;
     layoutDirection: LayoutDirectionEnum;
     dragHandleDisplay: DragHandleDisplayEnum;
     accentColor: string;
@@ -78,6 +81,8 @@ export interface PwbCustomizeContainerDataViewPreviewProps {
     laneTitleContent: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     sortedAttribute: string;
     onSortAction: {} | null;
+    readOnlyMode: boolean;
+    sortIdAttribute: string;
     layoutDirection: LayoutDirectionEnum;
     dragHandleDisplay: DragHandleDisplayEnum;
     accentColor: string;

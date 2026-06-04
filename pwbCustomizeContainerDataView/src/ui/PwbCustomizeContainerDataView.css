@@ -2,6 +2,9 @@
 
 .pwb-customize-container-dataview-wrapper {
     width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
     box-sizing: border-box;
 }
 
@@ -35,6 +38,7 @@
     
     padding: 6px;
     min-height: 50px;
+    flex-grow: 1;
     contain: layout style;
     transition: background-color 0.2s ease;
 }
@@ -263,6 +267,7 @@
     background: #f8fafc;
     border: 2px dashed #cbd5e1;
     box-sizing: border-box;
+    flex-grow: 1;
 }
 
 /* The actual drag receiver is stretched fully above the empty text overlay */
@@ -411,7 +416,13 @@
     display: flex;
     flex-direction: column;
     width: 100%;
+    height: 100%;
     box-sizing: border-box;
+}
+
+.pwb-customize-container-dataview-root .pwb-customize-container-dataview-wrapper {
+    flex-grow: 1;
+    height: auto;
 }
 
 .pwb-lane-title-section {

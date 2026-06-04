@@ -234,16 +234,26 @@ export function DragContainer({
             }, 50);
         };
 
+        const handlePointerDropExternal = (e: Event): void => {
+            const customEvent = e as CustomEvent;
+            const { itemId, sourceContainerId, targetIndex } = customEvent.detail;
+            if (onDropExternal) {
+                onDropExternal(itemId, sourceContainerId, targetIndex);
+            }
+        };
+
         if (!readOnlyMode) {
             el.addEventListener("pwb-drag-over-container", handleHoverEvent);
             el.addEventListener("pwb-drag-leave-container", handleLeaveEvent);
             el.addEventListener("pwb-keyboard-accept-item", handleKeyboardAccept);
+            el.addEventListener("pwb-pointer-drop-item", handlePointerDropExternal);
         }
 
         return () => {
             el.removeEventListener("pwb-drag-over-container", handleHoverEvent);
             el.removeEventListener("pwb-drag-leave-container", handleLeaveEvent);
             el.removeEventListener("pwb-keyboard-accept-item", handleKeyboardAccept);
+            el.removeEventListener("pwb-pointer-drop-item", handlePointerDropExternal);
         };
     }, [
         containerId,

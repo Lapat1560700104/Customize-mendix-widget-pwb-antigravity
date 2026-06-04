@@ -481,11 +481,17 @@ export function usePointerDrag({
                                 !isDenied &&
                                 (!targetDragGroup || targetDragGroup === registry.sourceDragGroup)
                             ) {
-                                if (onDropExternal) {
-                                    triggerVibrate(10);
-                                    onDropExternal(registry.itemId, registry.sourceContainerId, finalIndex);
-                                    orderChanged = true;
-                                }
+                                triggerVibrate(10);
+                                lastTargetContainer.dispatchEvent(
+                                    new CustomEvent("pwb-pointer-drop-item", {
+                                        detail: {
+                                            itemId: registry.itemId,
+                                            sourceContainerId: registry.sourceContainerId,
+                                            targetIndex: finalIndex
+                                        }
+                                    })
+                                );
+                                orderChanged = true;
                             }
                         }
                     }

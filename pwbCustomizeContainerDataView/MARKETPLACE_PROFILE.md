@@ -37,3 +37,11 @@ PWB Customize Container DataView
 * **รองรับการจัดคอลัมน์คัมบัง (Kanban Column Support)**: ลากการ์ดข้ามระหว่างหลายๆ วิดเจตคอนเทนเนอร์เพื่อเปลี่ยนสถานะได้ พร้อมระบบ Optimistic UI ป้องกันอาการกระพริบของการ์ดขณะกำลังอัปเดตฐานข้อมูล Asynchronous
 * **การเข้าถึงมาตรฐาน WCAG 2.1**: จัดเรียงลำดับได้ 100% ผ่านคีย์บอร์ด (Tab, Space, Enter, Arrow Keys, Escape) พร้อมเสียงอ่านออกลำโพงช่วยผู้บกพร่องทางการมองเห็น
 * **ธีมความสวยงามสำเร็จรูป (Theme Presets)**: ปรับดีไซน์ได้หลากหลายในปุ่มเดียว ทั้งโหมดขอบมนปกติ (Modern Rounded), กระจกใสฝ้า (Glassmorphism), แบนราบลบขอบ (Minimalist Flat) และขอบดำเงาย้อนยุค (Neo-Brutalist)
+
+---
+
+## 4. Marketplace Assets (ไฟล์ภาพสำหรับอัปโหลด)
+
+* **Marketplace Icon (ภาพไอคอนหลัก)**: [widget_icon.png](file:///Users/lapat.ta/.gemini/antigravity-ide/brain/bd4da4f5-7d0a-4a0e-94f0-3d2ce827e6d5/widget_icon_1780642974709.png)
+* **Marketplace Cover Banner (ภาพหน้าปกสไตล์แลนด์สเคป)**: [widget_banner.png](file:///Users/lapat.ta/.gemini/antigravity-ide/brain/bd4da4f5-7d0a-4a0e-94f0-3d2ce827e6d5/widget_banner_1780642993416.png)
+

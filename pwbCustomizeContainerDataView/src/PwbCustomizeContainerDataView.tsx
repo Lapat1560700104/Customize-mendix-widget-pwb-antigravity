@@ -63,7 +63,16 @@ export function PwbCustomizeContainerDataView({
     actionsSectionPositionCol,
     actionsSectionLayout,
     actionsSectionSize,
-    actionsSectionSizeCustom
+    actionsSectionSizeCustom,
+    dragHandleIcon,
+    dragHandleSvg,
+    dragHandlePosition,
+    dragGhostScale,
+    dragGhostOpacity,
+    dragGhostShadow,
+    hoverRevealActions,
+    animationSpeed,
+    wobbleStrength
 }: PwbCustomizeContainerDataViewContainerProps): ReactElement {
     // 1. Sanitize Aesthetics Configuration
     const colorRegex =
@@ -125,11 +134,25 @@ export function PwbCustomizeContainerDataView({
         ? ({ "--pwb-actions-size-resolved": resolvedActionsSize } as React.CSSProperties)
         : {};
 
+    const ghostScaleOverride =
+        dragGhostScale !== undefined && dragGhostScale !== null ? { "--pwb-ghost-scale": String(dragGhostScale) } : {};
+    const ghostOpacityOverride =
+        dragGhostOpacity !== undefined && dragGhostOpacity !== null
+            ? { "--pwb-ghost-opacity": String(dragGhostOpacity) }
+            : {};
+    const ghostShadowOverride =
+        dragGhostShadow && dragGhostShadow.trim() !== "" ? { "--pwb-ghost-shadow": dragGhostShadow.trim() } : {};
+    const animSpeedOverride = animationSpeed ? { "--pwb-anim-speed": `${animationSpeed}ms` } : {};
+
     const containerOverrideStyle = {
         ...accentOverrideStyle,
         ...radiusOverrideStyle,
         ...gapOverrideStyle,
-        ...actionsSizeStyle
+        ...actionsSizeStyle,
+        ...ghostScaleOverride,
+        ...ghostOpacityOverride,
+        ...ghostShadowOverride,
+        ...animSpeedOverride
     };
 
     // 2. Handle Loading & Empty States Elegantly
@@ -436,6 +459,15 @@ export function PwbCustomizeContainerDataView({
                             actionsSectionLayout={actionsSectionLayout}
                             actionsSectionSize={actionsSectionSize}
                             actionsSectionSizeCustom={actionsSectionSizeCustom}
+                            dragHandleIcon={dragHandleIcon}
+                            dragHandleSvg={dragHandleSvg}
+                            dragHandlePosition={dragHandlePosition}
+                            dragGhostScale={dragGhostScale}
+                            dragGhostOpacity={dragGhostOpacity}
+                            dragGhostShadow={dragGhostShadow}
+                            hoverRevealActions={hoverRevealActions}
+                            animationSpeed={animationSpeed}
+                            wobbleStrength={wobbleStrength}
                         />
                         <div className="pwb-empty-state-content-overlay">
                             <svg
@@ -485,6 +517,15 @@ export function PwbCustomizeContainerDataView({
                         actionsSectionLayout={actionsSectionLayout}
                         actionsSectionSize={actionsSectionSize}
                         actionsSectionSizeCustom={actionsSectionSizeCustom}
+                        dragHandleIcon={dragHandleIcon}
+                        dragHandleSvg={dragHandleSvg}
+                        dragHandlePosition={dragHandlePosition}
+                        dragGhostScale={dragGhostScale}
+                        dragGhostOpacity={dragGhostOpacity}
+                        dragGhostShadow={dragGhostShadow}
+                        hoverRevealActions={hoverRevealActions}
+                        animationSpeed={animationSpeed}
+                        wobbleStrength={wobbleStrength}
                     />
                 )}
 

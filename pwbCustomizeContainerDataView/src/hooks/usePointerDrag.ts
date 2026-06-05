@@ -1,5 +1,6 @@
 import { useState, RefObject, PointerEvent as ReactPointerEvent } from "react";
 import { GUID } from "mendix";
+import Big from "big.js";
 import { DragItem } from "../components/DragContainer";
 
 interface UsePointerDragProps {
@@ -18,6 +19,9 @@ interface UsePointerDragProps {
     onRemoveItemExternal?: (itemId: GUID) => void;
     containerId: string;
     containerRef: RefObject<HTMLDivElement | null>;
+    dragGhostScale?: Big;
+    dragGhostOpacity?: Big;
+    dragGhostShadow?: string;
 }
 
 const getScrollParent = (node: HTMLElement | null): HTMLElement | null => {
@@ -73,7 +77,10 @@ export function usePointerDrag({
     onDropExternal: _onDropExternal,
     onRemoveItemExternal,
     containerId,
-    containerRef
+    containerRef,
+    dragGhostScale,
+    dragGhostOpacity,
+    dragGhostShadow
 }: UsePointerDragProps): UsePointerDragResult {
     const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -202,6 +209,15 @@ export function usePointerDrag({
                 ghostEl.style.height = `${rect.height}px`;
                 ghostEl.style.setProperty("--accent-color", accentColor);
                 ghostEl.style.setProperty("--border-radius", borderRadius);
+                if (dragGhostScale !== undefined && dragGhostScale !== null) {
+                    ghostEl.style.setProperty("--pwb-ghost-scale", String(dragGhostScale));
+                }
+                if (dragGhostOpacity !== undefined && dragGhostOpacity !== null) {
+                    ghostEl.style.setProperty("--pwb-ghost-opacity", String(dragGhostOpacity));
+                }
+                if (dragGhostShadow && dragGhostShadow.trim() !== "") {
+                    ghostEl.style.setProperty("--pwb-ghost-shadow", dragGhostShadow.trim());
+                }
 
                 // Fixed baseline coords so translate3d operates purely on viewport coordinates
                 ghostEl.style.left = "0px";

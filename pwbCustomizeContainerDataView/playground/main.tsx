@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import React, { useState, ReactNode, useRef, CSSProperties } from "react";
 import { PwbCustomizeContainerDataView } from "../src/PwbCustomizeContainerDataView";
 import "../src/ui/PwbCustomizeContainerDataView.css";
+import Big from "big.js";
 
 // ─── Simulated data items ────────────────────────────────────────────────────
 interface TaskItem {
@@ -483,6 +484,15 @@ function App() {
     const [itemPadding, setItemPadding] = useState<string>("");
     const [itemGap, setItemGap] = useState<string>("");
     const [saveDelay, setSaveDelay] = useState<number>(300);
+    const [dragHandleIcon, setDragHandleIcon] = useState<"dots" | "bars" | "hand" | "crosshair" | "custom_svg">("dots");
+    const [dragHandleSvg, setDragHandleSvg] = useState<string>("");
+    const [dragHandlePosition, setDragHandlePosition] = useState<"left" | "right">("left");
+    const [dragGhostScale, setDragGhostScale] = useState<number>(1.03);
+    const [dragGhostOpacity, setDragGhostOpacity] = useState<number>(0.85);
+    const [dragGhostShadow, setDragGhostShadow] = useState<string>("");
+    const [hoverRevealActions, setHoverRevealActions] = useState<boolean>(false);
+    const [animationSpeed, setAnimationSpeed] = useState<number>(250);
+    const [wobbleStrength, setWobbleStrength] = useState<number>(1.0);
     const [enableKanban, setEnableKanban] = useState<boolean>(true);
     const [enableHeader, setEnableHeader] = useState<boolean>(true);
     const [enableFooter, setEnableFooter] = useState<boolean>(true);
@@ -994,7 +1004,16 @@ function App() {
             actionsSectionPositionCol: actionsSectionPositionCol as any,
             actionsSectionLayout: actionsSectionLayout as any,
             actionsSectionSize: actionsSectionSize as any,
-            actionsSectionSizeCustom
+            actionsSectionSizeCustom,
+            dragHandleIcon,
+            dragHandleSvg,
+            dragHandlePosition,
+            dragGhostScale: new Big(dragGhostScale),
+            dragGhostOpacity: new Big(dragGhostOpacity),
+            dragGhostShadow,
+            hoverRevealActions,
+            animationSpeed,
+            wobbleStrength: new Big(wobbleStrength)
         };
     };
 
@@ -1285,7 +1304,16 @@ function App() {
             actionsSectionPositionCol: "top" as any,
             actionsSectionLayout: "side_by_side" as any,
             actionsSectionSize: "auto" as any,
-            actionsSectionSizeCustom: "200px"
+            actionsSectionSizeCustom: "200px",
+            dragHandleIcon,
+            dragHandleSvg,
+            dragHandlePosition,
+            dragGhostScale: new Big(dragGhostScale),
+            dragGhostOpacity: new Big(dragGhostOpacity),
+            dragGhostShadow,
+            hoverRevealActions,
+            animationSpeed,
+            wobbleStrength: new Big(wobbleStrength)
         };
     };
 
@@ -1904,6 +1932,135 @@ function App() {
                                     label="Show Drag Handles (⠿)"
                                     value={dragHandleDisplay === "left"}
                                     onChange={v => setDragHandleDisplay(v ? "left" : "hide")}
+                                />
+                                {dragHandleDisplay === "left" && (
+                                    <>
+                                        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                            <span style={{ fontSize: "13px", color: "#94a3b8" }}>Drag Handle Position</span>
+                                            <select
+                                                value={dragHandlePosition}
+                                                onChange={e => setDragHandlePosition(e.target.value as any)}
+                                                style={{
+                                                    width: "100%",
+                                                    padding: "8px",
+                                                    borderRadius: "8px",
+                                                    background: "#0f172a",
+                                                    border: "1.5px solid #1e293b",
+                                                    color: "#f1f5f9",
+                                                    fontSize: "13px",
+                                                    cursor: "pointer"
+                                                }}
+                                            >
+                                                <option value="left">Left</option>
+                                                <option value="right">Right</option>
+                                            </select>
+                                        </div>
+                                        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                            <span style={{ fontSize: "13px", color: "#94a3b8" }}>Drag Handle Icon</span>
+                                            <select
+                                                value={dragHandleIcon}
+                                                onChange={e => setDragHandleIcon(e.target.value as any)}
+                                                style={{
+                                                    width: "100%",
+                                                    padding: "8px",
+                                                    borderRadius: "8px",
+                                                    background: "#0f172a",
+                                                    border: "1.5px solid #1e293b",
+                                                    color: "#f1f5f9",
+                                                    fontSize: "13px",
+                                                    cursor: "pointer"
+                                                }}
+                                            >
+                                                <option value="dots">Dots (6-dots)</option>
+                                                <option value="bars">Bars (3-bars)</option>
+                                                <option value="hand">Hand</option>
+                                                <option value="crosshair">Crosshair</option>
+                                                <option value="custom_svg">Custom SVG</option>
+                                            </select>
+                                        </div>
+                                        {dragHandleIcon === "custom_svg" && (
+                                            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                                <span style={{ fontSize: "13px", color: "#94a3b8" }}>Custom Handle SVG</span>
+                                                <textarea
+                                                    value={dragHandleSvg}
+                                                    onChange={e => setDragHandleSvg(e.target.value)}
+                                                    placeholder="Paste SVG XML content here..."
+                                                    rows={3}
+                                                    style={{
+                                                        width: "100%",
+                                                        padding: "8px 12px",
+                                                        borderRadius: "8px",
+                                                        border: "1.5px solid #1e293b",
+                                                        background: "#0f172a",
+                                                        color: "#f1f5f9",
+                                                        fontSize: "12px",
+                                                        boxSizing: "border-box",
+                                                        outline: "none",
+                                                        fontFamily: "monospace"
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                                <Slider
+                                    label="Ghost Scale"
+                                    value={Math.round(dragGhostScale * 100)}
+                                    min={50}
+                                    max={150}
+                                    onChange={v => setDragGhostScale(v / 100)}
+                                    unit="%"
+                                />
+                                <Slider
+                                    label="Ghost Opacity"
+                                    value={Math.round(dragGhostOpacity * 100)}
+                                    min={10}
+                                    max={100}
+                                    onChange={v => setDragGhostOpacity(v / 100)}
+                                    unit="%"
+                                />
+                                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                    <span style={{ fontSize: "13px", color: "#94a3b8" }}>Ghost Shadow (CSS)</span>
+                                    <input
+                                        type="text"
+                                        value={dragGhostShadow}
+                                        onChange={e => setDragGhostShadow(e.target.value)}
+                                        placeholder="e.g. 0 10px 30px rgba(0,0,0,0.5)"
+                                        style={{
+                                            width: "100%",
+                                            padding: "8px 12px",
+                                            borderRadius: "8px",
+                                            border: "1.5px solid #1e293b",
+                                            background: "#0f172a",
+                                            color: "#f1f5f9",
+                                            fontSize: "13px",
+                                            boxSizing: "border-box",
+                                            outline: "none"
+                                        }}
+                                    />
+                                </div>
+                                {enableActionsSection && (
+                                    <Toggle
+                                        label="Hover Reveal Actions"
+                                        value={hoverRevealActions}
+                                        onChange={setHoverRevealActions}
+                                    />
+                                )}
+                                <Slider
+                                    label="Animation Speed"
+                                    value={animationSpeed}
+                                    min={50}
+                                    max={1000}
+                                    onChange={setAnimationSpeed}
+                                    unit="ms"
+                                />
+                                <Slider
+                                    label="Wobble Strength"
+                                    value={Math.round(wobbleStrength * 100)}
+                                    min={0}
+                                    max={300}
+                                    onChange={v => setWobbleStrength(v / 100)}
+                                    unit="%"
                                 />
                             </Section>
 

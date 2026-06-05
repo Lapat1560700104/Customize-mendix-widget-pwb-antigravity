@@ -157,6 +157,14 @@ export function getProperties(
         }
     }
 
+    if (values.dragHandleDisplay === "hide") {
+        propsToHide.push("dragHandleIcon", "dragHandleSvg", "dragHandlePosition");
+    } else {
+        if (values.dragHandleIcon !== "custom_svg") {
+            propsToHide.push("dragHandleSvg");
+        }
+    }
+
     if (propsToHide.length > 0) {
         const filterProperties = (groups: PropertyGroup[]): PropertyGroup[] => {
             return groups.map(group => {
@@ -256,6 +264,51 @@ export function check(values: PwbCustomizeContainerDataViewPreviewProps): Proble
             property: "accentColor",
             severity: "warning",
             message: "Please enter a valid CSS hex, rgb, or color name."
+        });
+    }
+
+    // Aesthetic Customizations Validations
+    if (values.dragHandleDisplay !== "hide") {
+        if (values.dragHandleIcon === "custom_svg") {
+            if (!values.dragHandleSvg || values.dragHandleSvg.trim() === "") {
+                errors.push({
+                    property: "dragHandleSvg",
+                    severity: "error",
+                    message: "Custom SVG content is required when Drag Handle Icon is set to Custom SVG."
+                });
+            }
+        }
+    }
+
+    if (values.dragGhostScale !== null && values.dragGhostScale <= 0) {
+        errors.push({
+            property: "dragGhostScale",
+            severity: "error",
+            message: "Drag Ghost Scale must be a positive number."
+        });
+    }
+
+    if (values.dragGhostOpacity !== null && (values.dragGhostOpacity < 0 || values.dragGhostOpacity > 1)) {
+        errors.push({
+            property: "dragGhostOpacity",
+            severity: "error",
+            message: "Drag Ghost Opacity must be between 0.0 and 1.0."
+        });
+    }
+
+    if (values.animationSpeed !== null && values.animationSpeed < 0) {
+        errors.push({
+            property: "animationSpeed",
+            severity: "error",
+            message: "Animation Speed must be a positive integer in milliseconds (or 0 for instant)."
+        });
+    }
+
+    if (values.wobbleStrength !== null && values.wobbleStrength < 0) {
+        errors.push({
+            property: "wobbleStrength",
+            severity: "error",
+            message: "Wobble Strength must be a non-negative number."
         });
     }
 

@@ -57,7 +57,7 @@
        Override in Atlas SCSS for global animation control across all instances.
        Example: .pwb-drag-container { --pwb-anim-duration: 0.15s; }
     */
-    --pwb-anim-duration: var(--motion-duration-fast, 0.25s);
+    --pwb-anim-duration: var(--pwb-anim-speed, var(--motion-duration-fast, 0.25s));
     --pwb-anim-easing: var(--motion-easing-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
     --pwb-anim-easing-smooth: var(--motion-easing-smooth, cubic-bezier(0.2, 0.8, 0.2, 1));
     --pwb-anim-ghost-rotate: 1.5deg;
@@ -409,13 +409,14 @@
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px) !important;
     border: 2px solid var(--accent-color, #3b82f6) !important;
-    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.16), 0 10px 15px -5px rgba(0, 0, 0, 0.08) !important;
+    box-shadow: var(--pwb-ghost-shadow, 0 20px 40px -10px rgba(0, 0, 0, 0.16), 0 10px 15px -5px rgba(0, 0, 0, 0.08)) !important;
+    opacity: var(--pwb-ghost-opacity, 0.85) !important;
     
     /* Translation is handled dynamically via translate3d in JS.
        Scale and rotate are transitioned individually for maximum performance and fluid tactile popup. */
-    scale: 1.03;
+    scale: var(--pwb-ghost-scale, 1.03) !important;
     rotate: 1.5deg;
-    transition: scale 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), rotate 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease !important;
+    transition: scale 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), rotate 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease, opacity 0.15s ease !important;
     
     box-sizing: border-box !important;
     padding: 12px 16px !important;
@@ -443,15 +444,36 @@
 /* Tactile Wobble Spring Shake Keyframes */
 @keyframes pwb-wobble {
     0%, 100% { transform: translateX(0); }
-    15% { transform: translateX(-6px) rotate(-1.5deg); }
-    30% { transform: translateX(5px) rotate(1deg); }
-    45% { transform: translateX(-4px) rotate(-1deg); }
-    60% { transform: translateX(3px) rotate(0.5deg); }
-    75% { transform: translateX(-1px) rotate(-0.5deg); }
+    15% { transform: translateX(calc(-6px * var(--pwb-wobble-strength, 1))) rotate(calc(-1.5deg * var(--pwb-wobble-strength, 1))); }
+    30% { transform: translateX(calc(5px * var(--pwb-wobble-strength, 1))) rotate(calc(1deg * var(--pwb-wobble-strength, 1))); }
+    45% { transform: translateX(calc(-4px * var(--pwb-wobble-strength, 1))) rotate(calc(-1deg * var(--pwb-wobble-strength, 1))); }
+    60% { transform: translateX(calc(3px * var(--pwb-wobble-strength, 1))) rotate(calc(0.5deg * var(--pwb-wobble-strength, 1))); }
+    75% { transform: translateX(calc(-1px * var(--pwb-wobble-strength, 1))) rotate(calc(-0.5deg * var(--pwb-wobble-strength, 1))); }
 }
 
 .pwb-wobble-shake {
-    animation: pwb-wobble 0.4s ease-in-out !important;
+    animation: pwb-wobble var(--pwb-anim-duration, 0.4s) ease-in-out !important;
+}
+
+/* Hover Reveal Actions logic */
+.pwb-draggable-row-item.pwb-hover-reveal-active .pwb-actions-section-card {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.96);
+    transition: opacity var(--pwb-anim-duration) ease, transform var(--pwb-anim-duration) ease, visibility var(--pwb-anim-duration);
+}
+
+.pwb-draggable-row-item.pwb-hover-reveal-active:hover .pwb-actions-section-card,
+.pwb-draggable-row-item.pwb-hover-reveal-active:focus-within .pwb-actions-section-card {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+
+/* Custom drag handle positions alignment */
+.pwb-drag-handle.pwb-drag-handle-pos-right {
+    margin-right: 0;
+    margin-left: 14px;
 }
 
 /* Header & Footer Custom Sections */

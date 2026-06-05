@@ -2,6 +2,7 @@ import { ReactElement, useState, useEffect, useRef, ReactNode } from "react";
 import { ObjectItem, GUID } from "mendix";
 import { useKeyboardDrag } from "../hooks/useKeyboardDrag";
 import { usePointerDrag } from "../hooks/usePointerDrag";
+import { Big } from "big.js";
 
 export interface DragItem {
     id: GUID;
@@ -34,6 +35,15 @@ export interface DragContainerProps {
     actionsSectionLayout?: "side_by_side" | "stacked";
     actionsSectionSize?: "auto" | "ratio_15" | "ratio_20" | "ratio_25" | "ratio_30" | "ratio_40" | "custom";
     actionsSectionSizeCustom?: string;
+    dragHandleIcon?: "dots" | "bars" | "hand" | "crosshair" | "custom_svg";
+    dragHandleSvg?: string;
+    dragHandlePosition?: "left" | "right";
+    dragGhostScale?: Big;
+    dragGhostOpacity?: Big;
+    dragGhostShadow?: string;
+    hoverRevealActions?: boolean;
+    animationSpeed?: number;
+    wobbleStrength?: Big;
 }
 
 interface DragRegistry {
@@ -88,7 +98,16 @@ export function DragContainer({
     actionsSectionPosition = "before",
     actionsSectionLayout = "side_by_side",
     actionsSectionSize = "auto",
-    actionsSectionSizeCustom
+    actionsSectionSizeCustom,
+    dragHandleIcon = "dots",
+    dragHandleSvg,
+    dragHandlePosition = "left",
+    dragGhostScale,
+    dragGhostOpacity,
+    dragGhostShadow,
+    hoverRevealActions = false,
+    animationSpeed,
+    wobbleStrength
 }: DragContainerProps): ReactElement {
     const [orderedItems, setOrderedItems] = useState<DragItem[]>([]);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -149,7 +168,10 @@ export function DragContainer({
         onDropExternal,
         onRemoveItemExternal,
         containerId,
-        containerRef
+        containerRef,
+        dragGhostScale,
+        dragGhostOpacity,
+        dragGhostShadow
     });
 
     // Sync state when items source updates from Mendix
@@ -295,6 +317,101 @@ export function DragContainer({
         setAnnouncement
     ]);
 
+    const renderDragHandle = (): ReactNode => {
+        if (dragHandleDisplay !== "left" || readOnlyMode) {
+            return null;
+        }
+
+        let iconContent: ReactNode = null;
+
+        if (dragHandleIcon === "custom_svg" && dragHandleSvg) {
+            iconContent = (
+                <div dangerouslySetInnerHTML={{ __html: dragHandleSvg }} className="pwb-drag-icon-svg-wrapper" />
+            );
+        } else if (dragHandleIcon === "bars") {
+            iconContent = (
+                <svg
+                    viewBox="0 0 24 24"
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                >
+                    <line x1="4" y1="6" x2="20" y2="6" />
+                    <line x1="4" y1="12" x2="20" y2="12" />
+                    <line x1="4" y1="18" x2="20" y2="18" />
+                </svg>
+            );
+        } else if (dragHandleIcon === "hand") {
+            iconContent = (
+                <svg
+                    viewBox="0 0 24 24"
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0" />
+                    <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0" />
+                    <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0" />
+                    <path d="M6 14v-1.5a1.5 1.5 0 0 0-3 0V16a5 5 0 0 0 5 5h4a8 8 0 0 0 8-8v-2a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2" />
+                </svg>
+            );
+        } else if (dragHandleIcon === "crosshair") {
+            iconContent = (
+                <svg
+                    viewBox="0 0 24 24"
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <polyline points="5 9 2 12 5 15" />
+                    <polyline points="9 5 12 2 15 5" />
+                    <polyline points="15 19 12 22 9 19" />
+                    <polyline points="19 9 22 12 19 15" />
+                    <line x1="2" y1="12" x2="22" y2="12" />
+                    <line x1="12" y1="2" x2="12" y2="22" />
+                </svg>
+            );
+        } else {
+            iconContent = (
+                <svg
+                    viewBox="0 0 24 24"
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                >
+                    <circle cx="9" cy="5" r="1.2" fill="currentColor" />
+                    <circle cx="9" cy="12" r="1.2" fill="currentColor" />
+                    <circle cx="9" cy="19" r="1.2" fill="currentColor" />
+                    <circle cx="15" cy="5" r="1.2" fill="currentColor" />
+                    <circle cx="15" cy="12" r="1.2" fill="currentColor" />
+                    <circle cx="15" cy="19" r="1.2" fill="currentColor" />
+                </svg>
+            );
+        }
+
+        const positionClass = `pwb-drag-handle-pos-${dragHandlePosition || "left"}`;
+
+        return (
+            <div className={`pwb-drag-handle ${positionClass}`} title="Drag to reorder">
+                {iconContent}
+            </div>
+        );
+    };
+
     const themeClass = `pwb-preset-${themePreset}`;
     const modeClass =
         darkModeBehavior === "dark"
@@ -321,7 +438,18 @@ export function DragContainer({
                     "--border-radius": borderRadius,
                     "--accent-glow": `color-mix(in srgb, ${accentColor} 15%, transparent)`,
                     "--pwb-item-padding": itemPadding,
-                    "--pwb-item-gap": itemGap
+                    "--pwb-item-gap": itemGap,
+                    "--pwb-ghost-scale":
+                        dragGhostScale !== undefined && dragGhostScale !== null ? String(dragGhostScale) : undefined,
+                    "--pwb-ghost-opacity":
+                        dragGhostOpacity !== undefined && dragGhostOpacity !== null
+                            ? String(dragGhostOpacity)
+                            : undefined,
+                    "--pwb-ghost-shadow":
+                        dragGhostShadow && dragGhostShadow.trim() !== "" ? dragGhostShadow.trim() : undefined,
+                    "--pwb-anim-speed": animationSpeed ? `${animationSpeed}ms` : undefined,
+                    "--pwb-wobble-strength":
+                        wobbleStrength !== undefined && wobbleStrength !== null ? String(wobbleStrength) : undefined
                 } as any
             }
         >
@@ -381,31 +509,12 @@ export function DragContainer({
                                     isGrabbed ? "pwb-keyboard-grabbed" : ""
                                 } ${wobblingItemId === item.id ? "pwb-wobble-shake" : ""} ${
                                     readOnlyMode ? "pwb-read-only-item" : ""
-                                }`}
+                                } ${hoverRevealActions ? "pwb-hover-reveal-active" : ""}`}
                                 style={{
                                     borderRadius: `calc(${borderRadius} * 0.5)`
                                 }}
                             >
-                                {dragHandleDisplay === "left" && !readOnlyMode && (
-                                    <div className="pwb-drag-handle" title="Drag to reorder">
-                                        <svg
-                                            viewBox="0 0 24 24"
-                                            width="16"
-                                            height="16"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="2.5"
-                                            strokeLinecap="round"
-                                        >
-                                            <circle cx="9" cy="5" r="1.2" fill="currentColor" />
-                                            <circle cx="9" cy="12" r="1.2" fill="currentColor" />
-                                            <circle cx="9" cy="19" r="1.2" fill="currentColor" />
-                                            <circle cx="15" cy="5" r="1.2" fill="currentColor" />
-                                            <circle cx="15" cy="12" r="1.2" fill="currentColor" />
-                                            <circle cx="15" cy="19" r="1.2" fill="currentColor" />
-                                        </svg>
-                                    </div>
-                                )}
+                                {dragHandlePosition !== "right" && renderDragHandle()}
                                 {enableActionsSection && actionsSectionContent ? (
                                     <div
                                         className={`pwb-actions-layout-container pwb-actions-layout-${actionsSectionLayout} pwb-actions-pos-${actionsSectionPosition}`}
@@ -432,6 +541,7 @@ export function DragContainer({
                                 ) : (
                                     <div className="pwb-draggable-item-content">{renderItem(item.rawObject)}</div>
                                 )}
+                                {dragHandlePosition === "right" && renderDragHandle()}
                             </div>
                         );
                     }

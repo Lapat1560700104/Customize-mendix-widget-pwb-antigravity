@@ -127,6 +127,53 @@
                 <caption>Border Radius</caption>
                 <description>Corner roundness of item rows and drop overlays. Specify standard CSS units (e.g., 16px, 8px, 0px).</description>
             </property>
+            <property key="dragHandleIcon" type="enumeration" defaultValue="dots">
+                <caption>Drag Handle Icon</caption>
+                <description>Select the icon type for the drag handle.</description>
+                <enumerationValues>
+                    <enumerationValue key="dots">Dots (Standard)</enumerationValue>
+                    <enumerationValue key="bars">Bars (Three lines)</enumerationValue>
+                    <enumerationValue key="hand">Hand Grab</enumerationValue>
+                    <enumerationValue key="crosshair">Move Crosshair</enumerationValue>
+                    <enumerationValue key="custom_svg">Custom SVG Code</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="dragHandleSvg" type="string" required="false" defaultValue="">
+                <caption>Custom SVG HTML Code</caption>
+                <description>Raw SVG markup for the drag handle (e.g. &lt;svg ...&gt;&lt;path .../&gt;&lt;/svg&gt;). Only used when Drag Handle Icon is set to Custom SVG.</description>
+            </property>
+            <property key="dragHandlePosition" type="enumeration" defaultValue="left">
+                <caption>Drag Handle Position</caption>
+                <description>Choose whether to place the drag handle on the Left or Right side of the card.</description>
+                <enumerationValues>
+                    <enumerationValue key="left">Left</enumerationValue>
+                    <enumerationValue key="right">Right</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="dragGhostScale" type="decimal" defaultValue="0.97">
+                <caption>Drag Card Scale</caption>
+                <description>Scale factor applied to the card while dragging (e.g. 0.95 to shrink, 1.05 to grow).</description>
+            </property>
+            <property key="dragGhostOpacity" type="decimal" defaultValue="0.85">
+                <caption>Drag Card Opacity</caption>
+                <description>Opacity of the card while dragging (0.0 to 1.0).</description>
+            </property>
+            <property key="dragGhostShadow" type="string" required="false" defaultValue="">
+                <caption>Drag Card CSS Box Shadow</caption>
+                <description>Custom CSS box-shadow value applied to the card while dragging (e.g. '0 20px 40px -10px rgba(0,0,0,0.35)'). Leave empty for default preset shadow.</description>
+            </property>
+            <property key="hoverRevealActions" type="boolean" defaultValue="false">
+                <caption>Hover Reveal Actions</caption>
+                <description>When enabled, the actions section is hidden by default and only slides/fades in when hovering over the card.</description>
+            </property>
+            <property key="animationSpeed" type="integer" defaultValue="200">
+                <caption>Animation Speed (ms)</caption>
+                <description>Duration of card reordering transitions and wobbles in milliseconds.</description>
+            </property>
+            <property key="wobbleStrength" type="decimal" defaultValue="1.0">
+                <caption>Wobble Shake Strength</caption>
+                <description>Multiplier for the wobble shake amplitude when a drop is canceled/denied (e.g. 1.0 for default, 2.0 for double wobble, 0.0 to disable).</description>
+            </property>
             <property key="themePreset" type="enumeration" defaultValue="default_rounded">
                 <caption>Theme Preset</caption>
                 <description>Choose a visual aesthetic theme preset for the card container layout.</description>

@@ -11,6 +11,10 @@ export type LayoutDirectionEnum = "vertical" | "horizontal";
 
 export type DragHandleDisplayEnum = "left" | "hide";
 
+export type DragHandleIconEnum = "dots" | "bars" | "hand" | "crosshair" | "custom_svg";
+
+export type DragHandlePositionEnum = "left" | "right";
+
 export type ThemePresetEnum = "default_rounded" | "modern_glass" | "minimalist_flat" | "neo_brutalist";
 
 export type DarkModeBehaviorEnum = "auto" | "light" | "dark";
@@ -49,6 +53,15 @@ export interface PwbCustomizeContainerDataViewContainerProps {
     dragHandleDisplay: DragHandleDisplayEnum;
     accentColor: string;
     borderRadius: string;
+    dragHandleIcon: DragHandleIconEnum;
+    dragHandleSvg: string;
+    dragHandlePosition: DragHandlePositionEnum;
+    dragGhostScale: Big;
+    dragGhostOpacity: Big;
+    dragGhostShadow: string;
+    hoverRevealActions: boolean;
+    animationSpeed: number;
+    wobbleStrength: Big;
     themePreset: ThemePresetEnum;
     darkModeBehavior: DarkModeBehaviorEnum;
     itemPadding: string;
@@ -102,6 +115,15 @@ export interface PwbCustomizeContainerDataViewPreviewProps {
     dragHandleDisplay: DragHandleDisplayEnum;
     accentColor: string;
     borderRadius: string;
+    dragHandleIcon: DragHandleIconEnum;
+    dragHandleSvg: string;
+    dragHandlePosition: DragHandlePositionEnum;
+    dragGhostScale: number | null;
+    dragGhostOpacity: number | null;
+    dragGhostShadow: string;
+    hoverRevealActions: boolean;
+    animationSpeed: number | null;
+    wobbleStrength: number | null;
     themePreset: ThemePresetEnum;
     darkModeBehavior: DarkModeBehaviorEnum;
     itemPadding: string;

@@ -154,10 +154,6 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
         }
     }
 
-    const actionsLayoutStyles = props.enableActionsSection
-        ? ({ "--pwb-actions-size-resolved": resolvedActionsSize } as CSSProperties)
-        : {};
-
     const containerStyle: CSSProperties = {
         display: "flex",
         flexDirection: "column",
@@ -167,29 +163,86 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
         border: `1px solid ${colors.border}`,
         backgroundColor: colors.bg,
         width: "100%",
-        fontFamily: "system-ui, -apple-system, sans-serif",
-        ...actionsLayoutStyles
+        fontFamily: "system-ui, -apple-system, sans-serif"
     };
 
-    const actionsPreview = props.enableActionsSection && props.actionsSectionContent?.renderer && (
-        <div className="pwb-actions-section-card" style={{ flexGrow: 1 }}>
-            <props.actionsSectionContent.renderer caption="Actions Content — Drag widgets here">
-                <div
-                    style={{
-                        padding: "8px 10px",
-                        background: colors.dropzoneBg,
-                        borderRadius: "6px",
-                        fontSize: "11px",
-                        color: colors.labelColor,
-                        border: `1px dashed ${colors.dropzoneBorder}`,
-                        textAlign: "center"
-                    }}
+    const renderCardContentPreview = (rowNumber: number, isGhost = false): ReactElement => {
+        const resolvedPosition =
+            props.actionsSectionLayout === "side_by_side"
+                ? props.actionsSectionPositionRow === "left"
+                    ? "before"
+                    : "after"
+                : props.actionsSectionPositionCol === "top"
+                ? "before"
+                : "after";
+
+        const customContent = (
+            <div style={{ flexGrow: 1, minWidth: 0 }}>
+                <props.customItemContent.renderer
+                    caption={`Row ${rowNumber} — ${isGhost ? "Repeated" : "Your content widgets render here"}`}
                 >
-                    ⬇ Drop buttons/actions here
+                    <div
+                        style={{
+                            padding: "8px 10px",
+                            background: colors.dropzoneBg,
+                            borderRadius: "6px",
+                            fontSize: "12px",
+                            color: colors.labelColor,
+                            border: `1px dashed ${colors.dropzoneBorder}`,
+                            textAlign: "center",
+                            opacity: isGhost ? 0.7 : 1
+                        }}
+                    >
+                        {isGhost
+                            ? "⬇ Same template — repeated per item"
+                            : "⬇ Drop widgets here — they appear in every row"}
+                    </div>
+                </props.customItemContent.renderer>
+            </div>
+        );
+
+        if (props.enableActionsSection && props.actionsSectionContent?.renderer) {
+            const cardActionsPreview = (
+                <div className="pwb-actions-section-card" style={{ flexGrow: 1 }}>
+                    <props.actionsSectionContent.renderer caption={`Row ${rowNumber} Actions`}>
+                        <div
+                            style={{
+                                padding: "8px 10px",
+                                background: colors.dropzoneBg,
+                                borderRadius: "6px",
+                                fontSize: "11px",
+                                color: colors.labelColor,
+                                border: `1px dashed ${colors.dropzoneBorder}`,
+                                textAlign: "center",
+                                opacity: isGhost ? 0.7 : 1
+                            }}
+                        >
+                            ⬇ Drop buttons/actions here
+                        </div>
+                    </props.actionsSectionContent.renderer>
                 </div>
-            </props.actionsSectionContent.renderer>
-        </div>
-    );
+            );
+
+            return (
+                <div
+                    className={`pwb-actions-layout-container pwb-actions-layout-${props.actionsSectionLayout} pwb-actions-pos-${resolvedPosition}`}
+                    style={
+                        {
+                            flexGrow: 1,
+                            minWidth: 0,
+                            "--pwb-actions-size-resolved": resolvedActionsSize
+                        } as CSSProperties
+                    }
+                >
+                    {resolvedPosition === "before" && cardActionsPreview}
+                    {customContent}
+                    {resolvedPosition === "after" && cardActionsPreview}
+                </div>
+            );
+        }
+
+        return customContent;
+    };
 
     const listContent = (
         <>
@@ -270,24 +323,7 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
                     {props.dragHandleDisplay === "left" && !props.readOnlyMode && (
                         <DragHandle color={colors.handleColor} />
                     )}
-                    <div style={{ flexGrow: 1, minWidth: 0 }}>
-                        <props.customItemContent.renderer caption="Row 1 — Your content widgets render here">
-                            {/* Fallback shown only when dropzone is empty */}
-                            <div
-                                style={{
-                                    padding: "8px 10px",
-                                    background: colors.dropzoneBg,
-                                    borderRadius: "6px",
-                                    fontSize: "12px",
-                                    color: colors.labelColor,
-                                    border: `1px dashed ${colors.dropzoneBorder}`,
-                                    textAlign: "center"
-                                }}
-                            >
-                                ⬇ Drop widgets here — they appear in every row
-                            </div>
-                        </props.customItemContent.renderer>
-                    </div>
+                    {renderCardContentPreview(1, false)}
                 </div>
 
                 {/* Row 2 — mirror of row 1, shows same live content */}
@@ -296,24 +332,7 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
                     {props.dragHandleDisplay === "left" && !props.readOnlyMode && (
                         <DragHandle color={colors.handleColor} />
                     )}
-                    <div style={{ flexGrow: 1, minWidth: 0 }}>
-                        <props.customItemContent.renderer caption="Row 2 — Repeated for each datasource item">
-                            <div
-                                style={{
-                                    padding: "8px 10px",
-                                    background: colors.dropzoneBg,
-                                    borderRadius: "6px",
-                                    fontSize: "12px",
-                                    color: colors.labelColor,
-                                    border: `1px dashed ${colors.dropzoneBorder}`,
-                                    opacity: 0.7,
-                                    textAlign: "center"
-                                }}
-                            >
-                                ⬇ Same template — repeated per item
-                            </div>
-                        </props.customItemContent.renderer>
-                    </div>
+                    {renderCardContentPreview(2, true)}
                 </div>
 
                 {/* Row 3 — ghost row hint */}
@@ -466,28 +485,8 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
                     </div>
                 )}
 
-                {/* ── Inner Content (Actions Layout & List Content) ── */}
-                {props.enableActionsSection ? (
-                    <div
-                        className={`pwb-actions-layout-container pwb-actions-layout-${props.actionsSectionLayout} pwb-actions-pos-${props.actionsSectionPosition}`}
-                    >
-                        {props.actionsSectionPosition === "before" && actionsPreview}
-                        <div
-                            style={{
-                                minWidth: 0,
-                                minHeight: 0,
-                                display: "flex",
-                                flexDirection: "column",
-                                width: "100%"
-                            }}
-                        >
-                            {listContent}
-                        </div>
-                        {props.actionsSectionPosition === "after" && actionsPreview}
-                    </div>
-                ) : (
-                    listContent
-                )}
+                {/* ── Inner Content (List Content) ── */}
+                {listContent}
             </div>
 
             {/* ── Outer Footer Section Preview ── */}

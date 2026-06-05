@@ -1,4 +1,4 @@
-import { ReactElement, useState, useEffect, useRef } from "react";
+import { ReactElement, useState, useEffect, useRef, ReactNode } from "react";
 import { ObjectItem, GUID } from "mendix";
 import { useKeyboardDrag } from "../hooks/useKeyboardDrag";
 import { usePointerDrag } from "../hooks/usePointerDrag";
@@ -28,6 +28,12 @@ export interface DragContainerProps {
     itemPadding?: string;
     itemGap?: string;
     readOnlyMode?: boolean;
+    enableActionsSection?: boolean;
+    actionsSectionContent?: (rawObject: ObjectItem) => ReactNode;
+    actionsSectionPosition?: "before" | "after";
+    actionsSectionLayout?: "side_by_side" | "stacked";
+    actionsSectionSize?: "auto" | "ratio_15" | "ratio_20" | "ratio_25" | "ratio_30" | "ratio_40" | "custom";
+    actionsSectionSizeCustom?: string;
 }
 
 interface DragRegistry {
@@ -76,10 +82,27 @@ export function DragContainer({
     darkModeBehavior,
     itemPadding,
     itemGap,
-    readOnlyMode = false
+    readOnlyMode = false,
+    enableActionsSection = false,
+    actionsSectionContent,
+    actionsSectionPosition = "before",
+    actionsSectionLayout = "side_by_side",
+    actionsSectionSize = "auto",
+    actionsSectionSizeCustom
 }: DragContainerProps): ReactElement {
     const [orderedItems, setOrderedItems] = useState<DragItem[]>([]);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    // Resolve actions size styling variables
+    let resolvedActionsSize = "auto";
+    if (enableActionsSection) {
+        if (actionsSectionSize === "custom") {
+            resolvedActionsSize = actionsSectionSizeCustom || "200px";
+        } else if (actionsSectionSize && actionsSectionSize.startsWith("ratio_")) {
+            const pct = actionsSectionSize.replace("ratio_", "");
+            resolvedActionsSize = `${pct}%`;
+        }
+    }
 
     // 1. Keyboard Drag Hook
     const {
@@ -383,7 +406,32 @@ export function DragContainer({
                                         </svg>
                                     </div>
                                 )}
-                                <div className="pwb-draggable-item-content">{renderItem(item.rawObject)}</div>
+                                {enableActionsSection && actionsSectionContent ? (
+                                    <div
+                                        className={`pwb-actions-layout-container pwb-actions-layout-${actionsSectionLayout} pwb-actions-pos-${actionsSectionPosition}`}
+                                        style={
+                                            {
+                                                flexGrow: 1,
+                                                minWidth: 0,
+                                                "--pwb-actions-size-resolved": resolvedActionsSize
+                                            } as any
+                                        }
+                                    >
+                                        {actionsSectionPosition === "before" && (
+                                            <div className="pwb-actions-section-card">
+                                                {actionsSectionContent(item.rawObject)}
+                                            </div>
+                                        )}
+                                        <div className="pwb-draggable-item-content">{renderItem(item.rawObject)}</div>
+                                        {actionsSectionPosition === "after" && (
+                                            <div className="pwb-actions-section-card">
+                                                {actionsSectionContent(item.rawObject)}
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="pwb-draggable-item-content">{renderItem(item.rawObject)}</div>
+                                )}
                             </div>
                         );
                     }

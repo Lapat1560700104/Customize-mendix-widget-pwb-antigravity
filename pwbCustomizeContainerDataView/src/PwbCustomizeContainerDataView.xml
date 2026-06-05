@@ -198,16 +198,24 @@
                 <caption>Enable Actions Section</caption>
                 <description>Enable a custom section (e.g. for action buttons, filter inputs) adjacent to the main items container.</description>
             </property>
-            <property key="actionsSectionContent" type="widgets" required="false">
+            <property key="actionsSectionContent" type="widgets" required="false" dataSource="itemsSource">
                 <caption>Actions Section Content</caption>
-                <description>Custom widgets to place in this section.</description>
+                <description>Custom widgets to place in this section (e.g. per-card action buttons).</description>
             </property>
-            <property key="actionsSectionPosition" type="enumeration" defaultValue="before">
-                <caption>Position</caption>
-                <description>Position the actions section before (front/left/top) or after (back/right/bottom) the main container.</description>
+            <property key="actionsSectionPositionRow" type="enumeration" defaultValue="left">
+                <caption>Position (Horizontal)</caption>
+                <description>Choose whether to place the actions section on the Left or Right side of the card content.</description>
                 <enumerationValues>
-                    <enumerationValue key="before">Before Container (Front)</enumerationValue>
-                    <enumerationValue key="after">After Container (Back)</enumerationValue>
+                    <enumerationValue key="left">Left</enumerationValue>
+                    <enumerationValue key="right">Right</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="actionsSectionPositionCol" type="enumeration" defaultValue="top">
+                <caption>Position (Vertical)</caption>
+                <description>Choose whether to place the actions section on the Top or Bottom side of the card content.</description>
+                <enumerationValues>
+                    <enumerationValue key="top">Top</enumerationValue>
+                    <enumerationValue key="bottom">Bottom</enumerationValue>
                 </enumerationValues>
             </property>
             <property key="actionsSectionLayout" type="enumeration" defaultValue="side_by_side">

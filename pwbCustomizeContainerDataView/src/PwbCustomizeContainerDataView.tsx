@@ -59,7 +59,8 @@ export function PwbCustomizeContainerDataView({
     itemAllowDropExpression,
     enableActionsSection,
     actionsSectionContent,
-    actionsSectionPosition,
+    actionsSectionPositionRow,
+    actionsSectionPositionCol,
     actionsSectionLayout,
     actionsSectionSize,
     actionsSectionSizeCustom
@@ -84,6 +85,15 @@ export function PwbCustomizeContainerDataView({
     };
     const safeItemPadding = sanitizeSpacing(itemPadding, "12px 16px");
     const safeItemGap = sanitizeSpacing(itemGap, "12px");
+
+    const resolvedPosition =
+        actionsSectionLayout === "side_by_side"
+            ? actionsSectionPositionRow === "left"
+                ? "before"
+                : "after"
+            : actionsSectionPositionCol === "top"
+            ? "before"
+            : "after";
 
     // Accent color override — only set when prop is explicitly provided.
     // If empty, CSS cascade falls back to Design Property class → Atlas token → default.
@@ -374,15 +384,8 @@ export function PwbCustomizeContainerDataView({
 
     const ariaLabel = enableLaneTitle && laneTitle?.value ? laneTitle.value : "PWB Drag and Drop Container";
 
-    const renderActionsSection = (): ReactElement | null => {
-        if (!enableActionsSection || !actionsSectionContent) {
-            return null;
-        }
-        return <div className="pwb-actions-section-card">{actionsSectionContent}</div>;
-    };
-
     const renderInnerContent = (): ReactElement => {
-        const listContent = (
+        return (
             <>
                 {enableLaneTitle && (
                     <div className="pwb-lane-title-section">
@@ -423,6 +426,14 @@ export function PwbCustomizeContainerDataView({
                             itemPadding={safeItemPadding}
                             itemGap={safeItemGap}
                             readOnlyMode={readOnlyMode}
+                            enableActionsSection={enableActionsSection}
+                            actionsSectionContent={
+                                actionsSectionContent ? rawObject => actionsSectionContent.get(rawObject) : undefined
+                            }
+                            actionsSectionPosition={resolvedPosition}
+                            actionsSectionLayout={actionsSectionLayout}
+                            actionsSectionSize={actionsSectionSize}
+                            actionsSectionSizeCustom={actionsSectionSizeCustom}
                         />
                         <div className="pwb-empty-state-content-overlay">
                             <svg
@@ -464,6 +475,14 @@ export function PwbCustomizeContainerDataView({
                         itemPadding={safeItemPadding}
                         itemGap={safeItemGap}
                         readOnlyMode={readOnlyMode}
+                        enableActionsSection={enableActionsSection}
+                        actionsSectionContent={
+                            actionsSectionContent ? rawObject => actionsSectionContent.get(rawObject) : undefined
+                        }
+                        actionsSectionPosition={resolvedPosition}
+                        actionsSectionLayout={actionsSectionLayout}
+                        actionsSectionSize={actionsSectionSize}
+                        actionsSectionSizeCustom={actionsSectionSizeCustom}
                     />
                 )}
 
@@ -472,21 +491,6 @@ export function PwbCustomizeContainerDataView({
                 {enableMainFooter && mainFooterContent && <div className="pwb-main-footer">{mainFooterContent}</div>}
             </>
         );
-
-        if (enableActionsSection) {
-            const classes = `pwb-actions-layout-container pwb-actions-layout-${actionsSectionLayout} pwb-actions-pos-${actionsSectionPosition}`;
-            return (
-                <div className={classes}>
-                    {actionsSectionPosition === "before" && renderActionsSection()}
-                    <div style={{ minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column", width: "100%" }}>
-                        {listContent}
-                    </div>
-                    {actionsSectionPosition === "after" && renderActionsSection()}
-                </div>
-            );
-        }
-
-        return listContent;
     };
 
     if (enableOuterFooter) {

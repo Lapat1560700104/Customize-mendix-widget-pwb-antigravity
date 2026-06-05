@@ -464,7 +464,8 @@ function App() {
 
     // Actions Section settings state
     const [enableActionsSection, setEnableActionsSection] = useState<boolean>(false);
-    const [actionsSectionPosition, setActionsSectionPosition] = useState<"before" | "after">("before");
+    const [actionsSectionPositionRow, setActionsSectionPositionRow] = useState<"left" | "right">("left");
+    const [actionsSectionPositionCol, setActionsSectionPositionCol] = useState<"top" | "bottom">("top");
     const [actionsSectionLayout, setActionsSectionLayout] = useState<"side_by_side" | "stacked">("side_by_side");
     const [actionsSectionSize, setActionsSectionSize] = useState<
         "auto" | "ratio_15" | "ratio_20" | "ratio_25" | "ratio_30" | "ratio_40" | "custom"
@@ -926,29 +927,32 @@ function App() {
             </div>
         );
 
-        const mockActionsContent = (
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%", boxSizing: "border-box" }}>
-                <span style={{ fontSize: "10px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                    {status.toUpperCase()} Actions
-                </span>
-                <button
-                    onClick={() => addLog(`🔥 Action Button clicked on ${status.toUpperCase()} column!`)}
-                    style={{
-                        background: accentColor,
-                        color: "white",
-                        border: "none",
-                        borderRadius: "6px",
-                        padding: "6px 10px",
-                        fontSize: "11px",
-                        cursor: "pointer",
-                        fontWeight: 600,
-                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
-                    }}
-                >
-                    ➕ Quick Action
-                </button>
-            </div>
-        );
+        const mockActionsContent = {
+            get: (itemObj: any) => (
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px", width: "100%", boxSizing: "border-box" }}>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            addLog(`🔥 Action clicked on card: "${itemObj.title}"`);
+                        }}
+                        style={{
+                            background: accentColor,
+                            color: "white",
+                            border: "none",
+                            borderRadius: "6px",
+                            padding: "4px 8px",
+                            fontSize: "11px",
+                            cursor: "pointer",
+                            fontWeight: 600,
+                            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                            whiteSpace: "nowrap"
+                        }}
+                    >
+                        ⚡ Action
+                    </button>
+                </div>
+            )
+        };
 
         return {
             name: `simulated-column-${status}`,
@@ -986,7 +990,8 @@ function App() {
             sortIdAttribute: sortIdAttribute as any,
             enableActionsSection,
             actionsSectionContent: mockActionsContent,
-            actionsSectionPosition: actionsSectionPosition as any,
+            actionsSectionPositionRow: actionsSectionPositionRow as any,
+            actionsSectionPositionCol: actionsSectionPositionCol as any,
             actionsSectionLayout: actionsSectionLayout as any,
             actionsSectionSize: actionsSectionSize as any,
             actionsSectionSizeCustom
@@ -1276,7 +1281,8 @@ function App() {
             sortIdAttribute: sortIdAttribute as any,
             enableActionsSection: false,
             actionsSectionContent: undefined,
-            actionsSectionPosition: "before" as any,
+            actionsSectionPositionRow: "left" as any,
+            actionsSectionPositionCol: "top" as any,
             actionsSectionLayout: "side_by_side" as any,
             actionsSectionSize: "auto" as any,
             actionsSectionSizeCustom: "200px"
@@ -1758,26 +1764,49 @@ function App() {
                                 />
                                 {enableActionsSection && (
                                     <>
-                                        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                                            <span style={{ fontSize: "13px", color: "#94a3b8" }}>Position</span>
-                                            <select
-                                                value={actionsSectionPosition}
-                                                onChange={e => setActionsSectionPosition(e.target.value as any)}
-                                                style={{
-                                                    width: "100%",
-                                                    padding: "8px",
-                                                    borderRadius: "8px",
-                                                    background: "#0f172a",
-                                                    border: "1.5px solid #1e293b",
-                                                    color: "#f1f5f9",
-                                                    fontSize: "13px",
-                                                    cursor: "pointer"
-                                                }}
-                                            >
-                                                <option value="before">Before Container (Front/Left/Top)</option>
-                                                <option value="after">After Container (Back/Right/Bottom)</option>
-                                            </select>
-                                        </div>
+                                        {actionsSectionLayout === "side_by_side" ? (
+                                            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                                <span style={{ fontSize: "13px", color: "#94a3b8" }}>Position (Horizontal)</span>
+                                                <select
+                                                    value={actionsSectionPositionRow}
+                                                    onChange={e => setActionsSectionPositionRow(e.target.value as any)}
+                                                    style={{
+                                                        width: "100%",
+                                                        padding: "8px",
+                                                        borderRadius: "8px",
+                                                        background: "#0f172a",
+                                                        border: "1.5px solid #1e293b",
+                                                        color: "#f1f5f9",
+                                                        fontSize: "13px",
+                                                        cursor: "pointer"
+                                                    }}
+                                                >
+                                                    <option value="left">Left</option>
+                                                    <option value="right">Right</option>
+                                                </select>
+                                            </div>
+                                        ) : (
+                                            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                                <span style={{ fontSize: "13px", color: "#94a3b8" }}>Position (Vertical)</span>
+                                                <select
+                                                    value={actionsSectionPositionCol}
+                                                    onChange={e => setActionsSectionPositionCol(e.target.value as any)}
+                                                    style={{
+                                                        width: "100%",
+                                                        padding: "8px",
+                                                        borderRadius: "8px",
+                                                        background: "#0f172a",
+                                                        border: "1.5px solid #1e293b",
+                                                        color: "#f1f5f9",
+                                                        fontSize: "13px",
+                                                        cursor: "pointer"
+                                                    }}
+                                                >
+                                                    <option value="top">Top</option>
+                                                    <option value="bottom">Bottom</option>
+                                                </select>
+                                            </div>
+                                        )}
                                         <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px" }}>
                                             <span style={{ fontSize: "13px", color: "#94a3b8" }}>Layout Style</span>
                                             <select

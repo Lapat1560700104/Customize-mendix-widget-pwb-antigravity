@@ -140,13 +140,21 @@ export function getProperties(
     if (!values.enableActionsSection) {
         propsToHide.push(
             "actionsSectionContent",
-            "actionsSectionPosition",
+            "actionsSectionPositionRow",
+            "actionsSectionPositionCol",
             "actionsSectionLayout",
             "actionsSectionSize",
             "actionsSectionSizeCustom"
         );
-    } else if (values.actionsSectionSize !== "custom") {
-        propsToHide.push("actionsSectionSizeCustom");
+    } else {
+        if (values.actionsSectionLayout === "side_by_side") {
+            propsToHide.push("actionsSectionPositionCol");
+        } else if (values.actionsSectionLayout === "stacked") {
+            propsToHide.push("actionsSectionPositionRow");
+        }
+        if (values.actionsSectionSize !== "custom") {
+            propsToHide.push("actionsSectionSizeCustom");
+        }
     }
 
     if (propsToHide.length > 0) {
@@ -300,13 +308,93 @@ export function getPreview(
             padding: 4
         });
     }
-    rowChildren.push({
+
+    const customItemContentDropZone: DropZoneProps = {
         type: "DropZone",
         property: values.customItemContent as object,
         placeholder: "⬇ Drop your content widgets here — each item row will display these widgets",
         showDataSourceHeader: false,
         grow: 1
-    });
+    };
+
+    if (values.enableActionsSection) {
+        const resolvedPosition =
+            values.actionsSectionLayout === "side_by_side"
+                ? values.actionsSectionPositionRow === "left"
+                    ? "before"
+                    : "after"
+                : values.actionsSectionPositionCol === "top"
+                ? "before"
+                : "after";
+
+        const actionsDropZone: DropZoneProps = {
+            type: "DropZone",
+            property: values.actionsSectionContent as object,
+            placeholder: "⬇ Drop actions/buttons here",
+            showDataSourceHeader: false,
+            grow: 1
+        };
+
+        let actionsGrow = 1;
+        let contentGrow = 3;
+
+        if (values.actionsSectionSize === "ratio_15") {
+            actionsGrow = 15;
+            contentGrow = 85;
+        } else if (values.actionsSectionSize === "ratio_20") {
+            actionsGrow = 20;
+            contentGrow = 80;
+        } else if (values.actionsSectionSize === "ratio_25") {
+            actionsGrow = 25;
+            contentGrow = 75;
+        } else if (values.actionsSectionSize === "ratio_30") {
+            actionsGrow = 30;
+            contentGrow = 70;
+        } else if (values.actionsSectionSize === "ratio_40") {
+            actionsGrow = 40;
+            contentGrow = 60;
+        }
+
+        const actionsCardPreview: ContainerProps = {
+            type: "Container",
+            borders: true,
+            borderRadius: 6,
+            borderWidth: 1,
+            padding: 6,
+            backgroundColor: "#f8fafc",
+            children: [actionsDropZone],
+            grow: actionsGrow
+        };
+
+        const mainContentWrapper: ContainerProps = {
+            type: "Container",
+            grow: contentGrow,
+            children: [customItemContentDropZone]
+        };
+
+        if (values.actionsSectionLayout === "side_by_side") {
+            rowChildren.push({
+                type: "RowLayout",
+                columnSize: "grow",
+                grow: 1,
+                children:
+                    resolvedPosition === "before"
+                        ? [actionsCardPreview, mainContentWrapper]
+                        : [mainContentWrapper, actionsCardPreview]
+            });
+        } else {
+            rowChildren.push({
+                type: "Container",
+                grow: 1,
+                children:
+                    resolvedPosition === "before"
+                        ? [actionsCardPreview, mainContentWrapper]
+                        : [mainContentWrapper, actionsCardPreview]
+            });
+        }
+    } else {
+        rowChildren.push(customItemContentDropZone);
+    }
 
     const itemRow: RowLayoutProps = {
         type: "RowLayout",
@@ -355,75 +443,7 @@ export function getPreview(
         child: itemRow
     };
 
-    let contentLayout: PreviewProps;
-
-    if (values.enableActionsSection) {
-        const actionsSectionPreview: PreviewProps = {
-            type: "DropZone",
-            property: values.actionsSectionContent as object,
-            placeholder: "⬇ Drop actions/buttons here",
-            showDataSourceHeader: false,
-            grow: 1
-        };
-
-        let actionsGrow = 1;
-        let contentGrow = 3;
-
-        if (values.actionsSectionSize === "ratio_15") {
-            actionsGrow = 15;
-            contentGrow = 85;
-        } else if (values.actionsSectionSize === "ratio_20") {
-            actionsGrow = 20;
-            contentGrow = 80;
-        } else if (values.actionsSectionSize === "ratio_25") {
-            actionsGrow = 25;
-            contentGrow = 75;
-        } else if (values.actionsSectionSize === "ratio_30") {
-            actionsGrow = 30;
-            contentGrow = 70;
-        } else if (values.actionsSectionSize === "ratio_40") {
-            actionsGrow = 40;
-            contentGrow = 60;
-        }
-
-        const actionsCardPreview: ContainerProps = {
-            type: "Container",
-            borders: true,
-            borderRadius: 8,
-            borderWidth: 1,
-            padding: 8,
-            backgroundColor: "#f8fafc",
-            children: [actionsSectionPreview],
-            grow: actionsGrow
-        };
-
-        const listContainerWrapper: ContainerProps = {
-            type: "Container",
-            children: [datasourceWrapper],
-            grow: contentGrow
-        };
-
-        if (values.actionsSectionLayout === "side_by_side") {
-            contentLayout = {
-                type: "RowLayout",
-                columnSize: "grow",
-                children:
-                    values.actionsSectionPosition === "before"
-                        ? [actionsCardPreview, listContainerWrapper]
-                        : [listContainerWrapper, actionsCardPreview]
-            };
-        } else {
-            contentLayout = {
-                type: "Container",
-                children:
-                    values.actionsSectionPosition === "before"
-                        ? [actionsCardPreview, listContainerWrapper]
-                        : [listContainerWrapper, actionsCardPreview]
-            };
-        }
-    } else {
-        contentLayout = datasourceWrapper;
-    }
+    const contentLayout = datasourceWrapper;
 
     // ── Outer container: header + content layout ──
     return {

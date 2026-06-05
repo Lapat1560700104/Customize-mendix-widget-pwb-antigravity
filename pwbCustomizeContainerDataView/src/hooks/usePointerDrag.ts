@@ -70,7 +70,7 @@ export function usePointerDrag({
     enableKanban,
     dragGroup,
     columnValue,
-    onDropExternal,
+    onDropExternal: _onDropExternal,
     onRemoveItemExternal,
     containerId,
     containerRef
@@ -124,7 +124,7 @@ export function usePointerDrag({
 
         // Tracks original and current order states directly in closure for 100% async state safety
         const originalOrderIds = orderedItems.map(item => item.id);
-        let activeItemsState = [...orderedItems];
+        const activeItemsState = [...orderedItems];
         let currentOrderIds = [...originalOrderIds];
         let draggingIndexState = index;
 

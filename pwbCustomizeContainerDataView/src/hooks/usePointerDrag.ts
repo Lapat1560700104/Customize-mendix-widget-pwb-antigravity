@@ -217,6 +217,12 @@ export function usePointerDrag({
                 const sourceNode = contentWrapper || cardEl;
                 const clonedNode = sourceNode.cloneNode(true) as HTMLElement;
 
+                // Strip ID attributes to prevent duplicate DOM IDs during drag
+                if (clonedNode.id) {
+                    clonedNode.removeAttribute("id");
+                }
+                clonedNode.querySelectorAll("[id]").forEach(el => el.removeAttribute("id"));
+
                 // Copy canvas elements content if any
                 const sourceCanvases = Array.from(sourceNode.querySelectorAll("canvas"));
                 if (sourceCanvases.length > 0) {

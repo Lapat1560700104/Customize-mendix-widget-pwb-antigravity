@@ -7,6 +7,7 @@ A premium, highly customizable React-based pluggable widget for Mendix that acts
 ## 1. Typical Usage Scenario
 
 This widget is designed for scenarios where users need to organize, prioritize, or visually manage items dynamically. Typical use cases include:
+
 * **Kanban Boards & Task Management**: Creating workflow lanes (e.g., Backlog, In Progress, Done) where cards can be dragged horizontally or vertically across status columns.
 * **Interactive Dashboards**: Allowing end-users to customize the ordering of their dashboard components or KPI widgets.
 * **Sortable Rows / Structured Lists**: Reordering product lists, document tables, attachments, or workflow steps with immediate or debounced persistence.
@@ -16,7 +17,8 @@ This widget is designed for scenarios where users need to organize, prioritize, 
 
 ## 2. Features and Limitations
 
-### Features:
+### Features
+
 * **Nested Widget Dropzone**: Drop any standard or custom Mendix widgets inside the list cards. Row-level context is fully propagated to all children.
 * **Fluid Drag & Drop**: Built using Web Pointer Events API for smooth touch-screen, mobile, and desktop interactions.
 * **Custom Card Actions (Actions Section)**: Embed a secondary action panel directly inside cards. Supports layout orientations:
@@ -27,7 +29,8 @@ This widget is designed for scenarios where users need to organize, prioritize, 
 * **A11y (WCAG 2.1)**: Fully keyboard navigable with live screen-reader announcements.
 * **Visual Presets**: Choose between **Modern Rounded**, **Glassmorphism**, **Minimalist Flat**, and **Neo-Brutalist** styles with built-in dark mode adaptation.
 
-### Limitations:
+### Limitations
+
 * **DataSource Bound**: The widget requires a database list source (`DataSource`). It cannot render statically without a Mendix entity list.
 * **Drag Handles**: When placing highly interactive elements (like text boxes or sliders) inside the custom content dropzone, users must use the provided drag handle to drag items rather than clicking directly on the card.
 
@@ -55,11 +58,13 @@ This widget is designed for scenarios where users need to organize, prioritize, 
 To configure the widget, place it on a page inside Mendix Studio Pro and fill in the following properties:
 
 ### Data Source Tab
+
 * **Items Source**: The list of objects (Mendix entity) to display in the container.
 * **Sort ID Attribute**: (Required for Read-only ordering and reorder persistence) The attribute containing the sort order value (can be an Integer, Decimal, or String).
 * **On Drag End Action**: Microflow, Nanoflow, or Action to trigger once a user completes a drag-and-drop reorder (typically updates the `SortID` and commits).
 
 ### Layout & Appearance Tab
+
 * **Layout Style**: Choose **Side by Side** (horizontal column alignment) or **Stacked** (vertical row alignment).
 * **Position**:
   * If Layout Style is *Side by Side*, configure **Position (Horizontal)** to `Left` or `Right`.
@@ -67,6 +72,7 @@ To configure the widget, place it on a page inside Mendix Studio Pro and fill in
 * **Theme Preset**: Select `Modern Rounded`, `Glassmorphism`, `Minimalist Flat`, or `Neo-Brutalist` to change visual styling instantly.
 
 ### Actions Section Tab
+
 * **Enable Actions Section**: Toggle to show a dedicated helper layout inside each item card.
 * **Actions Content**: The Mendix widgets (e.g., helper buttons) to place in the Actions Section.
 
@@ -80,8 +86,10 @@ To configure the widget, place it on a page inside Mendix Studio Pro and fill in
 
 ## 7. Frequently Asked Questions
 
-#### Q: How do I save the new sorting order to the database?
+### Q: How do I save the new sorting order to the database?
+
 A: Configure the **Sort ID Attribute** and implement a microflow/nanoflow in the **On Drag End Action** that updates the sequence values in the database and refreshes the client.
 
-#### Q: Can I put another Pluggable Widget inside this container?
+### Q: Can I put another Pluggable Widget inside this container?
+
 A: Yes! You can nest any Mendix widget (including text boxes, dropdowns, images, or even other nested containers) inside the custom item content dropzone.

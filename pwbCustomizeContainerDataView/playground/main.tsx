@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import { useState, useCallback, ReactNode, useRef, useEffect, CSSProperties } from "react";
+import React, { useState, ReactNode, useRef, CSSProperties } from "react";
 import { PwbCustomizeContainerDataView } from "../src/PwbCustomizeContainerDataView";
 import "../src/ui/PwbCustomizeContainerDataView.css";
 
@@ -378,13 +378,70 @@ interface FormField {
 }
 
 const FORM_TEMPLATES: FormField[] = [
-    { id: "tmpl-text", type: "text", label: "ข้อความสั้น (Short Text)", placeholder: "ระบุข้อความ...", required: false, status: "toolbox", sortId: 1 },
-    { id: "tmpl-number", type: "number", label: "ตัวเลข (Number)", placeholder: "0", required: false, status: "toolbox", sortId: 2 },
-    { id: "tmpl-dropdown", type: "dropdown", label: "ตัวเลือก (Dropdown)", placeholder: "โปรดเลือก...", required: false, options: "ตัวเลือก 1, ตัวเลือก 2, ตัวเลือก 3", status: "toolbox", sortId: 3 },
-    { id: "tmpl-datepicker", type: "datepicker", label: "วันที่ (Date Picker)", placeholder: "วว/ดด/ปปปป", required: false, status: "toolbox", sortId: 4 },
-    { id: "tmpl-checkbox", type: "checkbox", label: "กล่องเลือก (Checkbox)", placeholder: "", required: false, status: "toolbox", sortId: 5 },
-    { id: "tmpl-textarea", type: "textarea", label: "ข้อความยาว (Textarea)", placeholder: "ระบุรายละเอียดเพิ่มเติม...", required: false, status: "toolbox", sortId: 6 },
-    { id: "tmpl-button", type: "button", label: "ปุ่มส่งข้อมูล (Submit Button)", placeholder: "", required: false, status: "toolbox", sortId: 7 }
+    {
+        id: "tmpl-text",
+        type: "text",
+        label: "ข้อความสั้น (Short Text)",
+        placeholder: "ระบุข้อความ...",
+        required: false,
+        status: "toolbox",
+        sortId: 1
+    },
+    {
+        id: "tmpl-number",
+        type: "number",
+        label: "ตัวเลข (Number)",
+        placeholder: "0",
+        required: false,
+        status: "toolbox",
+        sortId: 2
+    },
+    {
+        id: "tmpl-dropdown",
+        type: "dropdown",
+        label: "ตัวเลือก (Dropdown)",
+        placeholder: "โปรดเลือก...",
+        required: false,
+        options: "ตัวเลือก 1, ตัวเลือก 2, ตัวเลือก 3",
+        status: "toolbox",
+        sortId: 3
+    },
+    {
+        id: "tmpl-datepicker",
+        type: "datepicker",
+        label: "วันที่ (Date Picker)",
+        placeholder: "วว/ดด/ปปปป",
+        required: false,
+        status: "toolbox",
+        sortId: 4
+    },
+    {
+        id: "tmpl-checkbox",
+        type: "checkbox",
+        label: "กล่องเลือก (Checkbox)",
+        placeholder: "",
+        required: false,
+        status: "toolbox",
+        sortId: 5
+    },
+    {
+        id: "tmpl-textarea",
+        type: "textarea",
+        label: "ข้อความยาว (Textarea)",
+        placeholder: "ระบุรายละเอียดเพิ่มเติม...",
+        required: false,
+        status: "toolbox",
+        sortId: 6
+    },
+    {
+        id: "tmpl-button",
+        type: "button",
+        label: "ปุ่มส่งข้อมูล (Submit Button)",
+        placeholder: "",
+        required: false,
+        status: "toolbox",
+        sortId: 7
+    }
 ];
 
 const inputStyle: CSSProperties = {
@@ -472,10 +529,42 @@ function App() {
 
     const loadContactTemplate = () => {
         const fields: FormField[] = [
-            { id: "contact-name", type: "text", label: "ชื่อผู้ติดต่อ (Full Name)", placeholder: "ระบุชื่อ-นามสกุล", required: true, status: "canvas", sortId: 1 },
-            { id: "contact-email", type: "text", label: "อีเมล (Email Address)", placeholder: "example@domain.com", required: true, status: "canvas", sortId: 2 },
-            { id: "contact-message", type: "textarea", label: "ข้อความถึงเรา (Your Message)", placeholder: "ระบุรายละเอียดข้อความ...", required: false, status: "canvas", sortId: 3 },
-            { id: "contact-submit", type: "button", label: "ส่งข้อความ (Send Message)", placeholder: "", required: false, status: "canvas", sortId: 4 }
+            {
+                id: "contact-name",
+                type: "text",
+                label: "ชื่อผู้ติดต่อ (Full Name)",
+                placeholder: "ระบุชื่อ-นามสกุล",
+                required: true,
+                status: "canvas",
+                sortId: 1
+            },
+            {
+                id: "contact-email",
+                type: "text",
+                label: "อีเมล (Email Address)",
+                placeholder: "example@domain.com",
+                required: true,
+                status: "canvas",
+                sortId: 2
+            },
+            {
+                id: "contact-message",
+                type: "textarea",
+                label: "ข้อความถึงเรา (Your Message)",
+                placeholder: "ระบุรายละเอียดข้อความ...",
+                required: false,
+                status: "canvas",
+                sortId: 3
+            },
+            {
+                id: "contact-submit",
+                type: "button",
+                label: "ส่งข้อความ (Send Message)",
+                placeholder: "",
+                required: false,
+                status: "canvas",
+                sortId: 4
+            }
         ];
         setFormFields(fields);
         setCanvasOrderIds(fields.map(f => f.id).join(","));
@@ -488,12 +577,61 @@ function App() {
 
     const loadRegisterTemplate = () => {
         const fields: FormField[] = [
-            { id: "reg-name", type: "text", label: "ชื่อผู้ลงทะเบียน (Full Name)", placeholder: "นาย/นาง/นางสาว...", required: true, status: "canvas", sortId: 1 },
-            { id: "reg-qty", type: "number", label: "จำนวนบัตรที่จอง (Ticket Qty)", placeholder: "1", required: true, status: "canvas", sortId: 2 },
-            { id: "reg-date", type: "datepicker", label: "วันที่เข้าร่วมงาน (Attendance Date)", placeholder: "วว/ดด/ปปปป", required: true, status: "canvas", sortId: 3 },
-            { id: "reg-type", type: "dropdown", label: "ประเภทบัตร (Ticket Type)", placeholder: "เลือกประเภทบัตร...", required: true, options: "General Admission, VIP Pass, Student Pass", status: "canvas", sortId: 4 },
-            { id: "reg-terms", type: "checkbox", label: "ฉันยอมรับข้อตกลงและเงื่อนไขการร่วมงาน", placeholder: "", required: true, status: "canvas", sortId: 5 },
-            { id: "reg-submit", type: "button", label: "ยืนยันลงทะเบียน (Confirm Registration)", placeholder: "", required: false, status: "canvas", sortId: 6 }
+            {
+                id: "reg-name",
+                type: "text",
+                label: "ชื่อผู้ลงทะเบียน (Full Name)",
+                placeholder: "นาย/นาง/นางสาว...",
+                required: true,
+                status: "canvas",
+                sortId: 1
+            },
+            {
+                id: "reg-qty",
+                type: "number",
+                label: "จำนวนบัตรที่จอง (Ticket Qty)",
+                placeholder: "1",
+                required: true,
+                status: "canvas",
+                sortId: 2
+            },
+            {
+                id: "reg-date",
+                type: "datepicker",
+                label: "วันที่เข้าร่วมงาน (Attendance Date)",
+                placeholder: "วว/ดด/ปปปป",
+                required: true,
+                status: "canvas",
+                sortId: 3
+            },
+            {
+                id: "reg-type",
+                type: "dropdown",
+                label: "ประเภทบัตร (Ticket Type)",
+                placeholder: "เลือกประเภทบัตร...",
+                required: true,
+                options: "General Admission, VIP Pass, Student Pass",
+                status: "canvas",
+                sortId: 4
+            },
+            {
+                id: "reg-terms",
+                type: "checkbox",
+                label: "ฉันยอมรับข้อตกลงและเงื่อนไขการร่วมงาน",
+                placeholder: "",
+                required: true,
+                status: "canvas",
+                sortId: 5
+            },
+            {
+                id: "reg-submit",
+                type: "button",
+                label: "ยืนยันลงทะเบียน (Confirm Registration)",
+                placeholder: "",
+                required: false,
+                status: "canvas",
+                sortId: 6
+            }
         ];
         setFormFields(fields);
         setCanvasOrderIds(fields.map(f => f.id).join(","));
@@ -512,7 +650,7 @@ function App() {
     // Helper: Updates selected field properties
     const updateSelectedField = (updated: Partial<FormField>) => {
         if (!selectedFieldId) return;
-        setFormFields(prev => prev.map(f => f.id === selectedFieldId ? { ...f, ...updated } : f));
+        setFormFields(prev => prev.map(f => (f.id === selectedFieldId ? { ...f, ...updated } : f)));
     };
 
     // Helper: Gets simulated props for a column status
@@ -523,10 +661,7 @@ function App() {
         // Simulated Mendix ListValue
         const itemsSource = {
             status: "available" as const,
-            items: statusItems.map(t => ({
-                id: t.id,
-                ...t
-            }))
+            items: statusItems.map(t => ({ ...t }))
         };
 
         // Determine which order attribute to bind
@@ -738,7 +873,7 @@ function App() {
                     : status === "done"
                     ? "🟢 DONE"
                     : "🟣 ARCHIVED"
-        };
+        } as any;
 
         const laneTitleContent = (
             <span
@@ -827,10 +962,7 @@ function App() {
 
         const itemsSource = {
             status: "available" as const,
-            items: columnItems.map(f => ({
-                id: f.id,
-                ...f
-            }))
+            items: columnItems.map(f => ({ ...f }))
         };
 
         let sortedValue = "";
@@ -849,7 +981,10 @@ function App() {
                 setCanvasOrderIds(cleanedIds);
 
                 // Update formFields order in state to guarantee Live Preview re-renders in correct order
-                const idArray = cleanedIds.split(",").map(id => id.trim()).filter(Boolean);
+                const idArray = cleanedIds
+                    .split(",")
+                    .map(id => id.trim())
+                    .filter(Boolean);
                 if (idArray.length > 0) {
                     setFormFields(prev => {
                         const fieldMap = new Map(prev.map(f => [f.id, f]));
@@ -875,7 +1010,7 @@ function App() {
         const itemColumnAttribute = {
             get: (itemObj: any) => ({
                 readOnly: false,
-                setValue: (newStatus: "toolbox" | "canvas") => {
+                setValue: (_newStatus: "toolbox" | "canvas") => {
                     if (column === "canvas" && itemObj.status === "toolbox") {
                         const newId = `field-${Date.now()}`;
                         lastClonedIdRef.current = newId;
@@ -912,7 +1047,8 @@ function App() {
                 return {
                     value: {
                         comparedTo: (other: any) => {
-                            const otherVal = other && typeof other === "object" && "value" in other ? other.value : other;
+                            const otherVal =
+                                other && typeof other === "object" && "value" in other ? other.value : other;
                             return val - otherVal;
                         },
                         value: val,
@@ -943,7 +1079,9 @@ function App() {
                                 {itemObj.type === "button" && "🔘"}
                             </span>
                             <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: "12px", fontWeight: 700, color: "#f1f5f9" }}>{itemObj.label}</div>
+                                <div style={{ fontSize: "12px", fontWeight: 700, color: "#f1f5f9" }}>
+                                    {itemObj.label}
+                                </div>
                             </div>
                         </div>
                     );
@@ -951,7 +1089,7 @@ function App() {
                     const isSelected = selectedFieldId === itemObj.id;
                     return (
                         <div
-                            onClick={(e) => {
+                            onClick={e => {
                                 e.stopPropagation();
                                 setSelectedFieldId(itemObj.id);
                             }}
@@ -1010,25 +1148,35 @@ function App() {
                                     </button>
                                 </div>
                             </div>
-                            
+
                             <div style={{ pointerEvents: "none", opacity: 0.8 }}>
                                 {itemObj.type === "text" && (
                                     <input type="text" placeholder={itemObj.placeholder} style={inputStyle} readOnly />
                                 )}
                                 {itemObj.type === "number" && (
-                                    <input type="number" placeholder={itemObj.placeholder} style={inputStyle} readOnly />
+                                    <input
+                                        type="number"
+                                        placeholder={itemObj.placeholder}
+                                        style={inputStyle}
+                                        readOnly
+                                    />
                                 )}
                                 {itemObj.type === "textarea" && (
-                                    <textarea placeholder={itemObj.placeholder} rows={2} style={{ ...inputStyle, resize: "none" }} readOnly />
+                                    <textarea
+                                        placeholder={itemObj.placeholder}
+                                        rows={2}
+                                        style={{ ...inputStyle, resize: "none" }}
+                                        readOnly
+                                    />
                                 )}
-                                {itemObj.type === "datepicker" && (
-                                    <input type="date" style={inputStyle} readOnly />
-                                )}
+                                {itemObj.type === "datepicker" && <input type="date" style={inputStyle} readOnly />}
                                 {itemObj.type === "dropdown" && (
                                     <select style={inputStyle} disabled>
                                         <option value="">{itemObj.placeholder || "เลือก..."}</option>
                                         {(itemObj.options || "").split(",").map((opt: string) => (
-                                            <option key={opt} value={opt.trim()}>{opt.trim()}</option>
+                                            <option key={opt} value={opt.trim()}>
+                                                {opt.trim()}
+                                            </option>
                                         ))}
                                     </select>
                                 )}
@@ -1087,6 +1235,7 @@ function App() {
             itemPadding: "8px 12px",
             itemGap: "8px",
             readOnlyMode: false,
+            laneClass: `playground-form-${column}`,
             sortIdAttribute: sortIdAttribute as any
         };
     };
@@ -1097,7 +1246,7 @@ function App() {
         e.preventDefault();
         const errors: Record<string, string> = {};
         const activeFields = getSortedCanvasFields();
-        
+
         activeFields.forEach(f => {
             if (f.type !== "button") {
                 const val = liveFormValues[f.id];
@@ -1233,7 +1382,6 @@ function App() {
 
             {/* ── BOTTOM CONTENT AREA ────────────────────────────────── */}
             <div style={{ display: "flex", flex: 1, minHeight: "calc(100vh - 65px)" }}>
-                
                 {/* ── LEFT: Properties Control Panel ─────────────────────── */}
                 <div
                     style={{
@@ -1251,8 +1399,16 @@ function App() {
                     {playgroundMode === "kanban" ? (
                         /* Kanban Properties */
                         <div style={{ padding: "16px 20px" }}>
-                            <div style={{ marginBottom: "14px", borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "10px" }}>
-                                <div style={{ fontSize: "16px", fontWeight: 800, color: "#f1f5f9" }}>Kanban & Perf Playground</div>
+                            <div
+                                style={{
+                                    marginBottom: "14px",
+                                    borderBottom: "1px solid rgba(255,255,255,0.06)",
+                                    paddingBottom: "10px"
+                                }}
+                            >
+                                <div style={{ fontSize: "16px", fontWeight: 800, color: "#f1f5f9" }}>
+                                    Kanban & Perf Playground
+                                </div>
                                 <div style={{ fontSize: "12px", color: "#64748b", marginTop: "2px" }}>
                                     pwbCustomizeContainerDataView v1.1.0
                                 </div>
@@ -1263,11 +1419,20 @@ function App() {
                                     value={readOnlyMode}
                                     onChange={v => {
                                         setReadOnlyMode(v);
-                                        addLog(`🎛️ [Read Only Toggle] → ${v ? "Enabled (sorting by SortID)" : "Disabled"}`);
+                                        addLog(
+                                            `🎛️ [Read Only Toggle] → ${v ? "Enabled (sorting by SortID)" : "Disabled"}`
+                                        );
                                     }}
                                 />
                                 {readOnlyMode && (
-                                    <div style={{ fontSize: "11px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
+                                    <div
+                                        style={{
+                                            fontSize: "11px",
+                                            color: "#64748b",
+                                            marginTop: "4px",
+                                            lineHeight: "1.4"
+                                        }}
+                                    >
                                         🔒 ล็อกไม่ให้ลากวางหรือขยับตำแหน่งการ์ด และจัดเรียงรายการอ้างอิงตามค่า SortID
                                         ของการ์ดแต่ละใบ
                                     </div>
@@ -1283,7 +1448,9 @@ function App() {
                                     onChange={setSaveDelay}
                                     unit="ms"
                                 />
-                                <div style={{ fontSize: "11px", color: "#475569", marginTop: "4px", lineHeight: "1.4" }}>
+                                <div
+                                    style={{ fontSize: "11px", color: "#475569", marginTop: "4px", lineHeight: "1.4" }}
+                                >
                                     ⏰ หน่วงเวลาบันทึกและส่ง Action กลับ Mendix ช่วยลด Database workload
                                 </div>
                             </Section>
@@ -1300,7 +1467,9 @@ function App() {
                                             setLaneCount(3);
                                         }
                                         addLog(
-                                            `🎛️ [Kanban Toggle] → ${v ? "Enabled (cross-column)" : "Disabled (single column)"}`
+                                            `🎛️ [Kanban Toggle] → ${
+                                                v ? "Enabled (cross-column)" : "Disabled (single column)"
+                                            }`
                                         );
                                     }}
                                 />
@@ -1349,8 +1518,11 @@ function App() {
                                                 padding: "8px",
                                                 borderRadius: "8px",
                                                 cursor: "pointer",
-                                                border: `1.5px solid ${layoutDirection === dir ? "#3b82f6" : "#1e293b"}`,
-                                                background: layoutDirection === dir ? "rgba(59,130,246,0.15)" : "#0f172a",
+                                                border: `1.5px solid ${
+                                                    layoutDirection === dir ? "#3b82f6" : "#1e293b"
+                                                }`,
+                                                background:
+                                                    layoutDirection === dir ? "rgba(59,130,246,0.15)" : "#0f172a",
                                                 color: layoutDirection === dir ? "#3b82f6" : "#64748b",
                                                 fontWeight: layoutDirection === dir ? 700 : 400,
                                                 fontSize: "13px",
@@ -1471,8 +1643,11 @@ function App() {
                                                     padding: "6px",
                                                     borderRadius: "8px",
                                                     cursor: "pointer",
-                                                    border: `1.5px solid ${darkModeBehavior === mode ? "#3b82f6" : "#1e293b"}`,
-                                                    background: darkModeBehavior === mode ? "rgba(59,130,246,0.15)" : "#0f172a",
+                                                    border: `1.5px solid ${
+                                                        darkModeBehavior === mode ? "#3b82f6" : "#1e293b"
+                                                    }`,
+                                                    background:
+                                                        darkModeBehavior === mode ? "rgba(59,130,246,0.15)" : "#0f172a",
                                                     color: darkModeBehavior === mode ? "#3b82f6" : "#64748b",
                                                     fontSize: "12px",
                                                     transition: "all 0.2s"
@@ -1537,7 +1712,15 @@ function App() {
                                     label="Accent Color"
                                     value={accentColor}
                                     onChange={setAccentColor}
-                                    presets={["#3b82f6", "#8b5cf6", "#ec4899", "#10b981", "#f59e0b", "#ef4444", "#06b6d4"]}
+                                    presets={[
+                                        "#3b82f6",
+                                        "#8b5cf6",
+                                        "#ec4899",
+                                        "#10b981",
+                                        "#f59e0b",
+                                        "#ef4444",
+                                        "#06b6d4"
+                                    ]}
                                 />
                                 <Slider
                                     label="Border Radius"
@@ -1578,13 +1761,21 @@ function App() {
                     ) : (
                         /* Form Builder Properties */
                         <div style={{ padding: "16px 20px" }}>
-                            <div style={{ marginBottom: "14px", borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "10px" }}>
-                                <div style={{ fontSize: "16px", fontWeight: 800, color: "#f1f5f9" }}>Form Builder Core</div>
+                            <div
+                                style={{
+                                    marginBottom: "14px",
+                                    borderBottom: "1px solid rgba(255,255,255,0.06)",
+                                    paddingBottom: "10px"
+                                }}
+                            >
+                                <div style={{ fontSize: "16px", fontWeight: 800, color: "#f1f5f9" }}>
+                                    Form Builder Core
+                                </div>
                                 <div style={{ fontSize: "12px", color: "#8b5cf6", marginTop: "2px" }}>
                                     Drag field template into canvas to instantiate.
                                 </div>
                             </div>
-                            
+
                             <Section title="Preload Templates">
                                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                     <button
@@ -1625,7 +1816,14 @@ function App() {
                             <Section title="Form Options">
                                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                     <div>
-                                        <span style={{ fontSize: "12px", color: "#94a3b8", display: "block", marginBottom: "4px" }}>
+                                        <span
+                                            style={{
+                                                fontSize: "12px",
+                                                color: "#94a3b8",
+                                                display: "block",
+                                                marginBottom: "4px"
+                                            }}
+                                        >
                                             หัวข้อแบบฟอร์ม (Form Title)
                                         </span>
                                         <input
@@ -1658,15 +1856,52 @@ function App() {
                                 <Section title="Field Properties">
                                     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                                         <div>
-                                            <span style={{ fontSize: "11px", color: "#64748b", display: "block", marginBottom: "2px" }}>ID</span>
-                                            <input type="text" value={selectedField.id} disabled style={{ ...inputStyle, opacity: 0.6, fontSize: "11px" }} />
+                                            <span
+                                                style={{
+                                                    fontSize: "11px",
+                                                    color: "#64748b",
+                                                    display: "block",
+                                                    marginBottom: "2px"
+                                                }}
+                                            >
+                                                ID
+                                            </span>
+                                            <input
+                                                type="text"
+                                                value={selectedField.id}
+                                                disabled
+                                                style={{ ...inputStyle, opacity: 0.6, fontSize: "11px" }}
+                                            />
                                         </div>
                                         <div>
-                                            <span style={{ fontSize: "11px", color: "#64748b", display: "block", marginBottom: "2px" }}>ประเภทช่อง (Type)</span>
-                                            <input type="text" value={selectedField.type.toUpperCase()} disabled style={{ ...inputStyle, opacity: 0.6, fontSize: "11px" }} />
+                                            <span
+                                                style={{
+                                                    fontSize: "11px",
+                                                    color: "#64748b",
+                                                    display: "block",
+                                                    marginBottom: "2px"
+                                                }}
+                                            >
+                                                ประเภทช่อง (Type)
+                                            </span>
+                                            <input
+                                                type="text"
+                                                value={selectedField.type.toUpperCase()}
+                                                disabled
+                                                style={{ ...inputStyle, opacity: 0.6, fontSize: "11px" }}
+                                            />
                                         </div>
                                         <div>
-                                            <span style={{ fontSize: "11px", color: "#94a3b8", display: "block", marginBottom: "4px" }}>ป้ายกำกับ (Label)</span>
+                                            <span
+                                                style={{
+                                                    fontSize: "11px",
+                                                    color: "#94a3b8",
+                                                    display: "block",
+                                                    marginBottom: "4px"
+                                                }}
+                                            >
+                                                ป้ายกำกับ (Label)
+                                            </span>
                                             <input
                                                 type="text"
                                                 value={selectedField.label}
@@ -1676,7 +1911,16 @@ function App() {
                                         </div>
                                         {selectedField.type !== "checkbox" && selectedField.type !== "button" && (
                                             <div>
-                                                <span style={{ fontSize: "11px", color: "#94a3b8", display: "block", marginBottom: "4px" }}>คำอธิบายเสริม (Placeholder)</span>
+                                                <span
+                                                    style={{
+                                                        fontSize: "11px",
+                                                        color: "#94a3b8",
+                                                        display: "block",
+                                                        marginBottom: "4px"
+                                                    }}
+                                                >
+                                                    คำอธิบายเสริม (Placeholder)
+                                                </span>
                                                 <input
                                                     type="text"
                                                     value={selectedField.placeholder}
@@ -1687,7 +1931,16 @@ function App() {
                                         )}
                                         {selectedField.type === "dropdown" && (
                                             <div>
-                                                <span style={{ fontSize: "11px", color: "#94a3b8", display: "block", marginBottom: "4px" }}>ตัวเลือก (แยกด้วยเครื่องหมายลูกน้ำ ,)</span>
+                                                <span
+                                                    style={{
+                                                        fontSize: "11px",
+                                                        color: "#94a3b8",
+                                                        display: "block",
+                                                        marginBottom: "4px"
+                                                    }}
+                                                >
+                                                    ตัวเลือก (แยกด้วยเครื่องหมายลูกน้ำ ,)
+                                                </span>
                                                 <textarea
                                                     value={selectedField.options || ""}
                                                     onChange={e => updateSelectedField({ options: e.target.value })}
@@ -1706,7 +1959,16 @@ function App() {
                                     </div>
                                 </Section>
                             ) : (
-                                <div style={{ textAlign: "center", padding: "16px", color: "#475569", fontSize: "12px", border: "1px dashed rgba(255,255,255,0.06)", borderRadius: "8px" }}>
+                                <div
+                                    style={{
+                                        textAlign: "center",
+                                        padding: "16px",
+                                        color: "#475569",
+                                        fontSize: "12px",
+                                        border: "1px dashed rgba(255,255,255,0.06)",
+                                        borderRadius: "8px"
+                                    }}
+                                >
                                     💡 คลิกที่ช่องฟิลด์ในการ์ดสีม่วงเพื่อตั้งค่ารายละเอียดฟิลด์ได้ที่นี่
                                 </div>
                             )}
@@ -1761,8 +2023,8 @@ function App() {
                                     PWB Customize Container DataView (Kanban Engine)
                                 </h1>
                                 <p style={{ margin: 0, color: "#64748b", fontSize: "13px" }}>
-                                    ทดลองลากการ์ดสลับระหว่าง **คอลัมน์แนวตั้ง** หรือ **กล่องแนวนอน** และสังเกตการหน่วงเวลาบันทึก
-                                    (Debounce Delay) เพื่อยืนยันความไหลลื่นและประสิทธิภาพ
+                                    ทดลองลากการ์ดสลับระหว่าง **คอลัมน์แนวตั้ง** หรือ **กล่องแนวนอน**
+                                    และสังเกตการหน่วงเวลาบันทึก (Debounce Delay) เพื่อยืนยันความไหลลื่นและประสิทธิภาพ
                                 </p>
                             </div>
 
@@ -1791,8 +2053,21 @@ function App() {
                                         }}
                                     >
                                         {!enableLaneTitle && (
-                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "space-between",
+                                                    alignItems: "center"
+                                                }}
+                                            >
+                                                <h3
+                                                    style={{
+                                                        fontSize: "14px",
+                                                        fontWeight: 700,
+                                                        color: "#94a3b8",
+                                                        margin: 0
+                                                    }}
+                                                >
                                                     🔴 TO DO
                                                 </h3>
                                                 <span
@@ -1830,8 +2105,21 @@ function App() {
                                         }}
                                     >
                                         {!enableLaneTitle && (
-                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "space-between",
+                                                    alignItems: "center"
+                                                }}
+                                            >
+                                                <h3
+                                                    style={{
+                                                        fontSize: "14px",
+                                                        fontWeight: 700,
+                                                        color: "#94a3b8",
+                                                        margin: 0
+                                                    }}
+                                                >
                                                     🟡 IN PROGRESS
                                                 </h3>
                                                 <span
@@ -1869,8 +2157,21 @@ function App() {
                                         }}
                                     >
                                         {!enableLaneTitle && (
-                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "space-between",
+                                                    alignItems: "center"
+                                                }}
+                                            >
+                                                <h3
+                                                    style={{
+                                                        fontSize: "14px",
+                                                        fontWeight: 700,
+                                                        color: "#94a3b8",
+                                                        margin: 0
+                                                    }}
+                                                >
                                                     🟢 DONE
                                                 </h3>
                                                 <span
@@ -1908,8 +2209,21 @@ function App() {
                                         }}
                                     >
                                         {!enableLaneTitle && (
-                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#94a3b8", margin: 0 }}>
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "space-between",
+                                                    alignItems: "center"
+                                                }}
+                                            >
+                                                <h3
+                                                    style={{
+                                                        fontSize: "14px",
+                                                        fontWeight: 700,
+                                                        color: "#94a3b8",
+                                                        margin: 0
+                                                    }}
+                                                >
                                                     🟣 ARCHIVED
                                                 </h3>
                                                 <span
@@ -1936,7 +2250,6 @@ function App() {
                     ) : (
                         /* FORM BUILDER WORKSPACE */
                         <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: "20px" }}>
-                            
                             {/* Info Banner */}
                             <div>
                                 <div
@@ -1965,17 +2278,26 @@ function App() {
                                         Playground Mode - Drag-and-drop Form Builder Simulation
                                     </span>
                                 </div>
-                                <h1 style={{ margin: "0 0 4px", fontSize: "22px", fontWeight: 800, background: "linear-gradient(90deg, #a78bfa, #818cf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                                <h1
+                                    style={{
+                                        margin: "0 0 4px",
+                                        fontSize: "22px",
+                                        fontWeight: 800,
+                                        background: "linear-gradient(90deg, #a78bfa, #818cf8)",
+                                        WebkitBackgroundClip: "text",
+                                        WebkitTextFillColor: "transparent"
+                                    }}
+                                >
                                     Drag-and-Drop Form Builder
                                 </h1>
                                 <p style={{ margin: 0, color: "#64748b", fontSize: "13px" }}>
-                                    ทดลองลากเทมเพลตฟิลด์จากฝั่งซ้ายมือ (Toolbox) ไปวางลงบนพื้นที่ออกแบบฟอร์ม (Form Canvas) แล้วจัดเรียง หรือลบได้ตามใจชอบ
+                                    ทดลองลากเทมเพลตฟิลด์จากฝั่งซ้ายมือ (Toolbox) ไปวางลงบนพื้นที่ออกแบบฟอร์ม (Form
+                                    Canvas) แล้วจัดเรียง หรือลบได้ตามใจชอบ
                                 </p>
                             </div>
 
                             {/* Split Columns Grid */}
                             <div style={{ display: "flex", gap: "20px", flex: 1, minHeight: "500px" }}>
-                                
                                 {/* 1. Toolbox Column */}
                                 <div
                                     style={{
@@ -1989,13 +2311,29 @@ function App() {
                                         gap: "12px"
                                     }}
                                 >
-                                    <h3 style={{ fontSize: "13px", fontWeight: 700, color: "#94a3b8", margin: 0, borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "8px" }}>
+                                    <h3
+                                        style={{
+                                            fontSize: "13px",
+                                            fontWeight: 700,
+                                            color: "#94a3b8",
+                                            margin: 0,
+                                            borderBottom: "1px solid rgba(255,255,255,0.06)",
+                                            paddingBottom: "8px"
+                                        }}
+                                    >
                                         📥 เทมเพลตฟิลด์ (Toolbox)
                                     </h3>
                                     <div style={{ flex: 1, overflowY: "auto" }}>
                                         <PwbCustomizeContainerDataView {...getFormColumnProps("toolbox")} />
                                     </div>
-                                    <div style={{ fontSize: "10px", color: "#64748b", textAlign: "center", lineHeight: "1.4" }}>
+                                    <div
+                                        style={{
+                                            fontSize: "10px",
+                                            color: "#64748b",
+                                            textAlign: "center",
+                                            lineHeight: "1.4"
+                                        }}
+                                    >
                                         💡 ลากจากกล่องนี้ไป Canvas เพื่อสร้างฟิลด์ใหม่
                                     </div>
                                 </div>
@@ -2013,20 +2351,44 @@ function App() {
                                         gap: "12px"
                                     }}
                                 >
-                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px dashed rgba(139,92,246,0.15)", paddingBottom: "8px" }}>
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            borderBottom: "1px dashed rgba(139,92,246,0.15)",
+                                            paddingBottom: "8px"
+                                        }}
+                                    >
                                         <h3 style={{ fontSize: "13px", fontWeight: 700, color: "#a78bfa", margin: 0 }}>
                                             📝 พื้นที่ออกแบบฟอร์ม (Form Canvas)
                                         </h3>
-                                        <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "10px", background: "rgba(139,92,246,0.15)", color: "#c084fc" }}>
+                                        <span
+                                            style={{
+                                                fontSize: "11px",
+                                                fontWeight: 700,
+                                                padding: "2px 8px",
+                                                borderRadius: "10px",
+                                                background: "rgba(139,92,246,0.15)",
+                                                color: "#c084fc"
+                                            }}
+                                        >
                                             {formFields.length} ฟิลด์
                                         </span>
                                     </div>
-                                    
+
                                     <div style={{ flex: 1, overflowY: "auto" }}>
                                         <PwbCustomizeContainerDataView {...getFormColumnProps("canvas")} />
                                     </div>
-                                    
-                                    <div style={{ fontSize: "10px", color: "#8b5cf6", textAlign: "center", lineHeight: "1.4" }}>
+
+                                    <div
+                                        style={{
+                                            fontSize: "10px",
+                                            color: "#8b5cf6",
+                                            textAlign: "center",
+                                            lineHeight: "1.4"
+                                        }}
+                                    >
                                         💡 ลากย้อนกลับไปด้านซ้ายเพื่อลบออกจาก Canvas
                                     </div>
                                 </div>
@@ -2045,14 +2407,24 @@ function App() {
                                     }}
                                 >
                                     {/* Tabs */}
-                                    <div style={{ display: "flex", gap: "4px", borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "8px" }}>
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            gap: "4px",
+                                            borderBottom: "1px solid rgba(255,255,255,0.06)",
+                                            paddingBottom: "8px"
+                                        }}
+                                    >
                                         <button
                                             onClick={() => setFormBuilderTab("preview")}
                                             style={{
                                                 padding: "6px 12px",
                                                 borderRadius: "6px",
                                                 border: "none",
-                                                background: formBuilderTab === "preview" ? "rgba(255,255,255,0.08)" : "transparent",
+                                                background:
+                                                    formBuilderTab === "preview"
+                                                        ? "rgba(255,255,255,0.08)"
+                                                        : "transparent",
                                                 color: formBuilderTab === "preview" ? "#f1f5f9" : "#64748b",
                                                 fontWeight: 600,
                                                 fontSize: "12px",
@@ -2067,7 +2439,10 @@ function App() {
                                                 padding: "6px 12px",
                                                 borderRadius: "6px",
                                                 border: "none",
-                                                background: formBuilderTab === "schema" ? "rgba(255,255,255,0.08)" : "transparent",
+                                                background:
+                                                    formBuilderTab === "schema"
+                                                        ? "rgba(255,255,255,0.08)"
+                                                        : "transparent",
                                                 color: formBuilderTab === "schema" ? "#f1f5f9" : "#64748b",
                                                 fontWeight: 600,
                                                 fontSize: "12px",
@@ -2082,17 +2457,68 @@ function App() {
                                         {formBuilderTab === "preview" ? (
                                             /* Live Form Preview */
                                             isSubmitted ? (
-                                                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", padding: "20px", textAlign: "center", animation: "pulse 1.5s infinite" }}>
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        flexDirection: "column",
+                                                        alignItems: "center",
+                                                        justifyContent: "center",
+                                                        height: "100%",
+                                                        padding: "20px",
+                                                        textAlign: "center",
+                                                        animation: "pulse 1.5s infinite"
+                                                    }}
+                                                >
                                                     <span style={{ fontSize: "40px" }}>🎉</span>
-                                                    <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#10b981", margin: "10px 0 6px" }}>ส่งข้อมูลสำเร็จ! (Submit Success)</h3>
-                                                    <p style={{ fontSize: "12px", color: "#94a3b8", margin: "0 0 16px" }}>นี่คือข้อมูลที่ท่านกรอกส่งจำลองกลับระบบ</p>
-                                                    <div style={{ width: "100%", background: "#090d16", borderRadius: "10px", padding: "12px", textAlign: "left", fontSize: "11px", border: "1px solid rgba(255,255,255,0.06)", boxSizing: "border-box" }}>
-                                                        {getSortedCanvasFields().filter(f => f.type !== "button").map(f => (
-                                                            <div key={f.id} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
-                                                                <span style={{ color: "#64748b" }}>{f.label}:</span>
-                                                                <span style={{ color: "#10b981", fontWeight: 600 }}>{String(liveFormValues[f.id] ?? "—")}</span>
-                                                            </div>
-                                                        ))}
+                                                    <h3
+                                                        style={{
+                                                            fontSize: "16px",
+                                                            fontWeight: 700,
+                                                            color: "#10b981",
+                                                            margin: "10px 0 6px"
+                                                        }}
+                                                    >
+                                                        ส่งข้อมูลสำเร็จ! (Submit Success)
+                                                    </h3>
+                                                    <p
+                                                        style={{
+                                                            fontSize: "12px",
+                                                            color: "#94a3b8",
+                                                            margin: "0 0 16px"
+                                                        }}
+                                                    >
+                                                        นี่คือข้อมูลที่ท่านกรอกส่งจำลองกลับระบบ
+                                                    </p>
+                                                    <div
+                                                        style={{
+                                                            width: "100%",
+                                                            background: "#090d16",
+                                                            borderRadius: "10px",
+                                                            padding: "12px",
+                                                            textAlign: "left",
+                                                            fontSize: "11px",
+                                                            border: "1px solid rgba(255,255,255,0.06)",
+                                                            boxSizing: "border-box"
+                                                        }}
+                                                    >
+                                                        {getSortedCanvasFields()
+                                                            .filter(f => f.type !== "button")
+                                                            .map(f => (
+                                                                <div
+                                                                    key={f.id}
+                                                                    style={{
+                                                                        display: "flex",
+                                                                        justifyContent: "space-between",
+                                                                        padding: "4px 0",
+                                                                        borderBottom: "1px solid rgba(255,255,255,0.03)"
+                                                                    }}
+                                                                >
+                                                                    <span style={{ color: "#64748b" }}>{f.label}:</span>
+                                                                    <span style={{ color: "#10b981", fontWeight: 600 }}>
+                                                                        {String(liveFormValues[f.id] ?? "—")}
+                                                                    </span>
+                                                                </div>
+                                                            ))}
                                                     </div>
                                                     <button
                                                         onClick={() => {
@@ -2114,33 +2540,78 @@ function App() {
                                                     </button>
                                                 </div>
                                             ) : (
-                                                <form onSubmit={handlePreviewSubmit} style={{ display: "flex", flexDirection: "column", gap: "14px", padding: "4px" }}>
-                                                    <h3 style={{ fontSize: "15px", fontWeight: 700, margin: "0 0 4px", color: "#f1f5f9", textAlign: "center" }}>
+                                                <form
+                                                    onSubmit={handlePreviewSubmit}
+                                                    style={{
+                                                        display: "flex",
+                                                        flexDirection: "column",
+                                                        gap: "14px",
+                                                        padding: "4px"
+                                                    }}
+                                                >
+                                                    <h3
+                                                        style={{
+                                                            fontSize: "15px",
+                                                            fontWeight: 700,
+                                                            margin: "0 0 4px",
+                                                            color: "#f1f5f9",
+                                                            textAlign: "center"
+                                                        }}
+                                                    >
                                                         {formTitle || "ไม่ได้ระบุหัวข้อ"}
                                                     </h3>
-                                                    
+
                                                     {getSortedCanvasFields().length === 0 ? (
-                                                        <div style={{ textAlign: "center", padding: "40px 10px", color: "#475569", fontSize: "12px", border: "1px dashed rgba(255,255,255,0.06)", borderRadius: "8px" }}>
+                                                        <div
+                                                            style={{
+                                                                textAlign: "center",
+                                                                padding: "40px 10px",
+                                                                color: "#475569",
+                                                                fontSize: "12px",
+                                                                border: "1px dashed rgba(255,255,255,0.06)",
+                                                                borderRadius: "8px"
+                                                            }}
+                                                        >
                                                             ฟอร์มว่างเปล่า ลากฟิลด์มาใส่เพื่อจำลองใช้งานจริง
                                                         </div>
                                                     ) : (
                                                         getSortedCanvasFields().map(f => (
-                                                            <div key={f.id} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                                                            <div
+                                                                key={f.id}
+                                                                style={{
+                                                                    display: "flex",
+                                                                    flexDirection: "column",
+                                                                    gap: "4px"
+                                                                }}
+                                                            >
                                                                 {f.type !== "button" && f.type !== "checkbox" && (
-                                                                    <label style={{ fontSize: "12px", fontWeight: 600, color: "#cbd5e1" }}>
-                                                                        {f.label} {f.required && <span style={{ color: "#ef4444" }}>*</span>}
+                                                                    <label
+                                                                        style={{
+                                                                            fontSize: "12px",
+                                                                            fontWeight: 600,
+                                                                            color: "#cbd5e1"
+                                                                        }}
+                                                                    >
+                                                                        {f.label}{" "}
+                                                                        {f.required && (
+                                                                            <span style={{ color: "#ef4444" }}>*</span>
+                                                                        )}
                                                                     </label>
                                                                 )}
-                                                                
+
                                                                 {f.type === "text" && (
                                                                     <input
                                                                         type="text"
                                                                         placeholder={f.placeholder}
                                                                         value={liveFormValues[f.id] || ""}
-                                                                        onChange={e => handleFormValueChange(f.id, e.target.value)}
+                                                                        onChange={e =>
+                                                                            handleFormValueChange(f.id, e.target.value)
+                                                                        }
                                                                         style={{
                                                                             ...inputStyle,
-                                                                            borderColor: formErrors[f.id] ? "#ef4444" : "rgba(255, 255, 255, 0.12)"
+                                                                            borderColor: formErrors[f.id]
+                                                                                ? "#ef4444"
+                                                                                : "rgba(255, 255, 255, 0.12)"
                                                                         }}
                                                                     />
                                                                 )}
@@ -2149,10 +2620,14 @@ function App() {
                                                                         type="number"
                                                                         placeholder={f.placeholder}
                                                                         value={liveFormValues[f.id] || ""}
-                                                                        onChange={e => handleFormValueChange(f.id, e.target.value)}
+                                                                        onChange={e =>
+                                                                            handleFormValueChange(f.id, e.target.value)
+                                                                        }
                                                                         style={{
                                                                             ...inputStyle,
-                                                                            borderColor: formErrors[f.id] ? "#ef4444" : "rgba(255, 255, 255, 0.12)"
+                                                                            borderColor: formErrors[f.id]
+                                                                                ? "#ef4444"
+                                                                                : "rgba(255, 255, 255, 0.12)"
                                                                         }}
                                                                     />
                                                                 )}
@@ -2161,10 +2636,14 @@ function App() {
                                                                         placeholder={f.placeholder}
                                                                         rows={3}
                                                                         value={liveFormValues[f.id] || ""}
-                                                                        onChange={e => handleFormValueChange(f.id, e.target.value)}
+                                                                        onChange={e =>
+                                                                            handleFormValueChange(f.id, e.target.value)
+                                                                        }
                                                                         style={{
                                                                             ...inputStyle,
-                                                                            borderColor: formErrors[f.id] ? "#ef4444" : "rgba(255, 255, 255, 0.12)",
+                                                                            borderColor: formErrors[f.id]
+                                                                                ? "#ef4444"
+                                                                                : "rgba(255, 255, 255, 0.12)",
                                                                             resize: "vertical"
                                                                         }}
                                                                     />
@@ -2173,47 +2652,85 @@ function App() {
                                                                     <input
                                                                         type="date"
                                                                         value={liveFormValues[f.id] || ""}
-                                                                        onChange={e => handleFormValueChange(f.id, e.target.value)}
+                                                                        onChange={e =>
+                                                                            handleFormValueChange(f.id, e.target.value)
+                                                                        }
                                                                         style={{
                                                                             ...inputStyle,
-                                                                            borderColor: formErrors[f.id] ? "#ef4444" : "rgba(255, 255, 255, 0.12)"
+                                                                            borderColor: formErrors[f.id]
+                                                                                ? "#ef4444"
+                                                                                : "rgba(255, 255, 255, 0.12)"
                                                                         }}
                                                                     />
                                                                 )}
                                                                 {f.type === "dropdown" && (
                                                                     <select
                                                                         value={liveFormValues[f.id] || ""}
-                                                                        onChange={e => handleFormValueChange(f.id, e.target.value)}
+                                                                        onChange={e =>
+                                                                            handleFormValueChange(f.id, e.target.value)
+                                                                        }
                                                                         style={{
                                                                             ...inputStyle,
-                                                                            borderColor: formErrors[f.id] ? "#ef4444" : "rgba(255, 255, 255, 0.12)"
+                                                                            borderColor: formErrors[f.id]
+                                                                                ? "#ef4444"
+                                                                                : "rgba(255, 255, 255, 0.12)"
                                                                         }}
                                                                     >
-                                                                        <option value="">{f.placeholder || "เลือก..."}</option>
-                                                                        {(f.options || "").split(",").map((opt: string) => (
-                                                                            <option key={opt} value={opt.trim()}>{opt.trim()}</option>
-                                                                        ))}
+                                                                        <option value="">
+                                                                            {f.placeholder || "เลือก..."}
+                                                                        </option>
+                                                                        {(f.options || "")
+                                                                            .split(",")
+                                                                            .map((opt: string) => (
+                                                                                <option key={opt} value={opt.trim()}>
+                                                                                    {opt.trim()}
+                                                                                </option>
+                                                                            ))}
                                                                     </select>
                                                                 )}
                                                                 {f.type === "checkbox" && (
-                                                                    <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", padding: "4px 0" }}>
+                                                                    <div
+                                                                        style={{
+                                                                            display: "flex",
+                                                                            alignItems: "flex-start",
+                                                                            gap: "8px",
+                                                                            padding: "4px 0"
+                                                                        }}
+                                                                    >
                                                                         <input
                                                                             type="checkbox"
                                                                             id={`preview-chk-${f.id}`}
                                                                             checked={liveFormValues[f.id] || false}
-                                                                            onChange={e => handleFormValueChange(f.id, e.target.checked)}
-                                                                            style={{ width: "16px", height: "16px", marginTop: "2px", accentColor: "#8b5cf6" }}
+                                                                            onChange={e =>
+                                                                                handleFormValueChange(
+                                                                                    f.id,
+                                                                                    e.target.checked
+                                                                                )
+                                                                            }
+                                                                            style={{
+                                                                                width: "16px",
+                                                                                height: "16px",
+                                                                                marginTop: "2px",
+                                                                                accentColor: "#8b5cf6"
+                                                                            }}
                                                                         />
                                                                         <label
                                                                             htmlFor={`preview-chk-${f.id}`}
                                                                             style={{
                                                                                 fontSize: "12px",
-                                                                                color: formErrors[f.id] ? "#ef4444" : "#94a3b8",
+                                                                                color: formErrors[f.id]
+                                                                                    ? "#ef4444"
+                                                                                    : "#94a3b8",
                                                                                 cursor: "pointer",
                                                                                 lineHeight: "1.4"
                                                                             }}
                                                                         >
-                                                                            {f.label} {f.required && <span style={{ color: "#ef4444" }}>*</span>}
+                                                                            {f.label}{" "}
+                                                                            {f.required && (
+                                                                                <span style={{ color: "#ef4444" }}>
+                                                                                    *
+                                                                                </span>
+                                                                            )}
                                                                         </label>
                                                                     </div>
                                                                 )}
@@ -2224,22 +2741,26 @@ function App() {
                                                                             width: "100%",
                                                                             padding: "10px",
                                                                             borderRadius: "8px",
-                                                                            background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)",
+                                                                            background:
+                                                                                "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)",
                                                                             border: "none",
                                                                             color: "#fff",
                                                                             fontWeight: 700,
                                                                             fontSize: "13px",
                                                                             cursor: "pointer",
                                                                             marginTop: "8px",
-                                                                            boxShadow: "0 4px 12px rgba(139, 92, 246, 0.2)"
+                                                                            boxShadow:
+                                                                                "0 4px 12px rgba(139, 92, 246, 0.2)"
                                                                         }}
                                                                     >
                                                                         {f.label}
                                                                     </button>
                                                                 )}
-                                                                
+
                                                                 {formErrors[f.id] && (
-                                                                    <span style={{ fontSize: "10px", color: "#f87171" }}>
+                                                                    <span
+                                                                        style={{ fontSize: "10px", color: "#f87171" }}
+                                                                    >
                                                                         ⚠️ {formErrors[f.id]}
                                                                     </span>
                                                                 )}
@@ -2292,7 +2813,6 @@ function App() {
                                         )}
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     )}
@@ -2324,11 +2844,11 @@ function App() {
                                 📋 Real-time Event & Performance Logs
                             </span>
                             <span style={{ fontSize: "10px", color: saveDelay > 0 ? "#60a5fa" : "#94a3b8" }}>
-                                {playgroundMode === "kanban" ? (
-                                    saveDelay > 0 ? `Debounce Delay active: ${saveDelay}ms` : "Synchronous Saving"
-                                ) : (
-                                    "Interactive UI Mapping"
-                                )}
+                                {playgroundMode === "kanban"
+                                    ? saveDelay > 0
+                                        ? `Debounce Delay active: ${saveDelay}ms`
+                                        : "Synchronous Saving"
+                                    : "Interactive UI Mapping"}
                             </span>
                         </div>
                         <div
@@ -2349,7 +2869,17 @@ function App() {
                                 </span>
                             ) : (
                                 logs.map((log, i) => (
-                                    <span key={i} style={{ color: i === 0 ? (playgroundMode === "kanban" ? "#22c55e" : "#a78bfa") : "#475569" }}>
+                                    <span
+                                        key={i}
+                                        style={{
+                                            color:
+                                                i === 0
+                                                    ? playgroundMode === "kanban"
+                                                        ? "#22c55e"
+                                                        : "#a78bfa"
+                                                    : "#475569"
+                                        }}
+                                    >
                                         {i === 0 ? "▶ " : "  "}
                                         {log}
                                     </span>

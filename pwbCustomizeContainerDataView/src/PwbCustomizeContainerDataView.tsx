@@ -1,4 +1,4 @@
-import { ReactElement, useMemo, useRef, useEffect, useState, CSSProperties } from "react";
+import React, { ReactElement, useMemo, useRef, useEffect, useState } from "react";
 import { DragContainer, DragItem } from "./components/DragContainer";
 import { PwbCustomizeContainerDataViewContainerProps } from "../typings/PwbCustomizeContainerDataViewProps";
 import { GUID } from "mendix";
@@ -78,6 +78,23 @@ export function PwbCustomizeContainerDataView({
     };
     const safeItemPadding = sanitizeSpacing(itemPadding, "12px 16px");
     const safeItemGap = sanitizeSpacing(itemGap, "12px");
+
+    // Accent color override — only set when prop is explicitly provided.
+    // If empty, CSS cascade falls back to Design Property class → Atlas token → default.
+    const accentOverrideStyle =
+        safeAccentColor !== "#3b82f6" || accentColor
+            ? ({ "--pwb-accent-override": safeAccentColor } as React.CSSProperties)
+            : {};
+
+    // Border radius override — only set when prop is explicitly provided.
+    const radiusOverrideStyle = borderRadius
+        ? ({ "--pwb-radius-override": safeBorderRadius } as React.CSSProperties)
+        : {};
+
+    // Gap override — only set when prop is explicitly provided.
+    const gapOverrideStyle = itemGap ? ({ "--pwb-gap-override": safeItemGap } as React.CSSProperties) : {};
+
+    const containerOverrideStyle = { ...accentOverrideStyle, ...radiusOverrideStyle, ...gapOverrideStyle };
 
     // 2. Handle Loading & Empty States Elegantly
     const [transitionTrigger, setTransitionTrigger] = useState(0);
@@ -329,6 +346,8 @@ export function PwbCustomizeContainerDataView({
         }
     };
 
+    const ariaLabel = enableLaneTitle && laneTitle?.value ? laneTitle.value : "PWB Drag and Drop Container";
+
     const renderInnerContent = (): ReactElement => (
         <>
             {enableLaneTitle && (
@@ -341,12 +360,15 @@ export function PwbCustomizeContainerDataView({
             {enableHeader && headerContent && <div className="pwb-section-header">{headerContent}</div>}
 
             {isLoading ? (
-                <div className="pwb-loading-state" style={{ "--accent-color": safeAccentColor } as CSSProperties}>
+                <div className="pwb-loading-state" style={containerOverrideStyle}>
                     <div className="pwb-spinner"></div>
                     <span>Loading options...</span>
                 </div>
             ) : !hasItems ? (
-                <div className="pwb-empty-state-container" style={{ borderRadius: safeBorderRadius }}>
+                <div
+                    className="pwb-empty-state-container"
+                    style={{ borderRadius: safeBorderRadius, ...containerOverrideStyle }}
+                >
                     <DragContainer
                         containerId={containerId}
                         items={[]}
@@ -417,7 +439,13 @@ export function PwbCustomizeContainerDataView({
 
     if (enableOuterFooter) {
         return (
-            <div className={`pwb-customize-container-dataview-root ${className || ""}`} style={style}>
+            <div
+                className={`pwb-customize-container-dataview-root ${className || ""}`}
+                style={{ ...style, ...containerOverrideStyle }}
+                role="region"
+                aria-label={ariaLabel}
+                aria-busy={isLoading}
+            >
                 <div className={`pwb-customize-container-dataview-wrapper ${laneClass || ""}`}>
                     {renderInnerContent()}
                 </div>
@@ -427,7 +455,13 @@ export function PwbCustomizeContainerDataView({
     }
 
     return (
-        <div className={`pwb-customize-container-dataview-wrapper ${className || ""}`} style={style}>
+        <div
+            className={`pwb-customize-container-dataview-wrapper ${className || ""}`}
+            style={{ ...style, ...containerOverrideStyle }}
+            role="region"
+            aria-label={ariaLabel}
+            aria-busy={isLoading}
+        >
             {renderInnerContent()}
         </div>
     );

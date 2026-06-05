@@ -1,0 +1,64 @@
+{
+    "themeName": "Atlas",
+    "designProperties": {
+        "pwb.pwbcustomizecontainerdataview.PwbCustomizeContainerDataView": [
+            {
+                "name": "Accent Color",
+                "type": "Dropdown",
+                "description": "Preset accent color for drag indicators, highlights and ghost cards.",
+                "options": [
+                    { "name": "Blue (Default)", "class": "pwb-accent-blue" },
+                    { "name": "Purple", "class": "pwb-accent-purple" },
+                    { "name": "Green", "class": "pwb-accent-green" },
+                    { "name": "Rose", "class": "pwb-accent-rose" },
+                    { "name": "Amber", "class": "pwb-accent-amber" },
+                    { "name": "Cyan", "class": "pwb-accent-cyan" }
+                ]
+            },
+            {
+                "name": "Card Style",
+                "type": "Dropdown",
+                "description": "Visual theme preset for item cards. Can be overridden by the Theme Preset property.",
+                "options": [
+                    { "name": "Default Rounded", "class": "pwb-style-rounded" },
+                    { "name": "Glassmorphism", "class": "pwb-style-glass" },
+                    { "name": "Minimalist Flat", "class": "pwb-style-flat" },
+                    { "name": "Neo-Brutalist", "class": "pwb-style-brutal" }
+                ]
+            },
+            {
+                "name": "Card Spacing",
+                "type": "Dropdown",
+                "description": "Gap spacing between item cards inside the container.",
+                "options": [
+                    { "name": "Compact (6px)", "class": "pwb-gap-compact" },
+                    { "name": "Normal (12px)", "class": "pwb-gap-normal" },
+                    { "name": "Relaxed (20px)", "class": "pwb-gap-relaxed" },
+                    { "name": "Spacious (28px)", "class": "pwb-gap-spacious" }
+                ]
+            },
+            {
+                "name": "Corner Style",
+                "type": "Dropdown",
+                "description": "Border radius preset for item cards. Can be overridden by the Border Radius property.",
+                "options": [
+                    { "name": "Sharp (0px)", "class": "pwb-radius-sharp" },
+                    { "name": "Subtle (6px)", "class": "pwb-radius-subtle" },
+                    { "name": "Rounded (12px)", "class": "pwb-radius-rounded" },
+                    { "name": "Pill (24px)", "class": "pwb-radius-pill" }
+                ]
+            },
+            {
+                "name": "Shadow Depth",
+                "type": "Dropdown",
+                "description": "Drop shadow intensity of item cards.",
+                "options": [
+                    { "name": "None", "class": "pwb-shadow-none" },
+                    { "name": "Subtle", "class": "pwb-shadow-subtle" },
+                    { "name": "Medium (Default)", "class": "pwb-shadow-medium" },
+                    { "name": "Deep", "class": "pwb-shadow-deep" }
+                ]
+            }
+        ]
+    }
+}

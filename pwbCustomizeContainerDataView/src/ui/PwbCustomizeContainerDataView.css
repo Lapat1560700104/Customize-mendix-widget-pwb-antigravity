@@ -14,10 +14,27 @@
     width: 100%;
     box-sizing: border-box;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --accent-color: #3b82f6;
-    --border-radius: 16px;
+
+    /* ── Atlas Design Token Integration ──────────────────────────────────────
+       These fallbacks let Atlas theme SCSS override widget appearance without
+       touching any widget properties. Just set these CSS vars in your theme.
+    */
+    --pwb-atlas-accent:  var(--color-brand-primary, #3b82f6);
+    --pwb-atlas-radius:  var(--border-radius-default, 16px);
+    --pwb-atlas-gap:     var(--spacing-large, 12px);
+
+    /* ── CSS Variable Cascade ─────────────────────────────────────────────────
+       Priority (highest → lowest):
+         1. JS prop: style={{ "--pwb-accent-override": safeAccentColor }}
+         2. Design Property class: .pwb-accent-purple → --accent-color: #8b5cf6
+         3. Atlas token: --color-brand-primary
+         4. Hardcoded default
+    */
+    --accent-color: var(--pwb-accent-override, var(--pwb-atlas-accent));
+    --border-radius: var(--pwb-radius-override, var(--pwb-atlas-radius));
+    --pwb-item-gap: var(--pwb-gap-override, var(--pwb-atlas-gap));
     --accent-glow: rgba(59, 130, 246, 0.15);
-    
+
     /* Design Tokens bridging to Atlas UI CSS Variables */
     --pwb-bg-main: var(--mx-bg-color-main, #ffffff);
     --pwb-bg-hover: var(--mx-bg-color-secondary, #f8fafc);
@@ -35,12 +52,50 @@
     --slate-600: #475569;
     --slate-700: #334155;
     --slate-800: #1e293b;
-    
+
+    /* ── Animation Tokens ──────────────────────────────────────────────────────
+       Override in Atlas SCSS for global animation control across all instances.
+       Example: .pwb-drag-container { --pwb-anim-duration: 0.15s; }
+    */
+    --pwb-anim-duration: var(--motion-duration-fast, 0.25s);
+    --pwb-anim-easing: var(--motion-easing-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
+    --pwb-anim-easing-smooth: var(--motion-easing-smooth, cubic-bezier(0.2, 0.8, 0.2, 1));
+    --pwb-anim-ghost-rotate: 1.5deg;
+    --pwb-anim-ghost-scale: 1.03;
+
     padding: 6px;
     min-height: 50px;
     flex-grow: 1;
     contain: layout style;
     transition: background-color 0.2s ease;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   ♿ Reduced Motion Support
+   Disables all animations/transitions for users who prefer reduced motion.
+*/
+@media (prefers-reduced-motion: reduce) {
+    .pwb-drag-container {
+        --pwb-anim-duration: 0.01s;
+        --pwb-anim-ghost-rotate: 0deg;
+        --pwb-anim-ghost-scale: 1;
+    }
+
+    .pwb-draggable-row-item,
+    .pwb-draggable-row-item:hover,
+    .pwb-drag-handle,
+    .pwb-pointer-drag-ghost {
+        transition: none !important;
+        animation: none !important;
+    }
+
+    .pwb-wobble-shake {
+        animation: none !important;
+    }
+
+    .pwb-empty-icon {
+        animation: none !important;
+    }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -103,11 +158,17 @@
     background: var(--pwb-bg-main);
     border: 1px solid var(--pwb-border-color);
     padding: var(--pwb-item-padding, 12px 16px);
-    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s, box-shadow 0.2s, background-color 0.2s, color 0.2s;
+    transition:
+        transform var(--pwb-anim-duration) var(--pwb-anim-easing),
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease,
+        color 0.2s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.015);
     position: relative;
     user-select: none;
     color: var(--pwb-text-primary);
+    border-radius: var(--border-radius);
 }
 
 .pwb-draggable-row-item:hover {
@@ -505,4 +566,142 @@
     cursor: not-allowed !important;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   🎨 Design Properties — Styling Tab Classes
+   Applied automatically when user picks options in Mendix Studio Pro Styling tab.
+   Priority: accentColor prop (inline --pwb-accent-override) > Design Property class > CSS default
+*/
 
+/* === Accent Color Presets === */
+.pwb-accent-blue .pwb-drag-container {
+    --accent-color: #3b82f6;
+    --accent-glow: rgba(59, 130, 246, 0.15);
+}
+.pwb-accent-purple .pwb-drag-container {
+    --accent-color: #8b5cf6;
+    --accent-glow: rgba(139, 92, 246, 0.15);
+}
+.pwb-accent-green .pwb-drag-container {
+    --accent-color: #10b981;
+    --accent-glow: rgba(16, 185, 129, 0.15);
+}
+.pwb-accent-rose .pwb-drag-container {
+    --accent-color: #f43f5e;
+    --accent-glow: rgba(244, 63, 94, 0.15);
+}
+.pwb-accent-amber .pwb-drag-container {
+    --accent-color: #f59e0b;
+    --accent-glow: rgba(245, 158, 11, 0.15);
+}
+.pwb-accent-cyan .pwb-drag-container {
+    --accent-color: #06b6d4;
+    --accent-glow: rgba(6, 182, 212, 0.15);
+}
+
+/* === Card Style Presets (bridges to existing visual patterns) === */
+/* pwb-style-rounded: uses default .pwb-draggable-row-item styles — no override needed */
+
+.pwb-style-glass .pwb-draggable-row-item {
+    background: color-mix(in srgb, var(--pwb-bg-main) 72%, transparent) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid color-mix(in srgb, var(--pwb-text-primary) 10%, transparent) !important;
+    box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.03) !important;
+}
+.pwb-style-glass .pwb-draggable-row-item:hover {
+    background: color-mix(in srgb, var(--pwb-bg-main) 84%, transparent) !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 12px 30px 0 color-mix(in srgb, var(--accent-color) 8%, transparent) !important;
+}
+
+.pwb-style-flat .pwb-draggable-row-item {
+    background: transparent !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--pwb-border-color) !important;
+    border-radius: 0px !important;
+    box-shadow: none !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+}
+.pwb-style-flat .pwb-draggable-row-item:hover {
+    background: var(--pwb-bg-hover) !important;
+    border-bottom-color: var(--accent-color) !important;
+}
+
+.pwb-style-brutal .pwb-draggable-row-item {
+    background: var(--pwb-bg-main) !important;
+    border: 3px solid #000000 !important;
+    box-shadow: 5px 5px 0px 0px #000000 !important;
+    border-radius: 4px !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s !important;
+}
+.pwb-style-brutal .pwb-draggable-row-item:hover {
+    transform: translate(-3px, -3px) !important;
+    box-shadow: 8px 8px 0px 0px #000000 !important;
+}
+:is(.theme-dark, .dark, .mx-dark) .pwb-style-brutal .pwb-draggable-row-item,
+.pwb-drag-container.pwb-dark-mode-force .pwb-style-brutal .pwb-draggable-row-item {
+    border-color: #ffffff !important;
+    box-shadow: 5px 5px 0px 0px var(--accent-color) !important;
+}
+
+/* === Card Spacing Presets === */
+.pwb-gap-compact .pwb-drag-container {
+    --pwb-item-gap: 6px;
+}
+.pwb-gap-normal .pwb-drag-container {
+    --pwb-item-gap: 12px;
+}
+.pwb-gap-relaxed .pwb-drag-container {
+    --pwb-item-gap: 20px;
+}
+.pwb-gap-spacious .pwb-drag-container {
+    --pwb-item-gap: 28px;
+}
+
+/* === Corner Radius Presets === */
+.pwb-radius-sharp .pwb-drag-container {
+    --border-radius: 0px;
+}
+.pwb-radius-subtle .pwb-drag-container {
+    --border-radius: 6px;
+}
+.pwb-radius-rounded .pwb-drag-container {
+    --border-radius: 12px;
+}
+.pwb-radius-pill .pwb-drag-container {
+    --border-radius: 24px;
+}
+.pwb-radius-sharp .pwb-draggable-row-item,
+.pwb-radius-subtle .pwb-draggable-row-item,
+.pwb-radius-rounded .pwb-draggable-row-item,
+.pwb-radius-pill .pwb-draggable-row-item {
+    border-radius: var(--border-radius) !important;
+}
+
+/* === Shadow Depth Presets === */
+.pwb-shadow-none .pwb-draggable-row-item {
+    box-shadow: none !important;
+}
+.pwb-shadow-none .pwb-draggable-row-item:hover {
+    box-shadow: none !important;
+}
+.pwb-shadow-subtle .pwb-draggable-row-item {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+}
+.pwb-shadow-subtle .pwb-draggable-row-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+/* pwb-shadow-medium: uses default box-shadow — no override needed */
+.pwb-shadow-deep .pwb-draggable-row-item {
+    box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 10px 30px -5px rgba(0, 0, 0, 0.15) !important;
+}
+.pwb-shadow-deep .pwb-draggable-row-item:hover {
+    box-shadow:
+        0 8px 12px -2px rgba(0, 0, 0, 0.12),
+        0 20px 50px -8px rgba(0, 0, 0, 0.2) !important;
+}

@@ -152,6 +152,8 @@ export function PwbCustomizeContainerDataView({
     // We sort them based on the initial or current value of `sortedAttribute` if it's set,
     // to preserve Mendix side sorting order when the widget loads.
     const dragItems: DragItem[] = useMemo(() => {
+        // Read transitionTrigger to force useMemo to re-evaluate when a cross-container
+        // Kanban transition starts/ends, ensuring the optimistic UI changes are rendered immediately.
         if (transitionTrigger) {
             // Read to satisfy dependency check
         }

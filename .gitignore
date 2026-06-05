@@ -17,3 +17,7 @@ local/
 deployment/
 theme/styles/web/sass/
 theme/styles/native/sass/
+
+# Local Environment Variables
+.env
+

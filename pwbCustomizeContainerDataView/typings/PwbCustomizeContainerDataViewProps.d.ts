@@ -50,6 +50,7 @@ export interface PwbCustomizeContainerDataViewContainerProps {
     readOnlyMode: boolean;
     sortIdAttribute?: ListAttributeValue<Big | string>;
     layoutDirection: LayoutDirectionEnum;
+    enable2DGrid: boolean;
     dragHandleDisplay: DragHandleDisplayEnum;
     accentColor: string;
     borderRadius: string;
@@ -81,6 +82,9 @@ export interface PwbCustomizeContainerDataViewContainerProps {
     actionsSectionSize: ActionsSectionSizeEnum;
     actionsSectionSizeCustom: string;
     saveDelay: number;
+    vibrateDragStart: number;
+    vibrateDrop: number;
+    vibrateError: number;
 }
 
 export interface PwbCustomizeContainerDataViewPreviewProps {
@@ -112,6 +116,7 @@ export interface PwbCustomizeContainerDataViewPreviewProps {
     readOnlyMode: boolean;
     sortIdAttribute: string;
     layoutDirection: LayoutDirectionEnum;
+    enable2DGrid: boolean;
     dragHandleDisplay: DragHandleDisplayEnum;
     accentColor: string;
     borderRadius: string;
@@ -143,4 +148,7 @@ export interface PwbCustomizeContainerDataViewPreviewProps {
     actionsSectionSize: ActionsSectionSizeEnum;
     actionsSectionSizeCustom: string;
     saveDelay: number | null;
+    vibrateDragStart: number | null;
+    vibrateDrop: number | null;
+    vibrateError: number | null;
 }

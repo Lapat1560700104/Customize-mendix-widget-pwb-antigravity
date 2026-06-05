@@ -72,7 +72,11 @@ export function PwbCustomizeContainerDataView({
     dragGhostShadow,
     hoverRevealActions,
     animationSpeed,
-    wobbleStrength
+    wobbleStrength,
+    enable2DGrid,
+    vibrateDragStart,
+    vibrateDrop,
+    vibrateError
 }: PwbCustomizeContainerDataViewContainerProps): ReactElement {
     // 1. Sanitize Aesthetics Configuration
     const colorRegex =
@@ -468,6 +472,10 @@ export function PwbCustomizeContainerDataView({
                             hoverRevealActions={hoverRevealActions}
                             animationSpeed={animationSpeed}
                             wobbleStrength={wobbleStrength}
+                            enable2DGrid={enable2DGrid}
+                            vibrateDragStart={vibrateDragStart}
+                            vibrateDrop={vibrateDrop}
+                            vibrateError={vibrateError}
                         />
                         <div className="pwb-empty-state-content-overlay">
                             <svg
@@ -526,6 +534,10 @@ export function PwbCustomizeContainerDataView({
                         hoverRevealActions={hoverRevealActions}
                         animationSpeed={animationSpeed}
                         wobbleStrength={wobbleStrength}
+                        enable2DGrid={enable2DGrid}
+                        vibrateDragStart={vibrateDragStart}
+                        vibrateDrop={vibrateDrop}
+                        vibrateError={vibrateError}
                     />
                 )}
 

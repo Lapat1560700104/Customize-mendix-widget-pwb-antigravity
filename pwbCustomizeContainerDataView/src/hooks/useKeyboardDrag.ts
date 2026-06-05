@@ -13,6 +13,7 @@ interface UseKeyboardDragProps {
     onRemoveItemExternal?: (itemId: GUID) => void;
     containerId: string;
     containerRef: RefObject<HTMLDivElement | null>;
+    enable2DGrid: boolean;
 }
 
 interface UseKeyboardDragResult {
@@ -35,7 +36,8 @@ export function useKeyboardDrag({
     columnValue,
     onRemoveItemExternal,
     containerId,
-    containerRef
+    containerRef,
+    enable2DGrid
 }: UseKeyboardDragProps): UseKeyboardDragResult {
     const [keyboardGrabbedId, setKeyboardGrabbedId] = useState<GUID | null>(null);
     const [originalItemsBeforeKeyboardDrag, setOriginalItemsBeforeKeyboardDrag] = useState<DragItem[]>([]);
@@ -86,7 +88,11 @@ export function useKeyboardDrag({
                 setAnnouncement(`Reordering canceled. ${itemTitle} returned to position ${origIndex + 1}.`);
                 setOriginalItemsBeforeKeyboardDrag([]);
             }
-        } else if (e.key === "ArrowDown" || (e.key === "ArrowRight" && !(enableKanban && dragGroup))) {
+        } else if (
+            (e.key === "ArrowDown" && !enable2DGrid) ||
+            (e.key === "ArrowRight" && !enable2DGrid && !(enableKanban && dragGroup)) ||
+            (e.key === "ArrowRight" && enable2DGrid && !(enableKanban && dragGroup))
+        ) {
             if (isGrabbed) {
                 e.preventDefault();
                 if (index < orderedItems.length - 1) {
@@ -104,7 +110,11 @@ export function useKeyboardDrag({
                     }, 0);
                 }
             }
-        } else if (e.key === "ArrowUp" || (e.key === "ArrowLeft" && !(enableKanban && dragGroup))) {
+        } else if (
+            (e.key === "ArrowUp" && !enable2DGrid) ||
+            (e.key === "ArrowLeft" && !enable2DGrid && !(enableKanban && dragGroup)) ||
+            (e.key === "ArrowLeft" && enable2DGrid && !(enableKanban && dragGroup))
+        ) {
             if (isGrabbed) {
                 e.preventDefault();
                 if (index > 0) {
@@ -120,6 +130,106 @@ export function useKeyboardDrag({
                         ) as HTMLElement;
                         prevEl?.focus();
                     }, 0);
+                }
+            }
+        } else if (e.key === "ArrowDown" && enable2DGrid) {
+            if (isGrabbed) {
+                e.preventDefault();
+                const container = containerRef.current;
+                if (container) {
+                    const currRect = e.currentTarget.getBoundingClientRect();
+                    const currCX = currRect.left + currRect.width / 2;
+                    const currCY = currRect.top + currRect.height / 2;
+
+                    const cards = Array.from(container.querySelectorAll(".pwb-draggable-row-item")) as HTMLElement[];
+                    const centers = cards.map(card => {
+                        const rect = card.getBoundingClientRect();
+                        return {
+                            element: card,
+                            index: parseInt(card.getAttribute("data-index") || "0", 10),
+                            cx: rect.left + rect.width / 2,
+                            cy: rect.top + rect.height / 2
+                        };
+                    });
+
+                    const below = centers.filter(c => c.cy > currCY + 10);
+                    if (below.length > 0) {
+                        const minCY = Math.min(...below.map(c => c.cy));
+                        const rowBelow = below.filter(c => Math.abs(c.cy - minCY) < 15);
+                        let targetCard = rowBelow[0];
+                        let minDX = Math.abs(rowBelow[0].cx - currCX);
+                        rowBelow.forEach(c => {
+                            const dx = Math.abs(c.cx - currCX);
+                            if (dx < minDX) {
+                                minDX = dx;
+                                targetCard = c;
+                            }
+                        });
+
+                        if (targetCard) {
+                            const targetIdx = targetCard.index;
+                            const nextItems = [...orderedItems];
+                            const temp = nextItems[index];
+                            nextItems[index] = nextItems[targetIdx];
+                            nextItems[targetIdx] = temp;
+                            setOrderedItems(nextItems);
+                            setAnnouncement(`Moved ${itemTitle} down to position ${targetIdx + 1}.`);
+                            setTimeout(() => {
+                                const targetEl = container.querySelector(`[data-index="${targetIdx}"]`) as HTMLElement;
+                                targetEl?.focus();
+                            }, 0);
+                        }
+                    }
+                }
+            }
+        } else if (e.key === "ArrowUp" && enable2DGrid) {
+            if (isGrabbed) {
+                e.preventDefault();
+                const container = containerRef.current;
+                if (container) {
+                    const currRect = e.currentTarget.getBoundingClientRect();
+                    const currCX = currRect.left + currRect.width / 2;
+                    const currCY = currRect.top + currRect.height / 2;
+
+                    const cards = Array.from(container.querySelectorAll(".pwb-draggable-row-item")) as HTMLElement[];
+                    const centers = cards.map(card => {
+                        const rect = card.getBoundingClientRect();
+                        return {
+                            element: card,
+                            index: parseInt(card.getAttribute("data-index") || "0", 10),
+                            cx: rect.left + rect.width / 2,
+                            cy: rect.top + rect.height / 2
+                        };
+                    });
+
+                    const above = centers.filter(c => c.cy < currCY - 10);
+                    if (above.length > 0) {
+                        const maxCY = Math.max(...above.map(c => c.cy));
+                        const rowAbove = above.filter(c => Math.abs(c.cy - maxCY) < 15);
+                        let targetCard = rowAbove[0];
+                        let minDX = Math.abs(rowAbove[0].cx - currCX);
+                        rowAbove.forEach(c => {
+                            const dx = Math.abs(c.cx - currCX);
+                            if (dx < minDX) {
+                                minDX = dx;
+                                targetCard = c;
+                            }
+                        });
+
+                        if (targetCard) {
+                            const targetIdx = targetCard.index;
+                            const nextItems = [...orderedItems];
+                            const temp = nextItems[index];
+                            nextItems[index] = nextItems[targetIdx];
+                            nextItems[targetIdx] = temp;
+                            setOrderedItems(nextItems);
+                            setAnnouncement(`Moved ${itemTitle} up to position ${targetIdx + 1}.`);
+                            setTimeout(() => {
+                                const targetEl = container.querySelector(`[data-index="${targetIdx}"]`) as HTMLElement;
+                                targetEl?.focus();
+                            }, 0);
+                        }
+                    }
                 }
             }
         } else if ((e.key === "ArrowRight" || e.key === "ArrowLeft") && enableKanban && dragGroup) {

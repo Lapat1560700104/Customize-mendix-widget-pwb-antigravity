@@ -114,7 +114,11 @@ export function getProperties(
             "itemAllowDropExpression",
             "sortedAttribute",
             "onSortAction",
-            "saveDelay"
+            "saveDelay",
+            "enable2DGrid",
+            "vibrateDragStart",
+            "vibrateDrop",
+            "vibrateError"
         );
     } else {
         propsToHide.push("sortIdAttribute");
@@ -311,6 +315,28 @@ export function check(values: PwbCustomizeContainerDataViewPreviewProps): Proble
             message: "Wobble Strength must be a non-negative number."
         });
     }
+
+    // Haptic Feedback Validations
+    const checkVibrate = (val: number | null, key: string, name: string) => {
+        if (val !== null) {
+            if (val < 0) {
+                errors.push({
+                    property: key,
+                    severity: "error",
+                    message: `${name} duration cannot be negative.`
+                });
+            } else if (val > 500) {
+                errors.push({
+                    property: key,
+                    severity: "warning",
+                    message: `${name} duration exceeds the recommended safeguard limit of 500ms.`
+                });
+            }
+        }
+    };
+    checkVibrate(values.vibrateDragStart, "vibrateDragStart", "Drag Start Vibration");
+    checkVibrate(values.vibrateDrop, "vibrateDrop", "Drop Vibration");
+    checkVibrate(values.vibrateError, "vibrateError", "Error Vibration");
 
     return errors;
 }

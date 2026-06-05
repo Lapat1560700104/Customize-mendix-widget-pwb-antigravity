@@ -200,7 +200,4 @@
             </property>
         </propertyGroup>
     </properties>
-    <systemProperties>
-        <systemProperty key="Label"/>
-    </systemProperties>
 </widget>

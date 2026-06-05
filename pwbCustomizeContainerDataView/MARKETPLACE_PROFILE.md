@@ -1,12 +1,15 @@
 # Mendix Marketplace Profile - PWB Customize Container DataView
 
 ## 1. Title
+
 PWB Customize Container DataView
 
 ## 2. Description
+
 A premium, highly customizable React-based pluggable widget for Mendix that acts as an intelligent drag-and-drop sortable container. It allows developers to place any standard or custom Mendix widgets (like cards, text boxes, buttons, or images) inside list rows, automatically propagating row-level entity contexts. It supports fluid drag-and-drop sorting (vertical lists or horizontal wrap grids), cross-column Kanban boards, debounced saves, and a robust **Read Only Mode** that disables layout adjustments and displays items ordered by a configurable `SortID` attribute.
 
 ## 3. Key Features
+
 * **Nested Widget Dropzone**: Drop any standard or custom Mendix widgets inside rows; row-level entity context is fully propagated to nested elements.
 * **Fluid Drag & Drop Reordering**: Powered by Web Pointer Events API for flawless touch screen and mobile/Safari support. Includes smooth hover glows and spring bounce physics.
 * **Cross-Column Kanban Support**: Fully supports dragging cards across multiple columns/lanes. Handles optimistic UI transitions to eliminate visual flicker during asynchronous Mendix database commits.
@@ -19,12 +22,15 @@ A premium, highly customizable React-based pluggable widget for Mendix that acts
 *(ภาษาไทย / Thai Version)*
 
 ## 1. ชื่อวิจเจต (Title)
+
 PWB Customize Container DataView
 
 ## 2. คำอธิบายฟีเจอร์การทำงาน (Description)
+
 วิจเจตประเภท Container ระดับพรีเมียมสำหรับ Mendix ที่เปิดโอกาสให้นักพัฒนาสามารถลากวาง Mendix Widget มาตรฐานหรือวิดเจ็ตกำหนดเองใดๆ เข้าไปจัดแสดงผลอยู่ด้านในแต่ละแถวรายการได้อย่างอิสระ พร้อมระบบลากสลับลำดับการ์ด (Drag & Drop Sorting) ที่มีประสิทธิภาพสูง รองรับบอร์ดคัมบังข้ามคอลัมน์ (Kanban Mode) และการบันทึกแบบลดภาระเซิร์ฟเวอร์ (Debounce Save) รวมถึงมี **Read Only Mode** สำหรับแสดงผลข้อมูลอย่างเดียวโดยไม่ยอมให้ย้ายตำแหน่งการ์ด และจัดเรียงข้อมูลอิงตามแอตทริบิวต์ `SortID` ของข้อมูลโดยอัตโนมัติ
 
 ## 3. คุณสมบัติเด่น (Key Features)
+
 * **การลากวาง Widget ซ้อนด้านใน (Nested Widget Dropzone)**: วาง Widget อะไรก็ได้ลงในการ์ด โดยจะได้รับ Context ของไอเทมแต่ละแถวโดยอัตโนมัติ
 * **ระบบลากย้ายลำดับแบบลื่นไหล (Fluid Drag & Drop)**: พัฒนาบน Web Pointer Events API รองรับหน้าจอสัมผัสบนสมาร์ทโฟนและแท็บเล็ต 100% พร้อม Drop Indicator แสดงทิศทางการวาง และระบบสปริงสั่นดีดกลับหากปล่อยการ์ดผิดที่
 * **โหมดแสดงผลอย่างเดียว (Read Only Mode)**: ปิดการลากวางการ์ด ลำดับแสดงผลจะถูกจัดเรียงตามค่าในคุณสมบัติ `SortID` (รองรับฟิลด์ประเภท Integer, Decimal หรือ String) และซ่อนปุ่มปุ่มลากจับทั้งหมด

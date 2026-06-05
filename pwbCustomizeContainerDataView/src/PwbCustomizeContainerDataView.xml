@@ -193,6 +193,50 @@
             </property>
         </propertyGroup>
 
+        <propertyGroup caption="Actions Section Settings">
+            <property key="enableActionsSection" type="boolean" defaultValue="false">
+                <caption>Enable Actions Section</caption>
+                <description>Enable a custom section (e.g. for action buttons, filter inputs) adjacent to the main items container.</description>
+            </property>
+            <property key="actionsSectionContent" type="widgets" required="false">
+                <caption>Actions Section Content</caption>
+                <description>Custom widgets to place in this section.</description>
+            </property>
+            <property key="actionsSectionPosition" type="enumeration" defaultValue="before">
+                <caption>Position</caption>
+                <description>Position the actions section before (front/left/top) or after (back/right/bottom) the main container.</description>
+                <enumerationValues>
+                    <enumerationValue key="before">Before Container (Front)</enumerationValue>
+                    <enumerationValue key="after">After Container (Back)</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="actionsSectionLayout" type="enumeration" defaultValue="side_by_side">
+                <caption>Layout Style</caption>
+                <description>Alignment style relative to the container: Side-by-Side (Row alignment) or Stacked (Column alignment).</description>
+                <enumerationValues>
+                    <enumerationValue key="side_by_side">Side-by-Side (Row)</enumerationValue>
+                    <enumerationValue key="stacked">Stacked (Column)</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="actionsSectionSize" type="enumeration" defaultValue="auto">
+                <caption>Section Size Ratio</caption>
+                <description>How much space is allocated to the actions section. Presets automatically divide space cleanly.</description>
+                <enumerationValues>
+                    <enumerationValue key="auto">Auto (Fit Content)</enumerationValue>
+                    <enumerationValue key="ratio_15">15% Width / Height</enumerationValue>
+                    <enumerationValue key="ratio_20">20% Width / Height</enumerationValue>
+                    <enumerationValue key="ratio_25">25% Width / Height</enumerationValue>
+                    <enumerationValue key="ratio_30">30% Width / Height</enumerationValue>
+                    <enumerationValue key="ratio_40">40% Width / Height</enumerationValue>
+                    <enumerationValue key="custom">Custom CSS Size</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="actionsSectionSizeCustom" type="string" required="false" defaultValue="200px">
+                <caption>Custom Size Value</caption>
+                <description>Custom CSS size value for the actions section (e.g. '200px', '2.5rem', '1fr'). Only applies when Size Ratio is set to Custom.</description>
+            </property>
+        </propertyGroup>
+
         <propertyGroup caption="Performance Settings">
             <property key="saveDelay" type="integer" required="true" defaultValue="0">
                 <caption>Save Delay (ms)</caption>

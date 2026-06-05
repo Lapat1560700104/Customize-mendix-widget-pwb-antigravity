@@ -51,18 +51,6 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
         dropzoneBorder: isXray ? `${accentColor}60` : "#cbd5e1"
     };
 
-    const containerStyle: CSSProperties = {
-        display: "flex",
-        flexDirection: "column",
-        gap: "6px",
-        padding: "10px",
-        borderRadius: "10px",
-        border: `1px solid ${colors.border}`,
-        backgroundColor: colors.bg,
-        width: "100%",
-        fontFamily: "system-ui, -apple-system, sans-serif"
-    };
-
     const rowContainerStyle: CSSProperties = {
         display: "flex",
         flexDirection: isHorizontal ? "row" : "column",
@@ -155,6 +143,280 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
 
     const widgetCount = props.customItemContent?.widgetCount ?? 0;
 
+    // Resolve actions size styling variables
+    let resolvedActionsSize = "auto";
+    if (props.enableActionsSection) {
+        if (props.actionsSectionSize === "custom") {
+            resolvedActionsSize = props.actionsSectionSizeCustom || "200px";
+        } else if (props.actionsSectionSize && props.actionsSectionSize.startsWith("ratio_")) {
+            const pct = props.actionsSectionSize.replace("ratio_", "");
+            resolvedActionsSize = `${pct}%`;
+        }
+    }
+
+    const actionsLayoutStyles = props.enableActionsSection
+        ? ({ "--pwb-actions-size-resolved": resolvedActionsSize } as CSSProperties)
+        : {};
+
+    const containerStyle: CSSProperties = {
+        display: "flex",
+        flexDirection: "column",
+        gap: "6px",
+        padding: "10px",
+        borderRadius: "10px",
+        border: `1px solid ${colors.border}`,
+        backgroundColor: colors.bg,
+        width: "100%",
+        fontFamily: "system-ui, -apple-system, sans-serif",
+        ...actionsLayoutStyles
+    };
+
+    const actionsPreview = props.enableActionsSection && props.actionsSectionContent?.renderer && (
+        <div className="pwb-actions-section-card" style={{ flexGrow: 1 }}>
+            <props.actionsSectionContent.renderer caption="Actions Content — Drag widgets here">
+                <div
+                    style={{
+                        padding: "8px 10px",
+                        background: colors.dropzoneBg,
+                        borderRadius: "6px",
+                        fontSize: "11px",
+                        color: colors.labelColor,
+                        border: `1px dashed ${colors.dropzoneBorder}`,
+                        textAlign: "center"
+                    }}
+                >
+                    ⬇ Drop buttons/actions here
+                </div>
+            </props.actionsSectionContent.renderer>
+        </div>
+    );
+
+    const listContent = (
+        <>
+            {/* ── Lane Title Section Preview ── */}
+            {props.enableLaneTitle && (
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "6px 8px",
+                        borderRadius: "6px",
+                        border: `1px solid ${colors.border}`,
+                        marginBottom: props.itemGap || "12px",
+                        backgroundColor: colors.rowBg
+                    }}
+                >
+                    <span style={{ fontSize: "13px", fontWeight: 700, color: colors.labelColor }}>
+                        📌 {props.laneTitle || "Lane Title Text"}
+                    </span>
+                    {props.laneTitleContent?.renderer && (
+                        <div style={{ flexGrow: 1, marginLeft: "16px" }}>
+                            <props.laneTitleContent.renderer caption="Title Widgets">
+                                <div
+                                    style={{
+                                        padding: "4px 8px",
+                                        background: colors.dropzoneBg,
+                                        borderRadius: "4px",
+                                        fontSize: "10px",
+                                        color: colors.labelColor,
+                                        border: `1px dashed ${colors.dropzoneBorder}`,
+                                        textAlign: "center"
+                                    }}
+                                >
+                                    ⬇ Drop title widgets here
+                                </div>
+                            </props.laneTitleContent.renderer>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* ── Header Section Preview ── */}
+            {props.enableHeader && props.headerContent?.renderer && (
+                <div
+                    style={{
+                        border: `1px dashed ${colors.border}`,
+                        borderRadius: `calc(${borderRadius} * 0.5)`,
+                        padding: "8px 12px",
+                        marginBottom: props.itemGap || "12px",
+                        backgroundColor: colors.rowBg,
+                        boxSizing: "border-box"
+                    }}
+                >
+                    <props.headerContent.renderer caption="Header Content — Drag widgets here">
+                        <div
+                            style={{
+                                padding: "8px 10px",
+                                background: colors.dropzoneBg,
+                                borderRadius: "6px",
+                                fontSize: "11px",
+                                color: colors.labelColor,
+                                border: `1px dashed ${colors.dropzoneBorder}`,
+                                textAlign: "center"
+                            }}
+                        >
+                            ⬇ Drop header widgets here
+                        </div>
+                    </props.headerContent.renderer>
+                </div>
+            )}
+
+            {/* ── Sortable Rows ── */}
+            <div style={rowContainerStyle}>
+                {/* Row 1 — shows the LIVE nested widgets via renderer */}
+                <div style={rowStyle}>
+                    <div style={accentBarStyle} />
+                    {props.dragHandleDisplay === "left" && !props.readOnlyMode && (
+                        <DragHandle color={colors.handleColor} />
+                    )}
+                    <div style={{ flexGrow: 1, minWidth: 0 }}>
+                        <props.customItemContent.renderer caption="Row 1 — Your content widgets render here">
+                            {/* Fallback shown only when dropzone is empty */}
+                            <div
+                                style={{
+                                    padding: "8px 10px",
+                                    background: colors.dropzoneBg,
+                                    borderRadius: "6px",
+                                    fontSize: "12px",
+                                    color: colors.labelColor,
+                                    border: `1px dashed ${colors.dropzoneBorder}`,
+                                    textAlign: "center"
+                                }}
+                            >
+                                ⬇ Drop widgets here — they appear in every row
+                            </div>
+                        </props.customItemContent.renderer>
+                    </div>
+                </div>
+
+                {/* Row 2 — mirror of row 1, shows same live content */}
+                <div style={{ ...rowStyle, opacity: 0.65 }}>
+                    <div style={accentBarStyle} />
+                    {props.dragHandleDisplay === "left" && !props.readOnlyMode && (
+                        <DragHandle color={colors.handleColor} />
+                    )}
+                    <div style={{ flexGrow: 1, minWidth: 0 }}>
+                        <props.customItemContent.renderer caption="Row 2 — Repeated for each datasource item">
+                            <div
+                                style={{
+                                    padding: "8px 10px",
+                                    background: colors.dropzoneBg,
+                                    borderRadius: "6px",
+                                    fontSize: "12px",
+                                    color: colors.labelColor,
+                                    border: `1px dashed ${colors.dropzoneBorder}`,
+                                    opacity: 0.7,
+                                    textAlign: "center"
+                                }}
+                            >
+                                ⬇ Same template — repeated per item
+                            </div>
+                        </props.customItemContent.renderer>
+                    </div>
+                </div>
+
+                {/* Row 3 — ghost row hint */}
+                {!isXray && (
+                    <div
+                        style={{
+                            ...rowStyle,
+                            opacity: 0.3,
+                            border: `1px dashed ${colors.rowBorder}`,
+                            backgroundColor: "transparent",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            padding: "8px 14px"
+                        }}
+                    >
+                        <span style={{ fontSize: "11px", color: colors.labelColor }}>
+                            · · · more rows from datasource · · ·
+                        </span>
+                    </div>
+                )}
+            </div>
+
+            {/* ── Footer Section Preview ── */}
+            {props.enableFooter && props.footerContent?.renderer && (
+                <div
+                    style={{
+                        border: `1px dashed ${colors.border}`,
+                        borderRadius: `calc(${borderRadius} * 0.5)`,
+                        padding: "8px 12px",
+                        marginTop: props.itemGap || "12px",
+                        backgroundColor: colors.rowBg,
+                        boxSizing: "border-box"
+                    }}
+                >
+                    <props.footerContent.renderer caption="Footer Content — Drag widgets here">
+                        <div
+                            style={{
+                                padding: "8px 10px",
+                                background: colors.dropzoneBg,
+                                borderRadius: "6px",
+                                fontSize: "11px",
+                                color: colors.labelColor,
+                                border: `1px dashed ${colors.dropzoneBorder}`,
+                                textAlign: "center"
+                            }}
+                        >
+                            ⬇ Drop footer widgets here
+                        </div>
+                    </props.footerContent.renderer>
+                </div>
+            )}
+
+            {/* ── Main Footer Section Preview ── */}
+            {props.enableMainFooter && props.mainFooterContent?.renderer && (
+                <div
+                    style={{
+                        border: `1px dashed ${colors.border}`,
+                        borderRadius: `calc(${borderRadius} * 0.5)`,
+                        padding: "8px 12px",
+                        marginTop: props.itemGap || "12px",
+                        backgroundColor: colors.rowBg,
+                        boxSizing: "border-box"
+                    }}
+                >
+                    <props.mainFooterContent.renderer caption="Main Footer Content — Drag widgets here">
+                        <div
+                            style={{
+                                padding: "8px 10px",
+                                background: colors.dropzoneBg,
+                                borderRadius: "6px",
+                                fontSize: "11px",
+                                color: colors.labelColor,
+                                border: `1px dashed ${colors.dropzoneBorder}`,
+                                textAlign: "center"
+                            }}
+                        >
+                            ⬇ Drop main footer widgets here
+                        </div>
+                    </props.mainFooterContent.renderer>
+                </div>
+            )}
+
+            {/* ── onSortAction indicator ── */}
+            {!isStructure && props.onSortAction && (
+                <div
+                    style={{
+                        fontSize: "10px",
+                        color: "#22c55e",
+                        padding: "4px 8px",
+                        background: "rgba(34,197,94,0.08)",
+                        borderRadius: "6px",
+                        border: "1px solid rgba(34,197,94,0.2)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px"
+                    }}
+                >
+                    ⚡ On Sort Action: connected
+                </div>
+            )}
+        </>
+    );
+
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
             <div style={containerStyle}>
@@ -185,7 +447,8 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
                             padding: "0 2px",
                             display: "flex",
                             gap: "12px",
-                            alignItems: "center"
+                            alignItems: "center",
+                            marginBottom: "4px"
                         }}
                     >
                         <span>
@@ -203,226 +466,27 @@ export function preview(props: PwbCustomizeContainerDataViewPreviewProps): React
                     </div>
                 )}
 
-                {/* ── Lane Title Section Preview ── */}
-                {props.enableLaneTitle && (
+                {/* ── Inner Content (Actions Layout & List Content) ── */}
+                {props.enableActionsSection ? (
                     <div
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            padding: "6px 8px",
-                            borderRadius: "6px",
-                            border: `1px solid ${colors.border}`,
-                            marginBottom: props.itemGap || "12px",
-                            backgroundColor: colors.rowBg
-                        }}
+                        className={`pwb-actions-layout-container pwb-actions-layout-${props.actionsSectionLayout} pwb-actions-pos-${props.actionsSectionPosition}`}
                     >
-                        <span style={{ fontSize: "13px", fontWeight: 700, color: colors.labelColor }}>
-                            📌 {props.laneTitle || "Lane Title Text"}
-                        </span>
-                        {props.laneTitleContent?.renderer && (
-                            <div style={{ flexGrow: 1, marginLeft: "16px" }}>
-                                <props.laneTitleContent.renderer caption="Title Widgets">
-                                    <div
-                                        style={{
-                                            padding: "4px 8px",
-                                            background: colors.dropzoneBg,
-                                            borderRadius: "4px",
-                                            fontSize: "10px",
-                                            color: colors.labelColor,
-                                            border: `1px dashed ${colors.dropzoneBorder}`,
-                                            textAlign: "center"
-                                        }}
-                                    >
-                                        ⬇ Drop title widgets here
-                                    </div>
-                                </props.laneTitleContent.renderer>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* ── Header Section Preview ── */}
-                {props.enableHeader && props.headerContent?.renderer && (
-                    <div
-                        style={{
-                            border: `1px dashed ${colors.border}`,
-                            borderRadius: `calc(${borderRadius} * 0.5)`,
-                            padding: "8px 12px",
-                            marginBottom: props.itemGap || "12px",
-                            backgroundColor: colors.rowBg,
-                            boxSizing: "border-box"
-                        }}
-                    >
-                        <props.headerContent.renderer caption="Header Content — Drag widgets here">
-                            <div
-                                style={{
-                                    padding: "8px 10px",
-                                    background: colors.dropzoneBg,
-                                    borderRadius: "6px",
-                                    fontSize: "11px",
-                                    color: colors.labelColor,
-                                    border: `1px dashed ${colors.dropzoneBorder}`,
-                                    textAlign: "center"
-                                }}
-                            >
-                                ⬇ Drop header widgets here
-                            </div>
-                        </props.headerContent.renderer>
-                    </div>
-                )}
-
-                {/* ── Sortable Rows ── */}
-                <div style={rowContainerStyle}>
-                    {/* Row 1 — shows the LIVE nested widgets via renderer */}
-                    <div style={rowStyle}>
-                        <div style={accentBarStyle} />
-                        {props.dragHandleDisplay === "left" && !props.readOnlyMode && (
-                            <DragHandle color={colors.handleColor} />
-                        )}
-                        <div style={{ flexGrow: 1, minWidth: 0 }}>
-                            <props.customItemContent.renderer caption="Row 1 — Your content widgets render here">
-                                {/* Fallback shown only when dropzone is empty */}
-                                <div
-                                    style={{
-                                        padding: "8px 10px",
-                                        background: colors.dropzoneBg,
-                                        borderRadius: "6px",
-                                        fontSize: "12px",
-                                        color: colors.labelColor,
-                                        border: `1px dashed ${colors.dropzoneBorder}`,
-                                        textAlign: "center"
-                                    }}
-                                >
-                                    ⬇ Drop widgets here — they appear in every row
-                                </div>
-                            </props.customItemContent.renderer>
-                        </div>
-                    </div>
-
-                    {/* Row 2 — mirror of row 1, shows same live content */}
-                    <div style={{ ...rowStyle, opacity: 0.65 }}>
-                        <div style={accentBarStyle} />
-                        {props.dragHandleDisplay === "left" && !props.readOnlyMode && (
-                            <DragHandle color={colors.handleColor} />
-                        )}
-                        <div style={{ flexGrow: 1, minWidth: 0 }}>
-                            <props.customItemContent.renderer caption="Row 2 — Repeated for each datasource item">
-                                <div
-                                    style={{
-                                        padding: "8px 10px",
-                                        background: colors.dropzoneBg,
-                                        borderRadius: "6px",
-                                        fontSize: "12px",
-                                        color: colors.labelColor,
-                                        border: `1px dashed ${colors.dropzoneBorder}`,
-                                        opacity: 0.7,
-                                        textAlign: "center"
-                                    }}
-                                >
-                                    ⬇ Same template — repeated per item
-                                </div>
-                            </props.customItemContent.renderer>
-                        </div>
-                    </div>
-
-                    {/* Row 3 — ghost row hint */}
-                    {!isXray && (
+                        {props.actionsSectionPosition === "before" && actionsPreview}
                         <div
                             style={{
-                                ...rowStyle,
-                                opacity: 0.3,
-                                border: `1px dashed ${colors.rowBorder}`,
-                                backgroundColor: "transparent",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                padding: "8px 14px"
+                                minWidth: 0,
+                                minHeight: 0,
+                                display: "flex",
+                                flexDirection: "column",
+                                width: "100%"
                             }}
                         >
-                            <span style={{ fontSize: "11px", color: colors.labelColor }}>
-                                · · · more rows from datasource · · ·
-                            </span>
+                            {listContent}
                         </div>
-                    )}
-                </div>
-
-                {/* ── Footer Section Preview ── */}
-                {props.enableFooter && props.footerContent?.renderer && (
-                    <div
-                        style={{
-                            border: `1px dashed ${colors.border}`,
-                            borderRadius: `calc(${borderRadius} * 0.5)`,
-                            padding: "8px 12px",
-                            marginTop: props.itemGap || "12px",
-                            backgroundColor: colors.rowBg,
-                            boxSizing: "border-box"
-                        }}
-                    >
-                        <props.footerContent.renderer caption="Footer Content — Drag widgets here">
-                            <div
-                                style={{
-                                    padding: "8px 10px",
-                                    background: colors.dropzoneBg,
-                                    borderRadius: "6px",
-                                    fontSize: "11px",
-                                    color: colors.labelColor,
-                                    border: `1px dashed ${colors.dropzoneBorder}`,
-                                    textAlign: "center"
-                                }}
-                            >
-                                ⬇ Drop footer widgets here
-                            </div>
-                        </props.footerContent.renderer>
+                        {props.actionsSectionPosition === "after" && actionsPreview}
                     </div>
-                )}
-
-                {/* ── Main Footer Section Preview ── */}
-                {props.enableMainFooter && props.mainFooterContent?.renderer && (
-                    <div
-                        style={{
-                            border: `1px dashed ${colors.border}`,
-                            borderRadius: `calc(${borderRadius} * 0.5)`,
-                            padding: "8px 12px",
-                            marginTop: props.itemGap || "12px",
-                            backgroundColor: colors.rowBg,
-                            boxSizing: "border-box"
-                        }}
-                    >
-                        <props.mainFooterContent.renderer caption="Main Footer Content — Drag widgets here">
-                            <div
-                                style={{
-                                    padding: "8px 10px",
-                                    background: colors.dropzoneBg,
-                                    borderRadius: "6px",
-                                    fontSize: "11px",
-                                    color: colors.labelColor,
-                                    border: `1px dashed ${colors.dropzoneBorder}`,
-                                    textAlign: "center"
-                                }}
-                            >
-                                ⬇ Drop main footer widgets here
-                            </div>
-                        </props.mainFooterContent.renderer>
-                    </div>
-                )}
-
-                {/* ── onSortAction indicator ── */}
-                {!isStructure && props.onSortAction && (
-                    <div
-                        style={{
-                            fontSize: "10px",
-                            color: "#22c55e",
-                            padding: "4px 8px",
-                            background: "rgba(34,197,94,0.08)",
-                            borderRadius: "6px",
-                            border: "1px solid rgba(34,197,94,0.2)",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px"
-                        }}
-                    >
-                        ⚡ On Sort Action: connected
-                    </div>
+                ) : (
+                    listContent
                 )}
             </div>
 

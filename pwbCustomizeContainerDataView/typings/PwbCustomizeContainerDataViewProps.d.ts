@@ -15,6 +15,12 @@ export type ThemePresetEnum = "default_rounded" | "modern_glass" | "minimalist_f
 
 export type DarkModeBehaviorEnum = "auto" | "light" | "dark";
 
+export type ActionsSectionPositionEnum = "before" | "after";
+
+export type ActionsSectionLayoutEnum = "side_by_side" | "stacked";
+
+export type ActionsSectionSizeEnum = "auto" | "ratio_15" | "ratio_20" | "ratio_25" | "ratio_30" | "ratio_40" | "custom";
+
 export interface PwbCustomizeContainerDataViewContainerProps {
     name: string;
     class: string;
@@ -52,6 +58,12 @@ export interface PwbCustomizeContainerDataViewContainerProps {
     itemColumnAttribute?: ListAttributeValue<string>;
     allowedSourceColumns?: DynamicValue<string>;
     itemAllowDropExpression?: ListExpressionValue<boolean>;
+    enableActionsSection: boolean;
+    actionsSectionContent?: ReactNode;
+    actionsSectionPosition: ActionsSectionPositionEnum;
+    actionsSectionLayout: ActionsSectionLayoutEnum;
+    actionsSectionSize: ActionsSectionSizeEnum;
+    actionsSectionSizeCustom: string;
     saveDelay: number;
 }
 
@@ -98,5 +110,11 @@ export interface PwbCustomizeContainerDataViewPreviewProps {
     itemColumnAttribute: string;
     allowedSourceColumns: string;
     itemAllowDropExpression: string;
+    enableActionsSection: boolean;
+    actionsSectionContent: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
+    actionsSectionPosition: ActionsSectionPositionEnum;
+    actionsSectionLayout: ActionsSectionLayoutEnum;
+    actionsSectionSize: ActionsSectionSizeEnum;
+    actionsSectionSizeCustom: string;
     saveDelay: number | null;
 }

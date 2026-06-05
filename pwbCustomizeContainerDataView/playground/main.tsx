@@ -462,7 +462,14 @@ function App() {
     // Mode Switcher: "kanban" | "form_builder"
     const [playgroundMode, setPlaygroundMode] = useState<"kanban" | "form_builder">("kanban");
 
-    // Kanban Simulation State (Original)
+    // Actions Section settings state
+    const [enableActionsSection, setEnableActionsSection] = useState<boolean>(false);
+    const [actionsSectionPosition, setActionsSectionPosition] = useState<"before" | "after">("before");
+    const [actionsSectionLayout, setActionsSectionLayout] = useState<"side_by_side" | "stacked">("side_by_side");
+    const [actionsSectionSize, setActionsSectionSize] = useState<
+        "auto" | "ratio_15" | "ratio_20" | "ratio_25" | "ratio_30" | "ratio_40" | "custom"
+    >("ratio_25");
+    const [actionsSectionSizeCustom, setActionsSectionSizeCustom] = useState<string>("200px");
     const [accentColor, setAccentColor] = useState("#3b82f6");
     const [borderRadiusPx, setBorderRadiusPx] = useState(16);
     const [layoutDirection, setLayoutDirection] = useState<"vertical" | "horizontal">("vertical");
@@ -919,6 +926,30 @@ function App() {
             </div>
         );
 
+        const mockActionsContent = (
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%", boxSizing: "border-box" }}>
+                <span style={{ fontSize: "10px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                    {status.toUpperCase()} Actions
+                </span>
+                <button
+                    onClick={() => addLog(`🔥 Action Button clicked on ${status.toUpperCase()} column!`)}
+                    style={{
+                        background: accentColor,
+                        color: "white",
+                        border: "none",
+                        borderRadius: "6px",
+                        padding: "6px 10px",
+                        fontSize: "11px",
+                        cursor: "pointer",
+                        fontWeight: 600,
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+                    }}
+                >
+                    ➕ Quick Action
+                </button>
+            </div>
+        );
+
         return {
             name: `simulated-column-${status}`,
             class: `pwb-column-${status}`,
@@ -952,7 +983,13 @@ function App() {
             itemPadding,
             itemGap,
             readOnlyMode,
-            sortIdAttribute: sortIdAttribute as any
+            sortIdAttribute: sortIdAttribute as any,
+            enableActionsSection,
+            actionsSectionContent: mockActionsContent,
+            actionsSectionPosition: actionsSectionPosition as any,
+            actionsSectionLayout: actionsSectionLayout as any,
+            actionsSectionSize: actionsSectionSize as any,
+            actionsSectionSizeCustom
         };
     };
 
@@ -1236,7 +1273,13 @@ function App() {
             itemGap: "8px",
             readOnlyMode: false,
             laneClass: `playground-form-${column}`,
-            sortIdAttribute: sortIdAttribute as any
+            sortIdAttribute: sortIdAttribute as any,
+            enableActionsSection: false,
+            actionsSectionContent: undefined,
+            actionsSectionPosition: "before" as any,
+            actionsSectionLayout: "side_by_side" as any,
+            actionsSectionSize: "auto" as any,
+            actionsSectionSizeCustom: "200px"
         };
     };
 
@@ -1705,6 +1748,104 @@ function App() {
                                         <option value="24px">Extra Large (24px)</option>
                                     </select>
                                 </div>
+                            </Section>
+
+                            <Section title="Actions Section Settings">
+                                <Toggle
+                                    label="Enable Actions Section"
+                                    value={enableActionsSection}
+                                    onChange={setEnableActionsSection}
+                                />
+                                {enableActionsSection && (
+                                    <>
+                                        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                            <span style={{ fontSize: "13px", color: "#94a3b8" }}>Position</span>
+                                            <select
+                                                value={actionsSectionPosition}
+                                                onChange={e => setActionsSectionPosition(e.target.value as any)}
+                                                style={{
+                                                    width: "100%",
+                                                    padding: "8px",
+                                                    borderRadius: "8px",
+                                                    background: "#0f172a",
+                                                    border: "1.5px solid #1e293b",
+                                                    color: "#f1f5f9",
+                                                    fontSize: "13px",
+                                                    cursor: "pointer"
+                                                }}
+                                            >
+                                                <option value="before">Before Container (Front/Left/Top)</option>
+                                                <option value="after">After Container (Back/Right/Bottom)</option>
+                                            </select>
+                                        </div>
+                                        <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px" }}>
+                                            <span style={{ fontSize: "13px", color: "#94a3b8" }}>Layout Style</span>
+                                            <select
+                                                value={actionsSectionLayout}
+                                                onChange={e => setActionsSectionLayout(e.target.value as any)}
+                                                style={{
+                                                    width: "100%",
+                                                    padding: "8px",
+                                                    borderRadius: "8px",
+                                                    background: "#0f172a",
+                                                    border: "1.5px solid #1e293b",
+                                                    color: "#f1f5f9",
+                                                    fontSize: "13px",
+                                                    cursor: "pointer"
+                                                }}
+                                            >
+                                                <option value="side_by_side">Side-by-Side (Row)</option>
+                                                <option value="stacked">Stacked (Column)</option>
+                                            </select>
+                                        </div>
+                                        <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px" }}>
+                                            <span style={{ fontSize: "13px", color: "#94a3b8" }}>Section Size Ratio</span>
+                                            <select
+                                                value={actionsSectionSize}
+                                                onChange={e => setActionsSectionSize(e.target.value as any)}
+                                                style={{
+                                                    width: "100%",
+                                                    padding: "8px",
+                                                    borderRadius: "8px",
+                                                    background: "#0f172a",
+                                                    border: "1.5px solid #1e293b",
+                                                    color: "#f1f5f9",
+                                                    fontSize: "13px",
+                                                    cursor: "pointer"
+                                                }}
+                                            >
+                                                <option value="auto">Auto (Fit Content)</option>
+                                                <option value="ratio_15">15% Width/Height</option>
+                                                <option value="ratio_20">20% Width/Height</option>
+                                                <option value="ratio_25">25% Width/Height</option>
+                                                <option value="ratio_30">30% Width/Height</option>
+                                                <option value="ratio_40">40% Width/Height</option>
+                                                <option value="custom">Custom Size</option>
+                                            </select>
+                                        </div>
+                                        {actionsSectionSize === "custom" && (
+                                            <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px" }}>
+                                                <span style={{ fontSize: "13px", color: "#94a3b8" }}>Custom Size Value</span>
+                                                <input
+                                                    type="text"
+                                                    value={actionsSectionSizeCustom}
+                                                    onChange={e => setActionsSectionSizeCustom(e.target.value)}
+                                                    style={{
+                                                        width: "100%",
+                                                        padding: "8px 12px",
+                                                        borderRadius: "8px",
+                                                        border: "1.5px solid #1e293b",
+                                                        background: "#0f172a",
+                                                        color: "#f1f5f9",
+                                                        fontSize: "13px",
+                                                        boxSizing: "border-box",
+                                                        outline: "none"
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+                                    </>
+                                )}
                             </Section>
 
                             <Section title="Aesthetics">

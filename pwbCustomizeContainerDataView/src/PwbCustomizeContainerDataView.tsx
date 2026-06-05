@@ -56,7 +56,13 @@ export function PwbCustomizeContainerDataView({
     laneTitle,
     laneTitleContent,
     allowedSourceColumns,
-    itemAllowDropExpression
+    itemAllowDropExpression,
+    enableActionsSection,
+    actionsSectionContent,
+    actionsSectionPosition,
+    actionsSectionLayout,
+    actionsSectionSize,
+    actionsSectionSizeCustom
 }: PwbCustomizeContainerDataViewContainerProps): ReactElement {
     // 1. Sanitize Aesthetics Configuration
     const colorRegex =
@@ -94,7 +100,27 @@ export function PwbCustomizeContainerDataView({
     // Gap override — only set when prop is explicitly provided.
     const gapOverrideStyle = itemGap ? ({ "--pwb-gap-override": safeItemGap } as React.CSSProperties) : {};
 
-    const containerOverrideStyle = { ...accentOverrideStyle, ...radiusOverrideStyle, ...gapOverrideStyle };
+    // Resolve actions size styling variables
+    let resolvedActionsSize = "auto";
+    if (enableActionsSection) {
+        if (actionsSectionSize === "custom") {
+            resolvedActionsSize = actionsSectionSizeCustom || "200px";
+        } else if (actionsSectionSize && actionsSectionSize.startsWith("ratio_")) {
+            const pct = actionsSectionSize.replace("ratio_", "");
+            resolvedActionsSize = `${pct}%`;
+        }
+    }
+
+    const actionsSizeStyle = enableActionsSection
+        ? ({ "--pwb-actions-size-resolved": resolvedActionsSize } as React.CSSProperties)
+        : {};
+
+    const containerOverrideStyle = {
+        ...accentOverrideStyle,
+        ...radiusOverrideStyle,
+        ...gapOverrideStyle,
+        ...actionsSizeStyle
+    };
 
     // 2. Handle Loading & Empty States Elegantly
     const [transitionTrigger, setTransitionTrigger] = useState(0);
@@ -348,31 +374,80 @@ export function PwbCustomizeContainerDataView({
 
     const ariaLabel = enableLaneTitle && laneTitle?.value ? laneTitle.value : "PWB Drag and Drop Container";
 
-    const renderInnerContent = (): ReactElement => (
-        <>
-            {enableLaneTitle && (
-                <div className="pwb-lane-title-section">
-                    {laneTitle && laneTitle.value && <h3 className="pwb-lane-title-text">{laneTitle.value}</h3>}
-                    {laneTitleContent && <div className="pwb-lane-title-content">{laneTitleContent}</div>}
-                </div>
-            )}
+    const renderActionsSection = (): ReactElement | null => {
+        if (!enableActionsSection || !actionsSectionContent) {
+            return null;
+        }
+        return <div className="pwb-actions-section-card">{actionsSectionContent}</div>;
+    };
 
-            {enableHeader && headerContent && <div className="pwb-section-header">{headerContent}</div>}
+    const renderInnerContent = (): ReactElement => {
+        const listContent = (
+            <>
+                {enableLaneTitle && (
+                    <div className="pwb-lane-title-section">
+                        {laneTitle && laneTitle.value && <h3 className="pwb-lane-title-text">{laneTitle.value}</h3>}
+                        {laneTitleContent && <div className="pwb-lane-title-content">{laneTitleContent}</div>}
+                    </div>
+                )}
 
-            {isLoading ? (
-                <div className="pwb-loading-state" style={containerOverrideStyle}>
-                    <div className="pwb-spinner"></div>
-                    <span>Loading options...</span>
-                </div>
-            ) : !hasItems ? (
-                <div
-                    className="pwb-empty-state-container"
-                    style={{ borderRadius: safeBorderRadius, ...containerOverrideStyle }}
-                >
+                {enableHeader && headerContent && <div className="pwb-section-header">{headerContent}</div>}
+
+                {isLoading ? (
+                    <div className="pwb-loading-state" style={containerOverrideStyle}>
+                        <div className="pwb-spinner"></div>
+                        <span>Loading options...</span>
+                    </div>
+                ) : !hasItems ? (
+                    <div
+                        className="pwb-empty-state-container"
+                        style={{ borderRadius: safeBorderRadius, ...containerOverrideStyle }}
+                    >
+                        <DragContainer
+                            containerId={containerId}
+                            items={[]}
+                            renderItem={() => <div />}
+                            onOrderChange={handleOrderChange}
+                            accentColor={safeAccentColor}
+                            borderRadius={safeBorderRadius}
+                            layoutDirection={layoutDirection}
+                            dragHandleDisplay={dragHandleDisplay}
+                            enableKanban={enableKanban}
+                            dragGroup={dragGroup}
+                            columnValue={columnValue}
+                            onDropExternal={handleDropExternal}
+                            onRemoveItemExternal={handleRemoveItemExternal}
+                            isDropAllowed={isDropAllowed}
+                            themePreset={themePreset}
+                            darkModeBehavior={darkModeBehavior}
+                            itemPadding={safeItemPadding}
+                            itemGap={safeItemGap}
+                            readOnlyMode={readOnlyMode}
+                        />
+                        <div className="pwb-empty-state-content-overlay">
+                            <svg
+                                viewBox="0 0 24 24"
+                                width="48"
+                                height="48"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                className="pwb-empty-icon"
+                            >
+                                <rect x="3" y="3" width="18" height="18" rx="2" strokeDasharray="4 4" />
+                                <path d="M8 12h8M12 8v8" strokeLinecap="round" />
+                            </svg>
+                            <div className="pwb-empty-title">No items inside container</div>
+                            <div className="pwb-empty-subtitle">
+                                Drop some widgets here or drag cards into this column.
+                            </div>
+                        </div>
+                    </div>
+                ) : (
                     <DragContainer
                         containerId={containerId}
-                        items={[]}
-                        renderItem={() => <div />}
+                        items={dragItems}
+                        renderItem={rawObject => customItemContent.get(rawObject) as ReactElement}
                         onOrderChange={handleOrderChange}
                         accentColor={safeAccentColor}
                         borderRadius={safeBorderRadius}
@@ -390,52 +465,29 @@ export function PwbCustomizeContainerDataView({
                         itemGap={safeItemGap}
                         readOnlyMode={readOnlyMode}
                     />
-                    <div className="pwb-empty-state-content-overlay">
-                        <svg
-                            viewBox="0 0 24 24"
-                            width="48"
-                            height="48"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            className="pwb-empty-icon"
-                        >
-                            <rect x="3" y="3" width="18" height="18" rx="2" strokeDasharray="4 4" />
-                            <path d="M8 12h8M12 8v8" strokeLinecap="round" />
-                        </svg>
-                        <div className="pwb-empty-title">No items inside container</div>
-                        <div className="pwb-empty-subtitle">Drop some widgets here or drag cards into this column.</div>
+                )}
+
+                {enableFooter && footerContent && <div className="pwb-section-footer">{footerContent}</div>}
+
+                {enableMainFooter && mainFooterContent && <div className="pwb-main-footer">{mainFooterContent}</div>}
+            </>
+        );
+
+        if (enableActionsSection) {
+            const classes = `pwb-actions-layout-container pwb-actions-layout-${actionsSectionLayout} pwb-actions-pos-${actionsSectionPosition}`;
+            return (
+                <div className={classes}>
+                    {actionsSectionPosition === "before" && renderActionsSection()}
+                    <div style={{ minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column", width: "100%" }}>
+                        {listContent}
                     </div>
+                    {actionsSectionPosition === "after" && renderActionsSection()}
                 </div>
-            ) : (
-                <DragContainer
-                    containerId={containerId}
-                    items={dragItems}
-                    renderItem={rawObject => customItemContent.get(rawObject) as ReactElement}
-                    onOrderChange={handleOrderChange}
-                    accentColor={safeAccentColor}
-                    borderRadius={safeBorderRadius}
-                    layoutDirection={layoutDirection}
-                    dragHandleDisplay={dragHandleDisplay}
-                    enableKanban={enableKanban}
-                    dragGroup={dragGroup}
-                    columnValue={columnValue}
-                    onDropExternal={handleDropExternal}
-                    onRemoveItemExternal={handleRemoveItemExternal}
-                    isDropAllowed={isDropAllowed}
-                    themePreset={themePreset}
-                    darkModeBehavior={darkModeBehavior}
-                    itemPadding={safeItemPadding}
-                    itemGap={safeItemGap}
-                    readOnlyMode={readOnlyMode}
-                />
-            )}
+            );
+        }
 
-            {enableFooter && footerContent && <div className="pwb-section-footer">{footerContent}</div>}
-
-            {enableMainFooter && mainFooterContent && <div className="pwb-main-footer">{mainFooterContent}</div>}
-        </>
-    );
+        return listContent;
+    };
 
     if (enableOuterFooter) {
         return (

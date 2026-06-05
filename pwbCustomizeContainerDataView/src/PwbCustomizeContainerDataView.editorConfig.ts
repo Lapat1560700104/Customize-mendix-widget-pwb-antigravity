@@ -137,6 +137,17 @@ export function getProperties(
     if (!values.enableOuterFooter) {
         propsToHide.push("outerFooterContent");
     }
+    if (!values.enableActionsSection) {
+        propsToHide.push(
+            "actionsSectionContent",
+            "actionsSectionPosition",
+            "actionsSectionLayout",
+            "actionsSectionSize",
+            "actionsSectionSizeCustom"
+        );
+    } else if (values.actionsSectionSize !== "custom") {
+        propsToHide.push("actionsSectionSizeCustom");
+    }
 
     if (propsToHide.length > 0) {
         const filterProperties = (groups: PropertyGroup[]): PropertyGroup[] => {
@@ -202,6 +213,28 @@ export function check(values: PwbCustomizeContainerDataViewPreviewProps): Proble
                 severity: "error",
                 message: "Save Delay must be a positive integer in milliseconds (use 0 for immediate sync)."
             });
+        }
+    }
+
+    if (values.enableActionsSection) {
+        if (values.actionsSectionSize === "custom") {
+            if (!values.actionsSectionSizeCustom || values.actionsSectionSizeCustom.trim() === "") {
+                errors.push({
+                    property: "actionsSectionSizeCustom",
+                    severity: "error",
+                    message: "Custom Size Value is required when Size Ratio is set to Custom."
+                });
+            } else if (
+                !/^(auto|min-content|max-content|fit-content|(\d+(\.\d+)?(px|%|em|rem|vh|vw|fr|ch|ex|in|cm|mm|pt|pc)))$/i.test(
+                    values.actionsSectionSizeCustom.trim()
+                )
+            ) {
+                errors.push({
+                    property: "actionsSectionSizeCustom",
+                    severity: "warning",
+                    message: "Please enter a valid CSS length value (e.g., '200px', '20%', '15rem', '1fr')."
+                });
+            }
         }
     }
 
@@ -322,14 +355,84 @@ export function getPreview(
         child: itemRow
     };
 
-    // ── Outer container: header + datasource row ──
+    let contentLayout: PreviewProps;
+
+    if (values.enableActionsSection) {
+        const actionsSectionPreview: PreviewProps = {
+            type: "DropZone",
+            property: values.actionsSectionContent as object,
+            placeholder: "⬇ Drop actions/buttons here",
+            showDataSourceHeader: false,
+            grow: 1
+        };
+
+        let actionsGrow = 1;
+        let contentGrow = 3;
+
+        if (values.actionsSectionSize === "ratio_15") {
+            actionsGrow = 15;
+            contentGrow = 85;
+        } else if (values.actionsSectionSize === "ratio_20") {
+            actionsGrow = 20;
+            contentGrow = 80;
+        } else if (values.actionsSectionSize === "ratio_25") {
+            actionsGrow = 25;
+            contentGrow = 75;
+        } else if (values.actionsSectionSize === "ratio_30") {
+            actionsGrow = 30;
+            contentGrow = 70;
+        } else if (values.actionsSectionSize === "ratio_40") {
+            actionsGrow = 40;
+            contentGrow = 60;
+        }
+
+        const actionsCardPreview: ContainerProps = {
+            type: "Container",
+            borders: true,
+            borderRadius: 8,
+            borderWidth: 1,
+            padding: 8,
+            backgroundColor: "#f8fafc",
+            children: [actionsSectionPreview],
+            grow: actionsGrow
+        };
+
+        const listContainerWrapper: ContainerProps = {
+            type: "Container",
+            children: [datasourceWrapper],
+            grow: contentGrow
+        };
+
+        if (values.actionsSectionLayout === "side_by_side") {
+            contentLayout = {
+                type: "RowLayout",
+                columnSize: "grow",
+                children:
+                    values.actionsSectionPosition === "before"
+                        ? [actionsCardPreview, listContainerWrapper]
+                        : [listContainerWrapper, actionsCardPreview]
+            };
+        } else {
+            contentLayout = {
+                type: "Container",
+                children:
+                    values.actionsSectionPosition === "before"
+                        ? [actionsCardPreview, listContainerWrapper]
+                        : [listContainerWrapper, actionsCardPreview]
+            };
+        }
+    } else {
+        contentLayout = datasourceWrapper;
+    }
+
+    // ── Outer container: header + content layout ──
     return {
         type: "Container",
         borders: true,
         borderRadius: 10,
         borderWidth: 1,
         padding: 8,
-        children: [headerBar, datasourceWrapper]
+        children: [headerBar, contentLayout]
     };
 }
 

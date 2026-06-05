@@ -44,6 +44,10 @@ export interface DragContainerProps {
     hoverRevealActions?: boolean;
     animationSpeed?: number;
     wobbleStrength?: Big;
+    enable2DGrid?: boolean;
+    vibrateDragStart?: number;
+    vibrateDrop?: number;
+    vibrateError?: number;
 }
 
 interface DragRegistry {
@@ -107,7 +111,11 @@ export function DragContainer({
     dragGhostShadow,
     hoverRevealActions = false,
     animationSpeed,
-    wobbleStrength
+    wobbleStrength,
+    enable2DGrid = false,
+    vibrateDragStart,
+    vibrateDrop,
+    vibrateError
 }: DragContainerProps): ReactElement {
     const [orderedItems, setOrderedItems] = useState<DragItem[]>([]);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -141,7 +149,8 @@ export function DragContainer({
         columnValue,
         onRemoveItemExternal,
         containerId,
-        containerRef
+        containerRef,
+        enable2DGrid
     });
 
     // 2. Pointer Drag Hook
@@ -171,7 +180,11 @@ export function DragContainer({
         containerRef,
         dragGhostScale,
         dragGhostOpacity,
-        dragGhostShadow
+        dragGhostShadow,
+        enable2DGrid,
+        vibrateDragStart,
+        vibrateDrop,
+        vibrateError
     });
 
     // Sync state when items source updates from Mendix
@@ -430,8 +443,10 @@ export function DragContainer({
             data-items-count={orderedItems.length}
             data-drop-denied={readOnlyMode || dropDenied ? "true" : "false"}
             className={`pwb-drag-container pwb-direction-${layoutDirection} ${themeClass} ${modeClass} ${
-                orderedItems.length === 0 ? "pwb-empty-container-dropzone" : ""
-            } ${dropDenied ? "pwb-lane-denied" : ""} ${readOnlyMode ? "pwb-read-only-mode" : ""}`}
+                enable2DGrid ? "pwb-2d-grid" : ""
+            } ${orderedItems.length === 0 ? "pwb-empty-container-dropzone" : ""} ${
+                dropDenied ? "pwb-lane-denied" : ""
+            } ${readOnlyMode ? "pwb-read-only-mode" : ""}`}
             style={
                 {
                     "--accent-color": accentColor,

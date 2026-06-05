@@ -111,6 +111,10 @@
                     <enumerationValue key="horizontal">Horizontal Grid Row</enumerationValue>
                 </enumerationValues>
             </property>
+            <property key="enable2DGrid" type="boolean" defaultValue="false">
+                <caption>Enable 2D Grid Drag &amp; Drop</caption>
+                <description>Enable 2D spatial reordering (both rows and columns) for grid layouts instead of 1D linear reordering.</description>
+            </property>
             <property key="dragHandleDisplay" type="enumeration" defaultValue="left">
                 <caption>Drag Handle Position</caption>
                 <description>Choose whether to show the drag handle icon on the left, or hide it entirely (dragging the whole card).</description>
@@ -296,6 +300,21 @@
             <property key="saveDelay" type="integer" required="true" defaultValue="0">
                 <caption>Save Delay (ms)</caption>
                 <description>Debounce saving to Mendix attribute and triggering actions in milliseconds. Reduces database saves during dragging (e.g. 300ms).</description>
+            </property>
+        </propertyGroup>
+
+        <propertyGroup caption="Haptic Feedback Settings">
+            <property key="vibrateDragStart" type="integer" defaultValue="15">
+                <caption>Drag Start Vibration (ms)</caption>
+                <description>Vibration duration in milliseconds when drag starts on supporting mobile devices. Use 0 to disable.</description>
+            </property>
+            <property key="vibrateDrop" type="integer" defaultValue="10">
+                <caption>Drop Vibration (ms)</caption>
+                <description>Vibration duration in milliseconds when card is successfully dropped on supporting mobile devices. Use 0 to disable.</description>
+            </property>
+            <property key="vibrateError" type="integer" defaultValue="30">
+                <caption>Error Vibration (ms)</caption>
+                <description>Vibration duration in milliseconds when drop is denied or canceled on supporting mobile devices. Use 0 to disable.</description>
             </property>
         </propertyGroup>
     </properties>

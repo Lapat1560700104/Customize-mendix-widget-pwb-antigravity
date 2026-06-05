@@ -507,6 +507,12 @@ function App() {
     const [doneOrderIds, setDoneOrderIds] = useState<string>("task-4");
     const [archivedOrderIds, setArchivedOrderIds] = useState<string>("task-6");
 
+    // Phase 2 Advanced & Haptic State
+    const [enable2DGrid, setEnable2DGrid] = useState<boolean>(false);
+    const [vibrateDragStart, setVibrateDragStart] = useState<number>(15);
+    const [vibrateDrop, setVibrateDrop] = useState<number>(10);
+    const [vibrateError, setVibrateError] = useState<number>(30);
+
     // Form Builder Simulation State (New)
     const [formTitle, setFormTitle] = useState<string>("แบบฟอร์มติดต่อสอบถาม (Contact Form)");
     const [formFields, setFormFields] = useState<FormField[]>([]);
@@ -531,6 +537,10 @@ function App() {
         setInProgressOrderIds("task-2,task-5");
         setDoneOrderIds("task-4");
         setArchivedOrderIds("task-6");
+        setEnable2DGrid(false);
+        setVibrateDragStart(15);
+        setVibrateDrop(10);
+        setVibrateError(30);
         setLogs([]);
         addLog("Database reset to defaults.");
     };
@@ -1013,7 +1023,11 @@ function App() {
             dragGhostShadow,
             hoverRevealActions,
             animationSpeed,
-            wobbleStrength: new Big(wobbleStrength)
+            wobbleStrength: new Big(wobbleStrength),
+            enable2DGrid,
+            vibrateDragStart,
+            vibrateDrop,
+            vibrateError
         };
     };
 
@@ -1313,7 +1327,11 @@ function App() {
             dragGhostShadow,
             hoverRevealActions,
             animationSpeed,
-            wobbleStrength: new Big(wobbleStrength)
+            wobbleStrength: new Big(wobbleStrength),
+            enable2DGrid,
+            vibrateDragStart,
+            vibrateDrop,
+            vibrateError
         };
     };
 
@@ -2061,6 +2079,44 @@ function App() {
                                     max={300}
                                     onChange={v => setWobbleStrength(v / 100)}
                                     unit="%"
+                                />
+                            </Section>
+
+                            <Section title="Advanced & Haptic Settings">
+                                <Toggle
+                                    label="Enable 2D Grid Drag & Drop"
+                                    value={enable2DGrid}
+                                    onChange={v => {
+                                        setEnable2DGrid(v);
+                                        if (v) {
+                                            setLayoutDirection("horizontal");
+                                        }
+                                        addLog(`🎛️ [2D Grid Drag] → ${v ? "Enabled (Forcing Horizontal Layout)" : "Disabled"}`);
+                                    }}
+                                />
+                                <Slider
+                                    label="Drag Start Vibration"
+                                    value={vibrateDragStart}
+                                    min={0}
+                                    max={500}
+                                    onChange={setVibrateDragStart}
+                                    unit="ms"
+                                />
+                                <Slider
+                                    label="Drop Success Vibration"
+                                    value={vibrateDrop}
+                                    min={0}
+                                    max={500}
+                                    onChange={setVibrateDrop}
+                                    unit="ms"
+                                />
+                                <Slider
+                                    label="Drop Denied/Error Vibration"
+                                    value={vibrateError}
+                                    min={0}
+                                    max={500}
+                                    onChange={setVibrateError}
+                                    unit="ms"
                                 />
                             </Section>
 

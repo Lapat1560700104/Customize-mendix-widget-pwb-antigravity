@@ -22,6 +22,10 @@ interface UsePointerDragProps {
     dragGhostScale?: Big;
     dragGhostOpacity?: Big;
     dragGhostShadow?: string;
+    enable2DGrid: boolean;
+    vibrateDragStart?: number;
+    vibrateDrop?: number;
+    vibrateError?: number;
 }
 
 const getScrollParent = (node: HTMLElement | null): HTMLElement | null => {
@@ -43,6 +47,12 @@ const getScrollParent = (node: HTMLElement | null): HTMLElement | null => {
 const triggerVibrate = (pattern: number | number[]): void => {
     if (typeof window !== "undefined" && window.navigator && typeof window.navigator.vibrate === "function") {
         try {
+            if (typeof pattern === "number" && pattern <= 0) {
+                return;
+            }
+            if (Array.isArray(pattern) && (pattern.length === 0 || pattern[0] <= 0)) {
+                return;
+            }
             window.navigator.vibrate(pattern);
         } catch {
             // Ignore error
@@ -80,7 +90,11 @@ export function usePointerDrag({
     containerRef,
     dragGhostScale,
     dragGhostOpacity,
-    dragGhostShadow
+    dragGhostShadow,
+    enable2DGrid,
+    vibrateDragStart,
+    vibrateDrop,
+    vibrateError
 }: UsePointerDragProps): UsePointerDragResult {
     const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -143,7 +157,7 @@ export function usePointerDrag({
         };
         document.addEventListener("touchmove", preventDefaultTouch, { passive: false });
 
-        triggerVibrate(15);
+        triggerVibrate(vibrateDragStart ?? 15);
 
         // Mount current item parameters to the global dragging registry
         window.__pwbDragRegistry = {
@@ -200,7 +214,7 @@ export function usePointerDrag({
                 setDraggingIndex(draggingIndexState);
                 document.body.classList.add("pwb-drag-active-body");
 
-                triggerVibrate(15);
+                triggerVibrate(vibrateDragStart ?? 15);
 
                 // Construct premium glassmorphic ghost card clone
                 ghostEl = document.createElement("div");
@@ -377,7 +391,30 @@ export function usePointerDrag({
                 }
 
                 const hoverContainer = elementUnder.closest(".pwb-drag-container") as HTMLElement | null;
-                const hoverCard = elementUnder.closest(".pwb-draggable-row-item") as HTMLElement | null;
+                let hoverCard = elementUnder.closest(".pwb-draggable-row-item") as HTMLElement | null;
+
+                if (enable2DGrid && hoverContainer) {
+                    const cards = Array.from(
+                        hoverContainer.querySelectorAll(".pwb-draggable-row-item:not(.pwb-pointer-drag-ghost)")
+                    ) as HTMLElement[];
+                    let closestCard: HTMLElement | null = null;
+                    let minDistance = Infinity;
+                    cards.forEach(card => {
+                        const cardRect = card.getBoundingClientRect();
+                        const centerX = cardRect.left + cardRect.width / 2;
+                        const centerY = cardRect.top + cardRect.height / 2;
+                        const dist = Math.sqrt(
+                            Math.pow(moveEvent.clientX - centerX, 2) + Math.pow(moveEvent.clientY - centerY, 2)
+                        );
+                        if (dist < minDistance) {
+                            minDistance = dist;
+                            closestCard = card;
+                        }
+                    });
+                    if (closestCard) {
+                        hoverCard = closestCard;
+                    }
+                }
 
                 // Handle pointer hover crossing container boundaries
                 if (hoverContainer !== lastTargetContainer) {
@@ -467,8 +504,34 @@ export function usePointerDrag({
                         let finalIndex = 0;
                         if (pointEl) {
                             const hoverContainer = pointEl.closest(".pwb-drag-container") as HTMLElement | null;
-                            const hoverCard = pointEl.closest(".pwb-draggable-row-item") as HTMLElement | null;
+                            let hoverCard = pointEl.closest(".pwb-draggable-row-item") as HTMLElement | null;
                             if (hoverContainer) {
+                                if (enable2DGrid) {
+                                    const cards = Array.from(
+                                        hoverContainer.querySelectorAll(
+                                            ".pwb-draggable-row-item:not(.pwb-pointer-drag-ghost)"
+                                        )
+                                    ) as HTMLElement[];
+                                    let closestCard: HTMLElement | null = null;
+                                    let minDistance = Infinity;
+                                    cards.forEach(card => {
+                                        const cardRect = card.getBoundingClientRect();
+                                        const centerX = cardRect.left + cardRect.width / 2;
+                                        const centerY = cardRect.top + cardRect.height / 2;
+                                        const dist = Math.sqrt(
+                                            Math.pow(upEvent.clientX - centerX, 2) +
+                                                Math.pow(upEvent.clientY - centerY, 2)
+                                        );
+                                        if (dist < minDistance) {
+                                            minDistance = dist;
+                                            closestCard = card;
+                                        }
+                                    });
+                                    if (closestCard) {
+                                        hoverCard = closestCard;
+                                    }
+                                }
+
                                 if (hoverCard) {
                                     const idxAttr = hoverCard.getAttribute("data-index");
                                     if (idxAttr !== null) {
@@ -487,7 +550,7 @@ export function usePointerDrag({
                             // Drop in SAME Container:
                             orderChanged = currentOrderIds.some((id, idx) => id !== originalOrderIds[idx]);
                             if (orderChanged) {
-                                triggerVibrate(10);
+                                triggerVibrate(vibrateDrop ?? 10);
                                 onOrderChange(currentOrderIds);
                             }
                         } else {
@@ -502,7 +565,7 @@ export function usePointerDrag({
                                 !isDenied &&
                                 (!targetDragGroup || targetDragGroup === registry.sourceDragGroup)
                             ) {
-                                triggerVibrate(10);
+                                triggerVibrate(vibrateDrop ?? 10);
                                 lastTargetContainer.dispatchEvent(
                                     new CustomEvent("pwb-pointer-drop-item", {
                                         detail: {
@@ -520,6 +583,10 @@ export function usePointerDrag({
                     if (!orderChanged) {
                         // Drop canceled or dropped in same slot: trigger wobble spring shake
                         setWobblingItemId(registry.itemId);
+                        const errorVibe = vibrateError ?? 30;
+                        if (errorVibe > 0) {
+                            triggerVibrate([errorVibe, 50, errorVibe]);
+                        }
                         setTimeout(() => setWobblingItemId(null), 400);
                     }
                 }

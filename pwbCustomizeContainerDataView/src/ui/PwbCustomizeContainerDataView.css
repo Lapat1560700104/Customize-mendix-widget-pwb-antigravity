@@ -802,3 +802,17 @@
     border-color: #ffffff !important;
 }
 
+/* 2D Grid Sorting Layout Adaptation */
+.pwb-drag-container.pwb-2d-grid {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: var(--pwb-item-gap, 12px) !important;
+}
+
+/* In 2D Grid mode, allow cards to auto-wrap responsively instead of stretching to full width */
+.pwb-drag-container.pwb-2d-grid .pwb-draggable-row-item {
+    width: auto !important;
+    flex: 1 1 calc(250px - var(--pwb-item-gap, 12px)) !important;
+    max-width: 100% !important;
+}
+

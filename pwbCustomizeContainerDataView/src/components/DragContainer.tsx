@@ -1,4 +1,4 @@
-import { ReactElement, useState, useEffect, useRef, ReactNode } from "react";
+import { ReactElement, useState, useEffect, useRef, ReactNode, useLayoutEffect } from "react";
 import { ObjectItem, GUID } from "mendix";
 import { useKeyboardDrag } from "../hooks/useKeyboardDrag";
 import { usePointerDrag } from "../hooks/usePointerDrag";
@@ -119,6 +119,84 @@ export function DragContainer({
 }: DragContainerProps): ReactElement {
     const [orderedItems, setOrderedItems] = useState<DragItem[]>([]);
     const containerRef = useRef<HTMLDivElement>(null);
+    const prevPositionsRef = useRef<Map<string, DOMRect>>(new Map());
+
+    useLayoutEffect(() => {
+        if (!containerRef.current) {
+            return;
+        }
+
+        const children = Array.from(containerRef.current.querySelectorAll("[data-flip-id]")) as HTMLElement[];
+
+        const firstRects = prevPositionsRef.current;
+        const lastRects = new Map<string, DOMRect>();
+
+        // 1. Measure Last positions (untransformed for absolute accuracy)
+        children.forEach(child => {
+            const flipId = child.getAttribute("data-flip-id");
+            if (flipId) {
+                // Clear transform and transition temporarily to measure natural target position
+                const prevTransform = child.style.transform;
+                const prevTransition = child.style.transition;
+
+                child.style.transform = "";
+                child.style.transition = "none";
+
+                lastRects.set(flipId, child.getBoundingClientRect());
+
+                // Restore previous styles
+                child.style.transform = prevTransform;
+                child.style.transition = prevTransition;
+            }
+        });
+
+        // 2. Compare and Invert
+        children.forEach(child => {
+            const flipId = child.getAttribute("data-flip-id");
+            if (!flipId) {
+                return;
+            }
+
+            const firstRect = firstRects.get(flipId);
+            const lastRect = lastRects.get(flipId);
+
+            if (firstRect && lastRect) {
+                const deltaX = firstRect.left - lastRect.left;
+                const deltaY = firstRect.top - lastRect.top;
+
+                if (deltaX !== 0 || deltaY !== 0) {
+                    // Invert: position element back to its start location instantly
+                    child.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0)`;
+                    child.style.transition = "none";
+
+                    // Force repaint
+                    if (child.offsetHeight > 0) {
+                        // Do nothing
+                    }
+
+                    // Play: transition element back to 0,0,0
+                    requestAnimationFrame(() => {
+                        child.style.transition =
+                            "transform var(--pwb-anim-duration, 200ms) cubic-bezier(0.2, 0.8, 0.2, 1)";
+                        child.style.transform = "translate3d(0, 0, 0)";
+                    });
+
+                    // Clean up styles
+                    const handleTransitionEnd = (e: TransitionEvent): void => {
+                        if (e.propertyName === "transform") {
+                            child.style.transform = "";
+                            child.style.transition = "";
+                            child.removeEventListener("transitionend", handleTransitionEnd);
+                        }
+                    };
+                    child.addEventListener("transitionend", handleTransitionEnd);
+                }
+            }
+        });
+
+        // 3. Store positions for next render
+        prevPositionsRef.current = lastRects;
+    }, [orderedItems]);
 
     // Resolve actions size styling variables
     let resolvedActionsSize = "auto";
@@ -510,6 +588,7 @@ export function DragContainer({
                             <div
                                 key={item.id}
                                 data-index={idx}
+                                data-flip-id={item.id}
                                 tabIndex={readOnlyMode ? undefined : 0}
                                 role="listitem"
                                 aria-grabbed={readOnlyMode ? undefined : isGrabbed}

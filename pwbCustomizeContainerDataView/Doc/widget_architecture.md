@@ -62,20 +62,32 @@ src/
 │   • ฟังก์ชัน getPreview() → PreviewProps สำหรับ Studio Pro (Datasource + DropZone)
 │   • ฟังก์ชัน getCustomCaption() → label ที่แสดงใน Studio Pro property panel
 │
+├── PwbCustomizeContainerDataView.icon.png           ← ไอคอนแสดงแทนตัววิจเจตใน Studio Pro
+│
+├── themesettings.json                               ← การตั้งค่าการออกแบบและจัดการชุดสี
+│
 ├── components/
-│   └── DragContainer.tsx                    ← Drag Engine (View Layer)
-│       • จัดการ State ของลำดับ (orderedItems[]) และ Keyboard-Drag States
-│       • Unified Web Pointer Events Engine: รองรับการลากผ่าน Pointer Down/Move/Up/Cancel
-│       • รองรับ Keyboard Navigation (Space/Enter, Arrow Keys, Escape) และ ARIA Accessibility
-│       • ไม่พึ่งพา Library ภายนอก (Zero-dependency)
+│   └── DragContainer.tsx                    ← Drag Engine Container (View Layer)
+│       • จัดการ State ของลำดับ (orderedItems[]) และควบคุม lifecycle การลากวาง
+│       • จัดการแอนิเมชันเปลี่ยนตำแหน่งการ์ดแบบเรียลไทม์ด้วยกลไก FLIP (First, Last, Invert, Play) เพื่อความลื่นไหลสูงสุด
 │       • เรียก onOrderChange() เมื่อจัดลำดับสำเร็จ หรือ onDropExternal() เมื่อวางข้ามตู้ Kanban
-│       • ระบบคำนวณ Auto-scroll บน Container Parent ที่ซ้อนอยู่ (Nested Scroll Parent)
+│
+├── hooks/
+│   ├── useKeyboardDrag.ts                   ← Keyboard Accessibility Hook
+│   │   • จัดการการควบคุมการย้ายตำแหน่งด้วยคีย์บอร์ด (Space/Enter, Arrow Keys, Escape)
+│   │   • ส่งคำประกาศสถานะการจัดลำดับแบบเรียลไทม์ผ่าน ARIA Live Announcements
+│   │   • จัดการโฟกัสติดตาม (Refocus) การ์ดหลังย้ายตำแหน่ง
+│   │
+│   └── usePointerDrag.ts                    ← Pointer Events Drag Hook
+│       • Unified Web Pointer Events Engine: รองรับการลากด้วยเมาส์และนิ้วสัมผัสบนทุกเบราว์เซอร์
+│       • คำนวณความเร็ว (Velocity) ในการลากการ์ด เพื่อส่งผลลัพธ์มุมเอียงพริ้วไหว (Sway/Tilt) ให้ Ghost Card แบบไดนามิก
+│       • ค้นหาตู้ปลายทางข้าม Column (Kanban) และรองรับ Auto-scroll บน Nested Scroll Parent
 │
 └── ui/
-    └── PwbCustomizeContainerDataView.css    ← Styling Layer
-        • CSS Custom Properties: --accent-color, --border-radius, --accent-glow
-        • Animation: pwb-spin (loading), pwb-pulse (empty state)
-        • Responsive breakpoint: 768px (horizontal → column)
+    └── PwbCustomizeContainerDataView.css    ← Styling & Animation Layer
+        • CSS Custom Properties: --accent-color, --border-radius, --accent-glow, --sway-tilt-angle
+        • Animation: pwb-spin (loading), pwb-pulse (empty state), FLIP transition helpers
+        • Styling presets: Modern Rounded, Glassmorphism, Minimalist Flat, Neo-Brutalist
 ```
 
 ---
@@ -146,16 +158,17 @@ handlePointerDown(e, index):
 ผู้ใช้ลากนิ้ว/เมาส์เคลื่อนที่ (pointermove):
   • ตรวจสอบระยะลากพ้น 5px (Threshold)
   • สร้าง Ghost Card (การ์ดกระจกแก้วจำลอง) เคลื่อนตามพิกัด pointer
+  • คำนวณความเร็วในการเคลื่อนที่ (Velocity) เพื่อนำมาเอียงการ์ด (Sway/Tilt) แบบไดนามิก (-6deg ถึง 6deg)
   • ตรวจสอบ Proximity ด้านบน/ล่างของ Nested Scroll Parent หรือ Window เพื่อรัน Auto-Scroll
   • ตรวจสอบ Element ใต้พิกัดลากผ่าน document.elementFromPoint()
-  • ลากผ่านแถวเดิม -> ทำการสลับลำดับใน orderedItems ทันที (มีแอนิเมชันเลื่อนหลบ)
+  • ลากผ่านแถวเดิม -> ทำการสลับลำดับใน orderedItems ทันที โดยใช้กลไก FLIP (First, Last, Invert, Play) เพื่อเลื่อนย้ายแถวการ์ดอย่างนุ่มนวล ไร้รอยสะดุด/วาป (Jank-free Layout Transitions)
   • ลากผ่าน Container อื่น -> ยิง CustomEvent "pwb-drag-over-container" ไปยังตู้เป้าหมาย
          │
          ▼
 ผู้ใช้ปล่อยมือ/เมาส์ (pointerup / pointercancel):
   • releasePointerCapture(e.pointerId)
   • ลบ Ghost Card ออกจาก body
-  • วางใน Container เดิม -> เปรียบเทียบลำดับและยิง onOrderChange()
+  • วางใน Container เดิม -> คืนสภาพตำแหน่งและยิง onOrderChange()
   • วางต่าง Container (Kanban) -> บันทึก window.__pwbActiveTransition และยิง onDropExternal()
   • หากวางที่เดิม/ยกเลิก -> รันแอนิเมชันสั่นดีดกลับ (Wobble Snap-Back)
 ```

@@ -218,10 +218,15 @@ pwbCustomizeContainerDataView/
     ├── PwbCustomizeContainerDataView.tsx                # จุดเชื่อมแกนหลัก React Component
     ├── PwbCustomizeContainerDataView.editorPreview.tsx  # ส่วนพรีวิวโครงสร้างแบบสมจริงใน Studio Pro
     ├── PwbCustomizeContainerDataView.editorConfig.ts    # ชุดตรวจจับกฎปัญหาสำหรับ Studio Pro
+    ├── PwbCustomizeContainerDataView.icon.png           # ไอคอนแสดงแทนตัววิจเจตใน Studio Pro
+    ├── themesettings.json                               # การตั้งค่าการออกแบบและจัดการชุดสี
     ├── components/
-    │   └── DragContainer.tsx      # กลไกระบบ Drag & Drop, Web Pointer Events และ Keyboard/Accessibility Engine
+    │   └── DragContainer.tsx      # กลไกระบบ Drag & Drop และกลไกสไลด์แอนิเมชันแบบ FLIP
+    ├── hooks/
+    │   ├── useKeyboardDrag.ts     # Hook จัดการควบคุมและเปลี่ยนลำดับผ่านคีย์บอร์ด (Accessibility)
+    │   └── usePointerDrag.ts      # Hook จัดการ Pointer Events (เมาส์/สัมผัส) พร้อมการเอียงการ์ดตามความเร็วลาก (Sway)
     └── ui/
-        └── PwbCustomizeContainerDataView.css  # ชุด CSS และ CSS Variables สำหรับตกแต่งรูปลักษณ์
+        └── PwbCustomizeContainerDataView.css  # ชุด CSS และ CSS Variables สำหรับตกแต่งรูปลักษณ์และสไตล์พรีเซ็ต
 ```
 
 ---

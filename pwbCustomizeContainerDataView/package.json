@@ -1,7 +1,7 @@
 {
   "name": "pwbcustomizecontainerdataview",
   "widgetName": "PwbCustomizeContainerDataView",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Premium highly customizable DataView Container with dynamic Drag and Drop sorting.",
   "copyright": "PWB 2026",
   "author": "Antigravity",

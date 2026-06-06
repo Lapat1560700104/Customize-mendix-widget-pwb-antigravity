@@ -131,26 +131,38 @@ export function DragContainer({
         const firstRects = prevPositionsRef.current;
         const lastRects = new Map<string, DOMRect>();
 
-        // 1. Measure Last positions (untransformed for absolute accuracy)
+        // 1. Write phase: clear transforms and transitions for ALL children to avoid Layout Thrashing
+        const savedStyles = new Map<HTMLElement, { transform: string; transition: string }>();
         children.forEach(child => {
             const flipId = child.getAttribute("data-flip-id");
             if (flipId) {
-                // Clear transform and transition temporarily to measure natural target position
-                const prevTransform = child.style.transform;
-                const prevTransition = child.style.transition;
-
+                savedStyles.set(child, {
+                    transform: child.style.transform,
+                    transition: child.style.transition
+                });
                 child.style.transform = "";
                 child.style.transition = "none";
-
-                lastRects.set(flipId, child.getBoundingClientRect());
-
-                // Restore previous styles
-                child.style.transform = prevTransform;
-                child.style.transition = prevTransition;
             }
         });
 
-        // 2. Compare and Invert
+        // 2. Read phase: measure natural target positions in one unified batch
+        children.forEach(child => {
+            const flipId = child.getAttribute("data-flip-id");
+            if (flipId) {
+                lastRects.set(flipId, child.getBoundingClientRect());
+            }
+        });
+
+        // 3. Write phase: restore original styles to preserve ongoing layouts
+        children.forEach(child => {
+            const styles = savedStyles.get(child);
+            if (styles) {
+                child.style.transform = styles.transform;
+                child.style.transition = styles.transition;
+            }
+        });
+
+        // 4. Compare and Animate using Web Animations API (WAAPI)
         children.forEach(child => {
             const flipId = child.getAttribute("data-flip-id");
             if (!flipId) {
@@ -165,38 +177,24 @@ export function DragContainer({
                 const deltaY = firstRect.top - lastRect.top;
 
                 if (deltaX !== 0 || deltaY !== 0) {
-                    // Invert: position element back to its start location instantly
-                    child.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0)`;
-                    child.style.transition = "none";
-
-                    // Force repaint
-                    if (child.offsetHeight > 0) {
-                        // Do nothing
-                    }
-
-                    // Play: transition element back to 0,0,0
-                    requestAnimationFrame(() => {
-                        child.style.transition =
-                            "transform var(--pwb-anim-duration, 200ms) cubic-bezier(0.2, 0.8, 0.2, 1)";
-                        child.style.transform = "translate3d(0, 0, 0)";
-                    });
-
-                    // Clean up styles
-                    const handleTransitionEnd = (e: TransitionEvent): void => {
-                        if (e.propertyName === "transform") {
-                            child.style.transform = "";
-                            child.style.transition = "";
-                            child.removeEventListener("transitionend", handleTransitionEnd);
+                    // Play layout animation smoothly using GPU-accelerated Web Animations API (Compositor Thread)
+                    child.animate(
+                        [
+                            { transform: `translate3d(${deltaX}px, ${deltaY}px, 0)` },
+                            { transform: "translate3d(0, 0, 0)" }
+                        ],
+                        {
+                            duration: animationSpeed || 200,
+                            easing: "cubic-bezier(0.2, 0.8, 0.2, 1)"
                         }
-                    };
-                    child.addEventListener("transitionend", handleTransitionEnd);
+                    );
                 }
             }
         });
 
-        // 3. Store positions for next render
+        // 5. Store positions for next render
         prevPositionsRef.current = lastRects;
-    }, [orderedItems]);
+    }, [orderedItems, animationSpeed]);
 
     // Resolve actions size styling variables
     let resolvedActionsSize = "auto";

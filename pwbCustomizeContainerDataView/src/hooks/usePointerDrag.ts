@@ -138,10 +138,33 @@ export function usePointerDrag({
         const offsetX = e.clientX - rect.left;
         const offsetY = e.clientY - rect.top;
 
+        // Cache all lane boundaries on drag start to prevent layout thrashing from document.elementFromPoint
+        const cachedLanes: Array<{
+            element: HTMLElement;
+            rect: DOMRect;
+        }> = [];
+        try {
+            const laneElements = Array.from(document.querySelectorAll(".pwb-drag-container")) as HTMLElement[];
+            laneElements.forEach(lane => {
+                cachedLanes.push({
+                    element: lane,
+                    rect: lane.getBoundingClientRect()
+                });
+            });
+        } catch {
+            // Fallback
+        }
+
         let dragInitiated = false;
         let ghostEl: HTMLDivElement | null = null;
         let lastTargetContainer: HTMLElement | null = null;
+
         const scrollParent = getScrollParent(containerRef.current);
+        const initialScrollTop = scrollParent ? scrollParent.scrollTop : 0;
+        const initialScrollLeft = scrollParent ? scrollParent.scrollLeft : 0;
+        const initialWindowScrollY = window.scrollY;
+        const initialWindowScrollX = window.scrollX;
+
         let lastX = startX;
         let tiltResetTimeout: ReturnType<typeof setTimeout> | null = null;
         let reorderScheduled = false;
@@ -406,38 +429,80 @@ export function usePointerDrag({
                     }
                 }
 
-                // Detect what elements sit directly under user finger coordinates
-                const elementUnder = document.elementFromPoint(
-                    moveEvent.clientX,
-                    moveEvent.clientY
-                ) as HTMLElement | null;
-                if (!elementUnder) {
-                    return;
+                // Determine hoverContainer using cached lane bounds and current scroll deltas
+                let hoverContainer: HTMLElement | null = null;
+                const currentScrollTop = scrollParent ? scrollParent.scrollTop : 0;
+                const currentScrollLeft = scrollParent ? scrollParent.scrollLeft : 0;
+                const scrollDeltaY = currentScrollTop - initialScrollTop;
+                const scrollDeltaX = currentScrollLeft - initialScrollLeft;
+
+                const currentWindowScrollY = window.scrollY;
+                const currentWindowScrollX = window.scrollX;
+                const windowScrollDeltaY = currentWindowScrollY - initialWindowScrollY;
+                const windowScrollDeltaX = currentWindowScrollX - initialWindowScrollX;
+
+                for (const lane of cachedLanes) {
+                    const r = lane.rect;
+                    let left = r.left - windowScrollDeltaX;
+                    let right = r.right - windowScrollDeltaX;
+                    let top = r.top - windowScrollDeltaY;
+                    let bottom = r.bottom - windowScrollDeltaY;
+
+                    if (scrollParent && scrollParent.contains(lane.element)) {
+                        left -= scrollDeltaX;
+                        right -= scrollDeltaX;
+                        top -= scrollDeltaY;
+                        bottom -= scrollDeltaY;
+                    }
+
+                    if (
+                        moveEvent.clientX >= left &&
+                        moveEvent.clientX <= right &&
+                        moveEvent.clientY >= top &&
+                        moveEvent.clientY <= bottom
+                    ) {
+                        hoverContainer = lane.element;
+                        break;
+                    }
                 }
 
-                const hoverContainer = elementUnder.closest(".pwb-drag-container") as HTMLElement | null;
-                let hoverCard = elementUnder.closest(".pwb-draggable-row-item") as HTMLElement | null;
-
-                if (enable2DGrid && hoverContainer) {
+                let hoverCard: HTMLElement | null = null;
+                if (hoverContainer) {
                     const cards = Array.from(
                         hoverContainer.querySelectorAll(".pwb-draggable-row-item:not(.pwb-pointer-drag-ghost)")
                     ) as HTMLElement[];
-                    let closestCard: HTMLElement | null = null;
-                    let minDistance = Infinity;
-                    cards.forEach(card => {
-                        const cardRect = card.getBoundingClientRect();
-                        const centerX = cardRect.left + cardRect.width / 2;
-                        const centerY = cardRect.top + cardRect.height / 2;
-                        const dist = Math.sqrt(
-                            Math.pow(moveEvent.clientX - centerX, 2) + Math.pow(moveEvent.clientY - centerY, 2)
-                        );
-                        if (dist < minDistance) {
-                            minDistance = dist;
-                            closestCard = card;
+
+                    if (enable2DGrid) {
+                        let closestCard: HTMLElement | null = null;
+                        let minDistance = Infinity;
+                        cards.forEach(card => {
+                            const cardRect = card.getBoundingClientRect();
+                            const centerX = cardRect.left + cardRect.width / 2;
+                            const centerY = cardRect.top + cardRect.height / 2;
+                            const dist = Math.sqrt(
+                                Math.pow(moveEvent.clientX - centerX, 2) + Math.pow(moveEvent.clientY - centerY, 2)
+                            );
+                            if (dist < minDistance) {
+                                minDistance = dist;
+                                closestCard = card;
+                            }
+                        });
+                        if (closestCard) {
+                            hoverCard = closestCard;
                         }
-                    });
-                    if (closestCard) {
-                        hoverCard = closestCard;
+                    } else {
+                        for (const card of cards) {
+                            const cardRect = card.getBoundingClientRect();
+                            if (
+                                moveEvent.clientX >= cardRect.left &&
+                                moveEvent.clientX <= cardRect.right &&
+                                moveEvent.clientY >= cardRect.top &&
+                                moveEvent.clientY <= cardRect.bottom
+                            ) {
+                                hoverCard = card;
+                                break;
+                            }
+                        }
                     }
                 }
 
@@ -526,53 +591,55 @@ export function usePointerDrag({
                     if (lastTargetContainer) {
                         const targetContainerId = lastTargetContainer.getAttribute("data-container-id");
 
-                        // Resolve exact drop coordinate details
-                        const pointEl = document.elementFromPoint(
-                            upEvent.clientX,
-                            upEvent.clientY
-                        ) as HTMLElement | null;
+                        // Resolve exact drop coordinate details using the same cached bounds logic
                         let finalIndex = 0;
-                        if (pointEl) {
-                            const hoverContainer = pointEl.closest(".pwb-drag-container") as HTMLElement | null;
-                            let hoverCard = pointEl.closest(".pwb-draggable-row-item") as HTMLElement | null;
-                            if (hoverContainer) {
-                                if (enable2DGrid) {
-                                    const cards = Array.from(
-                                        hoverContainer.querySelectorAll(
-                                            ".pwb-draggable-row-item:not(.pwb-pointer-drag-ghost)"
-                                        )
-                                    ) as HTMLElement[];
-                                    let closestCard: HTMLElement | null = null;
-                                    let minDistance = Infinity;
-                                    cards.forEach(card => {
-                                        const cardRect = card.getBoundingClientRect();
-                                        const centerX = cardRect.left + cardRect.width / 2;
-                                        const centerY = cardRect.top + cardRect.height / 2;
-                                        const dist = Math.sqrt(
-                                            Math.pow(upEvent.clientX - centerX, 2) +
-                                                Math.pow(upEvent.clientY - centerY, 2)
-                                        );
-                                        if (dist < minDistance) {
-                                            minDistance = dist;
-                                            closestCard = card;
-                                        }
-                                    });
-                                    if (closestCard) {
-                                        hoverCard = closestCard;
-                                    }
-                                }
+                        const cards = Array.from(
+                            lastTargetContainer.querySelectorAll(".pwb-draggable-row-item:not(.pwb-pointer-drag-ghost)")
+                        ) as HTMLElement[];
 
-                                if (hoverCard) {
-                                    const idxAttr = hoverCard.getAttribute("data-index");
-                                    if (idxAttr !== null) {
-                                        finalIndex = parseInt(idxAttr, 10);
-                                    }
-                                } else {
-                                    const countAttr = hoverContainer.getAttribute("data-items-count");
-                                    if (countAttr !== null) {
-                                        finalIndex = parseInt(countAttr, 10);
-                                    }
+                        let hoverCard: HTMLElement | null = null;
+                        if (enable2DGrid) {
+                            let closestCard: HTMLElement | null = null;
+                            let minDistance = Infinity;
+                            cards.forEach(card => {
+                                const cardRect = card.getBoundingClientRect();
+                                const centerX = cardRect.left + cardRect.width / 2;
+                                const centerY = cardRect.top + cardRect.height / 2;
+                                const dist = Math.sqrt(
+                                    Math.pow(upEvent.clientX - centerX, 2) + Math.pow(upEvent.clientY - centerY, 2)
+                                );
+                                if (dist < minDistance) {
+                                    minDistance = dist;
+                                    closestCard = card;
                                 }
+                            });
+                            if (closestCard) {
+                                hoverCard = closestCard;
+                            }
+                        } else {
+                            for (const card of cards) {
+                                const cardRect = card.getBoundingClientRect();
+                                if (
+                                    upEvent.clientX >= cardRect.left &&
+                                    upEvent.clientX <= cardRect.right &&
+                                    upEvent.clientY >= cardRect.top &&
+                                    upEvent.clientY <= cardRect.bottom
+                                ) {
+                                    hoverCard = card;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (hoverCard) {
+                            const idxAttr = hoverCard.getAttribute("data-index");
+                            if (idxAttr !== null) {
+                                finalIndex = parseInt(idxAttr, 10);
+                            }
+                        } else {
+                            const countAttr = lastTargetContainer.getAttribute("data-items-count");
+                            if (countAttr !== null) {
+                                finalIndex = parseInt(countAttr, 10);
                             }
                         }
 

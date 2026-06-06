@@ -184,8 +184,8 @@ export function DragContainer({
                             { transform: "translate3d(0, 0, 0)" }
                         ],
                         {
-                            duration: animationSpeed || 200,
-                            easing: "cubic-bezier(0.2, 0.8, 0.2, 1)"
+                            duration: animationSpeed || 280,
+                            easing: "cubic-bezier(0.34, 1.56, 0.64, 1)"
                         }
                     );
                 }

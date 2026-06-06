@@ -40,6 +40,10 @@
 pwbCustomizeContainerDataView/
 ├── tsconfig.json                             # TypeScript compilation config
 ├── package.json                              # Widget package configuration
+├── playground/                               # Developer playground (Local dev dashboard)
+│   ├── index.html                            # Main HTML entry point
+│   ├── main.tsx                              # React playground client code
+│   └── vite.config.ts                        # Vite dev server configuration (port 3002)
 ├── typings/
 │   └── PwbCustomizeContainerDataViewProps.d.ts  # Auto-generated Mendix props typings
 └── src/
@@ -48,10 +52,15 @@ pwbCustomizeContainerDataView/
     ├── PwbCustomizeContainerDataView.tsx                # Main React component wrapper
     ├── PwbCustomizeContainerDataView.editorPreview.tsx  # Studio Pro design preview
     ├── PwbCustomizeContainerDataView.editorConfig.ts    # Property validation rules
+    ├── PwbCustomizeContainerDataView.icon.png           # Widget icon inside Studio Pro
+    ├── themesettings.json                               # Theme settings configuration
     ├── components/
-    │   └── DragContainer.tsx                # Drag & Drop sorting engine
+    │   └── DragContainer.tsx                # Drag & Drop sorting container and FLIP animation engine
+    ├── hooks/
+    │   ├── useKeyboardDrag.ts               # Hook handling keyboard-based sorting & accessibility
+    │   └── usePointerDrag.ts                # Hook handling touch/mouse-based drag events with tilt velocity
     └── ui/
-        └── PwbCustomizeContainerDataView.css  # Widget premium styling
+        └── PwbCustomizeContainerDataView.css  # Widget premium styling and presets
 ```
 
 ---

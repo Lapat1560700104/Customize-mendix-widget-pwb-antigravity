@@ -16,10 +16,14 @@
     "release:pwbDatePicker": "npm run release -w pwbDatePicker",
     "build:pwbComboBox": "npm run build -w pwbComboBox",
     "release:pwbComboBox": "npm run release -w pwbComboBox",
+    "build:pwbCustomizeContainerDataView": "npm run build -w pwbCustomizeContainerDataView",
+    "release:pwbCustomizeContainerDataView": "npm run release -w pwbCustomizeContainerDataView",
     "bump:patch:pwbDatePicker": "npm version patch -w pwbDatePicker --no-git-tag-version && npm run release:pwbDatePicker",
     "bump:minor:pwbDatePicker": "npm version minor -w pwbDatePicker --no-git-tag-version && npm run release:pwbDatePicker",
     "bump:patch:pwbComboBox": "npm version patch -w pwbComboBox --no-git-tag-version && npm run release:pwbComboBox",
     "bump:minor:pwbComboBox": "npm version minor -w pwbComboBox --no-git-tag-version && npm run release:pwbComboBox",
+    "bump:patch:pwbCustomizeContainerDataView": "npm version patch -w pwbCustomizeContainerDataView --no-git-tag-version && npm run release:pwbCustomizeContainerDataView",
+    "bump:minor:pwbCustomizeContainerDataView": "npm version minor -w pwbCustomizeContainerDataView --no-git-tag-version && npm run release:pwbCustomizeContainerDataView",
     "git:pr": "node scripts/git-pr.js",
     "git:sync-main": "node scripts/git-sync-main.js"
   }

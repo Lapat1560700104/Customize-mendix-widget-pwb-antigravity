@@ -547,20 +547,46 @@ export function usePointerDrag({
                     // A. Same Container Dropzone: Transient Real-time Shifting!
                     if (hoverContainer === containerRef.current) {
                         if (hoverCard && targetIdx !== draggingIndexState && !reorderScheduled) {
-                            reorderScheduled = true;
+                            // Midpoint Thresholding: Swap only when pointer crosses the midpoint of the target item card
+                            const hoverCardRect = hoverCard.getBoundingClientRect();
+                            let isThresholdPassed = false;
 
-                            // Swap array element positions synchronously in mutable closure state
-                            const [movedItem] = activeItemsState.splice(draggingIndexState, 1);
-                            activeItemsState.splice(targetIdx, 0, movedItem);
-                            currentOrderIds = activeItemsState.map(item => item.id);
-                            draggingIndexState = targetIdx; // Update closure variable to keep track!
+                            if (layoutDirection === "horizontal") {
+                                const midX = hoverCardRect.left + hoverCardRect.width / 2;
+                                if (targetIdx > draggingIndexState) {
+                                    // Dragging right
+                                    isThresholdPassed = moveEvent.clientX > midX;
+                                } else {
+                                    // Dragging left
+                                    isThresholdPassed = moveEvent.clientX < midX;
+                                }
+                            } else {
+                                const midY = hoverCardRect.top + hoverCardRect.height / 2;
+                                if (targetIdx > draggingIndexState) {
+                                    // Dragging down
+                                    isThresholdPassed = moveEvent.clientY > midY;
+                                } else {
+                                    // Dragging up
+                                    isThresholdPassed = moveEvent.clientY < midY;
+                                }
+                            }
 
-                            // Schedule React re-render visually at next frame
-                            requestAnimationFrame(() => {
-                                setOrderedItems([...activeItemsState]);
-                                setDraggingIndex(targetIdx);
-                                reorderScheduled = false;
-                            });
+                            if (isThresholdPassed) {
+                                reorderScheduled = true;
+
+                                // Swap array element positions synchronously in mutable closure state
+                                const [movedItem] = activeItemsState.splice(draggingIndexState, 1);
+                                activeItemsState.splice(targetIdx, 0, movedItem);
+                                currentOrderIds = activeItemsState.map(item => item.id);
+                                draggingIndexState = targetIdx; // Update closure variable to keep track!
+
+                                // Schedule React re-render visually at next frame
+                                requestAnimationFrame(() => {
+                                    setOrderedItems([...activeItemsState]);
+                                    setDraggingIndex(targetIdx);
+                                    reorderScheduled = false;
+                                });
+                            }
                         }
                     } else {
                         // B. External Container Dropzone: Dispatch custom cross-container hover event

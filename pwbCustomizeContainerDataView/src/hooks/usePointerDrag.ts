@@ -142,6 +142,9 @@ export function usePointerDrag({
         let ghostEl: HTMLDivElement | null = null;
         let lastTargetContainer: HTMLElement | null = null;
         const scrollParent = getScrollParent(containerRef.current);
+        let lastX = startX;
+        let tiltResetTimeout: ReturnType<typeof setTimeout> | null = null;
+        let reorderScheduled = false;
 
         // Tracks original and current order states directly in closure for 100% async state safety
         const originalOrderIds = orderedItems.map(item => item.id);
@@ -176,6 +179,13 @@ export function usePointerDrag({
                 return;
             }
             cleanupDone = true;
+
+            if (tiltResetTimeout) {
+                clearTimeout(tiltResetTimeout);
+                tiltResetTimeout = null;
+            }
+
+            reorderScheduled = false;
 
             document.body.style.cursor = "";
             document.removeEventListener("pointermove", onPointerMove);
@@ -304,10 +314,25 @@ export function usePointerDrag({
             }
 
             if (dragInitiated && ghostEl) {
+                const currentX = moveEvent.clientX;
+                const velocityX = currentX - lastX;
+                lastX = currentX;
+
                 // Instantly sync coordinates with finger/mouse cursor using GPU-accelerated translate3d
-                ghostEl.style.transform = `translate3d(${moveEvent.clientX - offsetX}px, ${
-                    moveEvent.clientY - offsetY
-                }px, 0)`;
+                ghostEl.style.transform = `translate3d(${currentX - offsetX}px, ${moveEvent.clientY - offsetY}px, 0)`;
+
+                // Dynamic tilt rotation based on velocityX
+                const tiltAngle = Math.max(-6, Math.min(6, velocityX * 0.25));
+                ghostEl.style.rotate = `${tiltAngle}deg`;
+
+                if (tiltResetTimeout) {
+                    clearTimeout(tiltResetTimeout);
+                }
+                tiltResetTimeout = setTimeout(() => {
+                    if (ghostEl) {
+                        ghostEl.style.rotate = "";
+                    }
+                }, 100);
 
                 // Premium Dynamic Mobile Auto-Scrolling Engine for nested Scroll Containers + Window Fallback
                 const scrollThreshold = 75;
@@ -456,16 +481,21 @@ export function usePointerDrag({
 
                     // A. Same Container Dropzone: Transient Real-time Shifting!
                     if (hoverContainer === containerRef.current) {
-                        if (hoverCard && targetIdx !== draggingIndexState) {
+                        if (hoverCard && targetIdx !== draggingIndexState && !reorderScheduled) {
+                            reorderScheduled = true;
+
                             // Swap array element positions synchronously in mutable closure state
                             const [movedItem] = activeItemsState.splice(draggingIndexState, 1);
                             activeItemsState.splice(targetIdx, 0, movedItem);
                             currentOrderIds = activeItemsState.map(item => item.id);
-
-                            // Trigger React re-render visually with copy of state
-                            setOrderedItems([...activeItemsState]);
-                            setDraggingIndex(targetIdx);
                             draggingIndexState = targetIdx; // Update closure variable to keep track!
+
+                            // Schedule React re-render visually at next frame
+                            requestAnimationFrame(() => {
+                                setOrderedItems([...activeItemsState]);
+                                setDraggingIndex(targetIdx);
+                                reorderScheduled = false;
+                            });
                         }
                     } else {
                         // B. External Container Dropzone: Dispatch custom cross-container hover event

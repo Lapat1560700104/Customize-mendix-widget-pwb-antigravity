@@ -139,6 +139,10 @@
     flex-direction: column;
 }
 
+.pwb-drag-container.pwb-direction-vertical .pwb-draggable-row-item {
+    width: 100%;
+}
+
 .pwb-drag-container.pwb-direction-horizontal {
     flex-direction: row;
     flex-wrap: wrap;

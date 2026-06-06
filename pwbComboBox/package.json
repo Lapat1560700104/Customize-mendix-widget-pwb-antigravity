@@ -21,7 +21,8 @@
     "build": "pluggable-widgets-tools build:web",
     "lint": "pluggable-widgets-tools lint",
     "lint:fix": "pluggable-widgets-tools lint:fix",
-    "prerelease": "npm run lint",
+    "prebuild": "node ../scripts/sync-xml-version.js",
+    "prerelease": "node ../scripts/sync-xml-version.js && npm run lint",
     "release": "pluggable-widgets-tools release:web && node ../scripts/rename_mpk.js",
     "playground": "vite playground"
   },
